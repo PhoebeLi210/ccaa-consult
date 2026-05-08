@@ -11,7 +11,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.api.v1 import projects, documents, uploads
+from app.api.v1 import templates, generator, company
+
+# 尝试导入现有路由
+try:
+    from app.api.v1 import projects, documents, uploads
+    HAS_EXISTING_ROUTES = True
+except ImportError:
+    HAS_EXISTING_ROUTES = False
 
 
 @asynccontextmanager
@@ -40,10 +47,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 注册路由
-app.include_router(projects.router, prefix="/api/v1")
-app.include_router(documents.router, prefix="/api/v1")
-app.include_router(uploads.router, prefix="/api/v1")
+# 注册新路由
+app.include_router(templates.router, prefix="/api/v1")
+app.include_router(generator.router, prefix="/api/v1")
+app.include_router(company.router, prefix="/api/v1")
+
+# 注册现有路由
+if HAS_EXISTING_ROUTES:
+    app.include_router(projects.router, prefix="/api/v1")
+    app.include_router(documents.router, prefix="/api/v1")
+    app.include_router(uploads.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -53,6 +66,11 @@ async def root():
         "name": "智质通·咨询版",
         "version": "1.0.0",
         "description": "面向ISO咨询顾问的AI智能文书工作站",
+        "endpoints": {
+            "templates": "/api/v1/templates",
+            "generator": "/api/v1/generator",
+            "company": "/api/v1/company",
+        }
     }
 
 
