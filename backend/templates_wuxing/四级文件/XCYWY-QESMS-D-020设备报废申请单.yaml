@@ -1,0 +1,46 @@
+document_info:
+  document_type: 四级文件
+  document_name: 设备报废申请单
+  document_code: XCYWY-QESMS-D-020
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 5
+      columns: 8
+    headers:
+    - 设备名称
+    - ''
+    - ''
+    - ''
+    - 设备型号
+    - ''
+    - 设备编号
+    - ''
+    sample_data:
+    - - 生产厂商
+      - ''
+      - ''
+      - ''
+      - 使用部门
+      - ''
+      - 设备购价
+      - ''
+    - - 出厂日期
+      - ''
+      - 购买日期
+      - ''
+      - 已用年限
+      - ''
+      - 估计残值
+      - ''
+    - - 报废原因
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''

@@ -1,0 +1,26 @@
+document_info:
+  document_type: 四级文件
+  document_name: 知识管理清单
+  document_code: XCYWY-QESMS-D-024
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 12
+      columns: 3
+    headers:
+    - 范围
+    - 知识名称
+    - 存放点/说明
+    sample_data:
+    - - 外部知识
+      - 政策法规和地方规章
+      - 综合部文件柜/电脑
+    - - 外部知识
+      - 监管标准
+      - 综合部文件柜/电脑
+    - - 外部知识
+      - 产品标准
+      - 综合部文件柜/电脑

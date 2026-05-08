@@ -1,0 +1,28 @@
+document_info:
+  document_type: 四级文件
+  document_name: 监视和测量资源台帐
+  document_code: XCYWY-QESMS-D-022
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 2
+      columns: 7
+    headers:
+    - 量具名称
+    - 型号规格
+    - 校验周期
+    - 数量
+    - 状态
+    - 使用部门
+    - 备注
+    sample_data:
+    - - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''

@@ -1,0 +1,28 @@
+document_info:
+  document_type: 四级文件
+  document_name: 管评改进培训记录表
+  document_code: XCYWY-QESMS-D-072
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 6
+      columns: 3
+    headers:
+    - 时间：2025-09-13
+    - 时间：2025-09-13
+    - 培训教师：高良
+    sample_data:
+    - - 地点：公司会议室
+      - 地点：公司会议室
+      - 培训方式：讨论学习
+    - - 参加培训人员名单
+      - 周曼,高良,范火炬,陈春英
+      - 周曼,高良,范火炬,陈春英
+    - - '培训内容
+
+        摘要'
+      - 强化职业健康安全绩效监测与分析，提升纠正措施及时性；完善供应商评估机制，保障供应链质量稳定性。
+      - 强化职业健康安全绩效监测与分析，提升纠正措施及时性；完善供应商评估机制，保障供应链质量稳定性。

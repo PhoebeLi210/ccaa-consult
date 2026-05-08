@@ -1,0 +1,38 @@
+document_info:
+  document_type: 四级文件
+  document_name: 一般固废处置记录
+  document_code: XCYWY-QESMS-D-035
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 14
+      columns: 6
+    headers:
+    - 序号
+    - 一般固废名称
+    - 处理时间
+    - 数量
+    - 经手人
+    - 处理单位/人
+    sample_data:
+    - - '1'
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+    - - '2'
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+    - - '3'
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''

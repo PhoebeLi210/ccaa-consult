@@ -1,0 +1,22 @@
+document_info:
+  document_type: 四级文件
+  document_name: 记录控制一览表
+  document_code: XCYWY-QESMS-D-029
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 79
+      columns: 2
+    headers:
+    - 记录名
+    - 保存期限/年
+    sample_data:
+    - - XCYWY-QESMS-D-001组织内外部环境分析表
+      - '3'
+    - - XCYWY-QESMS-D-002组织内外部环境相关信息的监视和评审
+      - '3'
+    - - XCYWY-QESMS-D-003相关方需求和期望识别表
+      - '3'

@@ -1,0 +1,38 @@
+document_info:
+  document_type: 四级文件
+  document_name: 相关方需求和期望识别表
+  document_code: XCYWY-QESMS-D-003
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 13
+      columns: 6
+    headers:
+    - 序号
+    - 相关方    类型
+    - 需求和期望
+    - 监测指标或项目
+    - 监测频率
+    - 监测部门
+    sample_data:
+    - - '1'
+      - 顾客
+      - 1、质量符合顾客要求                        2、及时交付                                      3、价格合理
+      - 顾客满意度
+      - 每年一次
+      - 市场部
+    - - '1'
+      - 顾客
+      - 1、质量符合顾客要求                        2、及时交付                                      3、价格合理
+      - 客户投诉率
+      - 每月一次
+      - 市场部
+    - - '1'
+      - 顾客
+      - 1、质量符合顾客要求                        2、及时交付                                      3、价格合理
+      - 交期变更率
+      - 每月一次
+      - 项目部

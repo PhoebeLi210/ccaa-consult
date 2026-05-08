@@ -1,0 +1,22 @@
+document_info:
+  document_type: 四级文件
+  document_name: 管理评审报告
+  document_code: XCYWY-QESMS-D-070
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 6
+      columns: 1
+    headers:
+    - "评审会议时间、地点：\n     2025-09-10 9:00-12:00/会议室"
+    sample_data:
+    - - '评审目的：
+
+        评价公司质量、环境、职业健康安全管理体系建立、实施以来，管理体系充分性、适宜性、有效性，包括评价管理体系改进的机会和变更的需要。'
+    - - "评审依据：\nGB/T 19001—2016 idt ISO 9001:2015质量管理体系  要求及使用指南；\n GB/T 24001—2016\
+        \ idt ISO 14001:2015 环境管理体系  要求及使用指南\nGB/T 45001—2020 idt ISO 45001:2018 职业健康安全管理体系\
+        \ 要求及使用指南\n体系文件；\n本公司适用的法律、法规和其他要求；"
+    - - "参加评审人员：\n   邵道鹏,高良,范火炬,周曼,曹良元"
