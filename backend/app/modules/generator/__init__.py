@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 文档生成器架构 - 解耦设计
@@ -43,7 +43,17 @@ from .required_docs import (
     RequiredDocCategory,
     RequiredDocStatus,
 )
-from .orchestrator import (
+
+# 新增：模板系统与LLM客户端
+from .llm_client import LLMService, LLMConfig, create_llm_service
+from .template_manager import (
+    TemplateManager, TemplateLoader, VariableResolver, TemplateRenderer,
+    Template, TemplateSection, TemplateVariable, DocumentLevel as TemplateDocLevel,
+    StandardType as TemplateStandardType,
+)
+from .document_hierarchy import (
+    DocumentHierarchyGenerator, DocumentRequirement, get_required_documents,
+)from .orchestrator import (
     DocumentOrchestrator,
     generate_full_package,
     generate_document_tree,
@@ -84,5 +94,21 @@ __all__ = [
     # 协调器
     "DocumentOrchestrator",
     "generate_full_package",
-    "generate_document_tree",
+    "generate_document_tree",    "generate_document_tree",
+    # 新增：模板系统
+    "LLMService",
+    "LLMConfig",
+    "create_llm_service",
+    "TemplateManager",
+    "TemplateLoader",
+    "VariableResolver",
+    "TemplateRenderer",
+    "Template",
+    "TemplateSection",
+    "TemplateVariable",
+    "TemplateDocLevel",
+    "TemplateStandardType",
+    "DocumentHierarchyGenerator",
+    "DocumentRequirement",
+    "get_required_documents",
 ]
