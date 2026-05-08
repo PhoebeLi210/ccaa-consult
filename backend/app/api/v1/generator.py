@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-智质通·咨询版 - 文档生成API接口
+智质通·咨询版 - 文档生成API接口 V2
+使用统一文档生成器
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
@@ -24,7 +25,7 @@ class GenerateRequest(BaseModel):
     template_id: str
     company_info: Dict[str, Any]
     additional_vars: Optional[Dict[str, Any]] = None
-    output_format: Optional[str] = "json"  # json / markdown / docx
+    output_format: Optional[str] = "json"
 
 
 class GenerateBatchRequest(BaseModel):
@@ -34,23 +35,31 @@ class GenerateBatchRequest(BaseModel):
     additional_vars: Optional[Dict[str, Any]] = None
 
 
+class GenerateLevelRequest(BaseModel):
+    """按层级生成请求"""
+    level: str  # 一级文件/二级文件/三级文件/四级文件
+    company_info: Dict[str, Any]
+    additional_vars: Optional[Dict[str, Any]] = None
+
+
 class GenerateResponse(BaseModel):
     """生成响应"""
     task_id: str
     status: str
     message: str
+    documents: Optional[List[Dict[str, Any]]] = None
 
 
 class TaskStatusResponse(BaseModel):
     """任务状态响应"""
     task_id: str
-    status: str  # pending / processing / completed / failed
+    status: str
     progress: int
     result: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
 
 
-# 任务存储（实际应用中应使用数据库）
+# 任务存储
 tasks = {}
 
 
@@ -110,6 +119,22 @@ def generate_document(template_id: str, company_info: Dict, additional_vars: Dic
         return None, str(e)
 
 
+def generate_by_level(level: str, company_info: Dict, additional_vars: Dict = None):
+    """按层级生成所有文档"""
+    documents = []
+    
+    level_dir = TEMPLATE_DIR / level
+    if not level_dir.exists():
+        return [], f"层级不存在: {level}"
+    
+    for template_file in level_dir.glob("*.yaml"):
+        doc, error = generate_document(template_file.stem, company_info, additional_vars)
+        if doc:
+            documents.append(doc)
+    
+    return documents, None
+
+
 @router.post("/generate", response_model=GenerateResponse, summary="生成单个文档")
 async def generate_single(request: GenerateRequest):
     """生成单个文档"""
@@ -124,7 +149,6 @@ async def generate_single(request: GenerateRequest):
     if error:
         raise HTTPException(status_code=500, detail=error)
     
-    # 保存结果
     tasks[task_id] = {
         "status": "completed",
         "progress": 100,
@@ -135,6 +159,7 @@ async def generate_single(request: GenerateRequest):
         task_id=task_id,
         status="completed",
         message="文档生成成功",
+        documents=[result],
     )
 
 
@@ -143,55 +168,59 @@ async def generate_batch(request: GenerateBatchRequest):
     """批量生成文档"""
     task_id = str(uuid.uuid4())
     
-    tasks[task_id] = {
-        "status": "processing",
-        "progress": 0,
-        "total": len(request.template_ids),
-        "completed": 0,
-        "results": [],
-    }
-    
-    results = []
-    for i, template_id in enumerate(request.template_ids):
+    documents = []
+    for template_id in request.template_ids:
         result, error = generate_document(
             template_id,
             request.company_info,
             request.additional_vars
         )
-        
         if result:
-            results.append(result)
-        
-        tasks[task_id]["progress"] = int((i + 1) / len(request.template_ids) * 100)
-        tasks[task_id]["completed"] = i + 1
+            documents.append(result)
     
-    tasks[task_id]["status"] = "completed"
-    tasks[task_id]["results"] = results
+    tasks[task_id] = {
+        "status": "completed",
+        "progress": 100,
+        "results": documents,
+    }
     
     return GenerateResponse(
         task_id=task_id,
         status="completed",
-        message=f"成功生成 {len(results)} 个文档",
+        message=f"成功生成 {len(documents)} 个文档",
+        documents=documents,
     )
 
 
-@router.get("/task/{task_id}", response_model=TaskStatusResponse, summary="查询任务状态")
-async def get_task_status(task_id: str):
-    """查询任务状态"""
-    if task_id not in tasks:
-        raise HTTPException(status_code=404, detail="任务不存在")
+@router.post("/generate/level", response_model=GenerateResponse, summary="按层级生成")
+async def generate_level(request: GenerateLevelRequest):
+    """按层级生成所有文档"""
+    task_id = str(uuid.uuid4())
     
-    task = tasks[task_id]
-    return TaskStatusResponse(
+    documents, error = generate_by_level(
+        request.level,
+        request.company_info,
+        request.additional_vars
+    )
+    
+    if error:
+        raise HTTPException(status_code=500, detail=error)
+    
+    tasks[task_id] = {
+        "status": "completed",
+        "progress": 100,
+        "results": documents,
+    }
+    
+    return GenerateResponse(
         task_id=task_id,
-        status=task["status"],
-        progress=task["progress"],
-        result=task.get("result"),
-        error=task.get("error"),
+        status="completed",
+        message=f"成功生成 {len(documents)} 个文档",
+        documents=documents,
     )
 
 
-@router.post("/generate/all", summary="生成全套体系文件")
+@router.post("/generate/all", response_model=GenerateResponse, summary="生成全套体系文件")
 async def generate_all_documents(request: GenerateBatchRequest):
     """根据企业信息生成全套体系文件"""
     task_id = str(uuid.uuid4())
@@ -236,3 +265,35 @@ async def generate_all_documents(request: GenerateBatchRequest):
         },
         "results": results,
     }
+
+
+@router.get("/task/{task_id}", response_model=TaskStatusResponse, summary="查询任务状态")
+async def get_task_status(task_id: str):
+    """查询任务状态"""
+    if task_id not in tasks:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    
+    task = tasks[task_id]
+    return TaskStatusResponse(
+        task_id=task_id,
+        status=task["status"],
+        progress=task["progress"],
+        result=task.get("result"),
+        error=task.get("error"),
+    )
+
+
+@router.get("/levels", summary="获取支持的层级")
+async def get_levels():
+    """获取支持的文档层级"""
+    levels = []
+    if TEMPLATE_DIR.exists():
+        for level_dir in TEMPLATE_DIR.iterdir():
+            if level_dir.is_dir():
+                count = len(list(level_dir.glob("*.yaml")))
+                levels.append({
+                    "name": level_dir.name,
+                    "template_count": count,
+                })
+    
+    return {"levels": levels}
