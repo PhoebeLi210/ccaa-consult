@@ -1,430 +1,575 @@
-# 智质通·咨询版 - 行业模板配置
-# 基于武汉永欣智能科技、武汉润通和机电设备、武汉鑫辰宇物业的体系文件分析
-
-# ==================== 行业分类配置 ====================
 industries:
-  # 智能科技行业
   intelligent_technology:
-    name: "智能科技行业"
-    code: "INTELLIGENT_TECH"
-    description: "智能产品研发、销售，涉及设计开发过程，软件/硬件结合"
-    representative_company: "武汉永欣智能科技有限公司"
-    
+    name: 智能科技行业
+    code: INTELLIGENT_TECH
+    description: 智能产品研发、销售，涉及设计开发过程，软件/硬件结合
+    representative_company: 武汉永欣智能科技有限公司
     business_characteristics:
-      - "智能产品研发、销售"
-      - "涉及设计开发过程"
-      - "软件/硬件结合"
-      - "技术服务"
-      - "项目制管理"
-    
+    - 智能产品研发、销售
+    - 涉及设计开发过程
+    - 软件/硬件结合
+    - 技术服务
+    - 项目制管理
     special_requirements:
       procedures:
-        - code: "B-016"
-          name: "产品和服务的设计开发程序"
-          required: true
-          description: "智能科技行业必备，控制产品设计开发过程"
-      
+      - code: B-016
+        name: 产品和服务的设计开发程序
+        required: true
+        description: 智能科技行业必备，控制产品设计开发过程
       instructions:
-        - name: "设计开发管理制度"
-          required: true
-        - name: "技术文件管理制度"
-          required: true
-        - name: "知识产权管理制度"
-          required: false
-      
+      - name: 设计开发管理制度
+        required: true
+      - name: 技术文件管理制度
+        required: true
+      - name: 知识产权管理制度
+        required: false
       forms:
-        - name: "项目建议书"
-          code: "D-001"
-        - name: "设计开发计划书"
-          code: "D-002"
-        - name: "设计开发任务书"
-          code: "D-003"
-        - name: "设计开发方案"
-          code: "D-004"
-        - name: "设计开发输入清单"
-          code: "D-005"
-        - name: "设计开发输出清单"
-          code: "D-006"
-        - name: "设计开发评审报告"
-          code: "D-009"
-        - name: "设计开发更改记录"
-          code: "D-007"
-    
+      - name: 项目建议书
+        code: D-001
+      - name: 设计开发计划书
+        code: D-002
+      - name: 设计开发任务书
+        code: D-003
+      - name: 设计开发方案
+        code: D-004
+      - name: 设计开发输入清单
+        code: D-005
+      - name: 设计开发输出清单
+        code: D-006
+      - name: 设计开发评审报告
+        code: D-009
+      - name: 设计开发更改记录
+        code: D-007
     required_company_materials:
       basic:
-        - name: "营业执照"
-          required: true
-          description: "必备，用于确认企业名称、统一社会信用代码、经营范围"
-        - name: "组织架构图"
-          required: true
-          description: "必备，显示部门设置和汇报关系"
-        - name: "员工花名册"
-          required: true
-          description: "必备，包含姓名、部门、岗位、入职时间"
-      
+      - name: 营业执照
+        required: true
+        description: 必备，用于确认企业名称、统一社会信用代码、经营范围
+      - name: 组织架构图
+        required: true
+        description: 必备，显示部门设置和汇报关系
+      - name: 员工花名册
+        required: true
+        description: 必备，包含姓名、部门、岗位、入职时间
       business:
-        - name: "产品/服务清单"
-          required: true
-          description: "必备，明确认证范围和产品类型"
-        - name: "设计开发项目案例"
-          required: true
-          description: "至少1-2个完整的设计开发项目资料"
-        - name: "软件著作权或专利证书"
-          required: false
-          description: "如有，提供知识产权证明"
-      
+      - name: 产品/服务清单
+        required: true
+        description: 必备，明确认证范围和产品类型
+      - name: 设计开发项目案例
+        required: true
+        description: 至少1-2个完整的设计开发项目资料
+      - name: 软件著作权或专利证书
+        required: false
+        description: 如有，提供知识产权证明
       site:
-        - name: "场地租赁合同或产权证明"
-          required: true
-          description: "必备，证明经营场所合法性"
-        - name: "研发场地照片"
-          required: false
-          description: "展示研发环境和设备"
-
-  # 机电设备行业
+      - name: 场地租赁合同或产权证明
+        required: true
+        description: 必备，证明经营场所合法性
+      - name: 研发场地照片
+        required: false
+        description: 展示研发环境和设备
   electromechanical_equipment:
-    name: "机电设备行业"
-    code: "ELECTROMECHANICAL"
-    description: "机电设备销售、安装调试、维护保养"
-    representative_company: "武汉润通和机电设备有限公司"
-    
+    name: 机电设备行业
+    code: ELECTROMECHANICAL
+    description: 机电设备销售、安装调试、维护保养
+    representative_company: 武汉润通和机电设备有限公司
     business_characteristics:
-      - "机电设备销售"
-      - "设备安装调试"
-      - "设备维护保养"
-      - "售后服务"
-      - "贸易型业务"
-    
+    - 机电设备销售
+    - 设备安装调试
+    - 设备维护保养
+    - 售后服务
+    - 贸易型业务
     special_requirements:
       procedures: []
-      
       instructions:
-        - name: "设备操作规程"
-          required: true
-        - name: "设备维护保养规程"
-          required: true
-        - name: "设备安全操作规程"
-          required: true
-      
+      - name: 设备操作规程
+        required: true
+      - name: 设备维护保养规程
+        required: true
+      - name: 设备安全操作规程
+        required: true
       forms:
-        - name: "设备台账"
-          code: "D-018"
-        - name: "设备点检表"
-          code: "D-019"
-        - name: "设备维护保养计划"
-          code: "D-021"
-        - name: "设备维保记录"
-          code: "D-021"
-        - name: "物体打击应急预案及演练"
-          code: "D-045"
-        - name: "机械伤害应急预案及演练"
-          code: "D-046"
-    
+      - name: 设备台账
+        code: D-018
+      - name: 设备点检表
+        code: D-019
+      - name: 设备维护保养计划
+        code: D-021
+      - name: 设备维保记录
+        code: D-021
+      - name: 物体打击应急预案及演练
+        code: D-045
+      - name: 机械伤害应急预案及演练
+        code: D-046
     required_company_materials:
       basic:
-        - name: "营业执照"
-          required: true
-          description: "必备"
-        - name: "组织架构图"
-          required: true
-          description: "必备"
-        - name: "员工花名册"
-          required: true
-          description: "必备"
-      
+      - name: 营业执照
+        required: true
+        description: 必备
+      - name: 组织架构图
+        required: true
+        description: 必备
+      - name: 员工花名册
+        required: true
+        description: 必备
       business:
-        - name: "设备销售合同"
-          required: true
-          description: "至少2-3份，证明销售业务"
-        - name: "设备采购合同"
-          required: true
-          description: "至少2-3份，证明采购渠道"
-        - name: "设备清单"
-          required: true
-          description: "主要销售的设备型号和规格"
-      
+      - name: 设备销售合同
+        required: true
+        description: 至少2-3份，证明销售业务
+      - name: 设备采购合同
+        required: true
+        description: 至少2-3份，证明采购渠道
+      - name: 设备清单
+        required: true
+        description: 主要销售的设备型号和规格
       site:
-        - name: "场地租赁合同"
-          required: true
-          description: "必备"
-        - name: "仓库照片"
-          required: false
-          description: "展示设备存储条件"
-
-  # 物业服务行业
+      - name: 场地租赁合同
+        required: true
+        description: 必备
+      - name: 仓库照片
+        required: false
+        description: 展示设备存储条件
   property_service:
-    name: "物业服务行业"
-    code: "PROPERTY_SERVICE"
-    description: "物业管理服务、保洁、绿化、安保"
-    representative_company: "武汉鑫辰宇物业服务有限公司"
-    
+    name: 物业服务行业
+    code: PROPERTY_SERVICE
+    description: 物业管理服务、保洁、绿化、安保、客户服务、停车场管理
+    representative_companies:
+    - 武汉鑫辰宇物业服务有限公司
+    - 湖北丰铭物业服务有限公司
     business_characteristics:
-      - "物业管理服务"
-      - "保洁服务"
-      - "绿化养护"
-      - "安保服务"
-      - "客户服务"
-    
+    - 物业管理服务
+    - 保洁服务
+    - 绿化养护
+    - 安保服务
+    - 客户服务
+    - 停车场管理
+    - 设备设施维护
+    - 投诉处理
     special_requirements:
       procedures:
-        - code: "B-018"
-          name: "服务提供控制程序"
-          required: true
-      
+      - code: B-018
+        name: 服务提供控制程序
+        required: true
+        description: 物业服务核心程序
+      - code: B-028
+        name: 外包服务控制程序
+        required: true
+        description: 物业常外包保洁、安保等服务
       instructions:
-        - name: "保洁作业指导书"
-          required: true
-        - name: "绿化养护作业指导书"
-          required: true
-        - name: "安保服务规范"
-          required: true
-        - name: "客户服务规范"
-          required: true
-      
+      - name: 保洁作业指导书
+        required: true
+        category: 保洁服务
+      - name: 保洁服务质量标准
+        required: true
+        category: 保洁服务
+      - name: 绿化养护作业指导书
+        required: true
+        category: 绿化服务
+      - name: 安保服务规范
+        required: true
+        category: 安保服务
+      - name: 巡逻作业指导书
+        required: true
+        category: 安保服务
+      - name: 门岗作业指导书
+        required: true
+        category: 安保服务
+      - name: 客户服务规范
+        required: true
+        category: 客户服务
+      - name: 投诉处理作业指导书
+        required: true
+        category: 客户服务
+      - name: 入住办理作业指导书
+        required: true
+        category: 客户服务
+      - name: 装修管理作业指导书
+        required: true
+        category: 客户服务
+      - name: 停车场管理作业指导书
+        required: true
+        category: 设施管理
+      - name: 电梯管理作业指导书
+        required: true
+        category: 设施管理
+      - name: 消防管理作业指导书
+        required: true
+        category: 设施管理
+      - name: 设备设施维护作业指导书
+        required: true
+        category: 设施管理
+      - name: 水电维修作业指导书
+        required: true
+        category: 设施管理
+      - name: 收费管理作业指导书
+        required: true
+        category: 收费管理
+      management_rules:
+      - name: 物业收费管理制度
+        required: true
+      - name: 业主档案管理制度
+        required: true
+      - name: 钥匙管理制度
+        required: true
+      - name: 访客管理制度
+        required: true
+      - name: 装修管理制度
+        required: true
+      - name: 停车场管理制度
+        required: true
+      - name: 电梯管理制度
+        required: true
+      - name: 消防管理制度
+        required: true
+      - name: 保洁管理制度
+        required: true
+      - name: 绿化管理制度
+        required: true
+      - name: 安保管理制度
+        required: true
+      - name: 投诉处理制度
+        required: true
+      - name: 报修处理制度
+        required: true
       forms:
-        - name: "保洁检查记录"
-          code: "D-XXX"
-        - name: "绿化养护记录"
-          code: "D-XXX"
-        - name: "安保巡逻记录"
-          code: "D-XXX"
-        - name: "客户投诉处理记录"
-          code: "D-XXX"
-        - name: "服务满意度调查表"
-          code: "D-XXX"
-    
+      - name: 保洁检查记录表
+        code: D-BJ-001
+        category: 保洁服务
+      - name: 保洁工作日志
+        code: D-BJ-002
+        category: 保洁服务
+      - name: 绿化养护记录表
+        code: D-LH-001
+        category: 绿化服务
+      - name: 绿化检查记录表
+        code: D-LH-002
+        category: 绿化服务
+      - name: 安保巡逻记录表
+        code: D-AB-001
+        category: 安保服务
+      - name: 访客登记表
+        code: D-AB-002
+        category: 安保服务
+      - name: 物品放行条
+        code: D-AB-003
+        category: 安保服务
+      - name: 安保交接班记录
+        code: D-AB-004
+        category: 安保服务
+      - name: 投诉处理记录表
+        code: D-KH-001
+        category: 客户服务
+      - name: 业主满意度调查表
+        code: D-KH-002
+        category: 客户服务
+      - name: 入住登记表
+        code: D-KH-003
+        category: 客户服务
+      - name: 退房验收表
+        code: D-KH-004
+        category: 客户服务
+      - name: 钥匙借用登记表
+        code: D-KH-005
+        category: 客户服务
+      - name: 装修申请表
+        code: D-ZX-001
+        category: 装修管理
+      - name: 装修验收表
+        code: D-ZX-002
+        category: 装修管理
+      - name: 装修巡查记录
+        code: D-ZX-003
+        category: 装修管理
+      - name: 停车收费记录表
+        code: D-TC-001
+        category: 停车场管理
+      - name: 车位使用登记表
+        code: D-TC-002
+        category: 停车场管理
+      - name: 设备巡检记录表
+        code: D-SB-001
+        category: 设施设备
+      - name: 设备维保记录表
+        code: D-SB-002
+        category: 设施设备
+      - name: 电梯维保记录表
+        code: D-SB-003
+        category: 设施设备
+      - name: 消防检查记录表
+        code: D-SB-004
+        category: 设施设备
+      - name: 报修处理记录表
+        code: D-SB-005
+        category: 设施设备
+      - name: 物业费收缴记录表
+        code: D-SF-001
+        category: 收费管理
+      - name: 收费通知单
+        code: D-SF-002
+        category: 收费管理
+      emergency_plans:
+      - name: 火灾应急预案
+        required: true
+      - name: 电梯困人应急预案
+        required: true
+      - name: 停电应急预案
+        required: true
+      - name: 停水应急预案
+        required: true
+      - name: 防汛应急预案
+        required: true
+      - name: 治安事件应急预案
+        required: true
+      - name: 业主突发疾病应急预案
+        required: true
+      - name: 燃气泄漏应急预案
+        required: true
     required_company_materials:
       basic:
-        - name: "营业执照"
-          required: true
-        - name: "组织架构图"
-          required: true
-        - name: "员工花名册"
-          required: true
-      
+      - name: 营业执照
+        required: true
+        description: 必备，经营范围需包含物业管理
+      - name: 组织架构图
+        required: true
+        description: 必备，显示各部门设置
+      - name: 员工花名册
+        required: true
+        description: 必备，包含保洁、安保、维修等人员
+      - name: 社保缴纳证明
+        required: true
+        description: 必备，证明员工劳动关系
       business:
-        - name: "物业服务合同"
-          required: true
-          description: "至少2-3份在管项目合同"
-        - name: "服务项目清单"
-          required: true
-          description: "在管项目列表"
-        - name: "外包合同"
-          required: false
-          description: "保洁、安保等外包服务合同"
-      
+      - name: 物业服务合同
+        required: true
+        description: 必备，至少2-3份在管项目合同
+      - name: 服务项目清单
+        required: true
+        description: 必备，在管项目列表及面积
+      - name: 外包服务合同
+        required: false
+        description: 如有保洁、安保外包，提供外包合同
+      - name: 停车场经营许可证
+        required: false
+        description: 如涉及停车场收费，需提供
+      - name: 电梯维保合同
+        required: true
+        description: 必备，电梯维保合同
+      - name: 消防维保合同
+        required: true
+        description: 必备，消防设施维保合同
       site:
-        - name: "办公场地证明"
-          required: true
-          description: "物业办公场地"
-        - name: "在管项目照片"
-          required: false
-          description: "展示服务现场"
-
-# ==================== 通用配置 ====================
+      - name: 办公场地证明
+        required: true
+        description: 必备，物业办公场地
+      - name: 在管项目照片
+        required: false
+        description: 展示服务现场
+      personnel:
+      - name: 管理者代表任命书
+        required: true
+        description: 必备
+      - name: 内审员名单
+        required: true
+        description: 必备，至少2名
+      - name: 保安员证
+        required: true
+        description: 安保人员需持证上岗
+      - name: 消防员证
+        required: false
+        description: 消防控制室值班人员需持证
+      - name: 电梯安全管理员证
+        required: true
+        description: 电梯安全管理员需持证
+      - name: 电工证
+        required: true
+        description: 维修电工需持证
 common:
-  # 通用体系文件（所有行业都需要）
   standard_documents:
     level1:
-      - name: "质量环境职业健康安全管理手册"
-        code: "A-001"
-        description: "三标一体管理手册"
-    
+    - name: 质量环境职业健康安全管理手册
+      code: A-001
+      description: 三标一体管理手册
     level2:
-      - code: "B-001"
-        name: "组织环境分析控制程序"
-      - code: "B-002"
-        name: "相关方需求和期望控制程序"
-      - code: "B-003"
-        name: "风险与机遇识别评价控制程序"
-      - code: "B-004"
-        name: "环境因素识别、危险源辨识和风险评价控制程序"
-      - code: "B-005"
-        name: "目标指标和管理方案控制程序"
-      - code: "B-006"
-        name: "基础设施和工作环境控制程序"
-      - code: "B-007"
-        name: "监视和测量设备控制程序"
-      - code: "B-008"
-        name: "组织知识控制程序"
-      - code: "B-009"
-        name: "人力资源控制程序"
-      - code: "B-010"
-        name: "信息交流和沟通控制程序"
-      - code: "B-011"
-        name: "记录控制程序"
-      - code: "B-012"
-        name: "文件控制程序"
-      - code: "B-013"
-        name: "环境、职业健康安全管理体系运行控制程序"
-      - code: "B-014"
-        name: "应急准备和响应控制程序"
-      - code: "B-015"
-        name: "与客户有关的过程控制程序"
-      - code: "B-017"
-        name: "外部提供过程、产品和服务的控制程序"
-      - code: "B-018"
-        name: "服务提供控制程序"
-      - code: "B-019"
-        name: "服务监视和测量控制程序"
-      - code: "B-020"
-        name: "管理体系监视和测量控制程序"
-      - code: "B-021"
-        name: "合规义务管理及合规性评价控制程序"
-      - code: "B-022"
-        name: "客户满意度监测控制程序"
-      - code: "B-023"
-        name: "内部审核控制程序"
-      - code: "B-024"
-        name: "管理评审控制程序"
-      - code: "B-025"
-        name: "不合格（不符合）控制程序"
-      - code: "B-026"
-        name: "事故报告调查处理控制程序"
-      - code: "B-027"
-        name: "改进措施控制程序"
-    
+    - code: B-001
+      name: 组织环境分析控制程序
+    - code: B-002
+      name: 相关方需求和期望控制程序
+    - code: B-003
+      name: 风险与机遇识别评价控制程序
+    - code: B-004
+      name: 环境因素识别、危险源辨识和风险评价控制程序
+    - code: B-005
+      name: 目标指标和管理方案控制程序
+    - code: B-006
+      name: 基础设施和工作环境控制程序
+    - code: B-007
+      name: 监视和测量设备控制程序
+    - code: B-008
+      name: 组织知识控制程序
+    - code: B-009
+      name: 人力资源控制程序
+    - code: B-010
+      name: 信息交流和沟通控制程序
+    - code: B-011
+      name: 记录控制程序
+    - code: B-012
+      name: 文件控制程序
+    - code: B-013
+      name: 环境、职业健康安全管理体系运行控制程序
+    - code: B-014
+      name: 应急准备和响应控制程序
+    - code: B-015
+      name: 与客户有关的过程控制程序
+    - code: B-017
+      name: 外部提供过程、产品和服务的控制程序
+    - code: B-018
+      name: 服务提供控制程序
+    - code: B-019
+      name: 服务监视和测量控制程序
+    - code: B-020
+      name: 管理体系监视和测量控制程序
+    - code: B-021
+      name: 合规义务管理及合规性评价控制程序
+    - code: B-022
+      name: 客户满意度监测控制程序
+    - code: B-023
+      name: 内部审核控制程序
+    - code: B-024
+      name: 管理评审控制程序
+    - code: B-025
+      name: 不合格（不符合）控制程序
+    - code: B-026
+      name: 事故报告调查处理控制程序
+    - code: B-027
+      name: 改进措施控制程序
     level3_common:
-      - name: "节能降耗管理规定"
-      - name: "固体废弃物排放管理实施规则"
-      - name: "消防管理制度"
-      - name: "设施设备安全管理制度"
-      - name: "岗位职责与任职要求"
-      - name: "工作人员考核制度"
-      - name: "销售服务规范"
-      - name: "售后服务管理制度"
-    
+    - name: 节能降耗管理规定
+    - name: 固体废弃物排放管理实施规则
+    - name: 消防管理制度
+    - name: 设施设备安全管理制度
+    - name: 岗位职责与任职要求
+    - name: 工作人员考核制度
+    - name: 销售服务规范
+    - name: 售后服务管理制度
     level4_common:
-      - name: "组织内外部环境分析表"
-        code: "D-001"
-      - name: "相关方需求和期望识别表"
-        code: "D-003"
-      - name: "风险与机遇评价与应对措施表"
-        code: "D-004"
-      - name: "环境因素识别与评价表"
-        code: "D-006"
-      - name: "危险源识别与评价表"
-        code: "D-009"
-      - name: "目标分解表"
-        code: "D-012"
-      - name: "年度培训计划表"
-        code: "D-026"
-      - name: "培训记录表"
-        code: "D-027"
-      - name: "受控文件清单"
-        code: "D-031"
-      - name: "内部审核年度计划"
-        code: "D-061"
-      - name: "管理评审计划"
-        code: "D-068"
-      - name: "管理评审报告"
-        code: "D-071"
-
-  # 通用企业资料要求
+    - name: 组织内外部环境分析表
+      code: D-001
+    - name: 相关方需求和期望识别表
+      code: D-003
+    - name: 风险与机遇评价与应对措施表
+      code: D-004
+    - name: 环境因素识别与评价表
+      code: D-006
+    - name: 危险源识别与评价表
+      code: D-009
+    - name: 目标分解表
+      code: D-012
+    - name: 年度培训计划表
+      code: D-026
+    - name: 培训记录表
+      code: D-027
+    - name: 受控文件清单
+      code: D-031
+    - name: 内部审核年度计划
+      code: D-061
+    - name: 管理评审计划
+      code: D-068
+    - name: 管理评审报告
+      code: D-071
   required_materials:
     personnel:
-      - name: "管理者代表任命书"
-        required: true
-        description: "必备，明确体系负责人"
-        template_available: true
-      - name: "内审员名单"
-        required: true
-        description: "必备，至少2名内审员"
-        template_available: true
-      - name: "关键岗位人员清单"
-        required: true
-        description: "质量负责人、安全员等"
-        template_available: true
-    
+    - name: 管理者代表任命书
+      required: true
+      description: 必备，明确体系负责人
+      template_available: true
+    - name: 内审员名单
+      required: true
+      description: 必备，至少2名内审员
+      template_available: true
+    - name: 关键岗位人员清单
+      required: true
+      description: 质量负责人、安全员等
+      template_available: true
     system:
-      - name: "管理体系运行情况说明"
-        required: true
-        description: "描述体系建立和运行情况"
-        template_available: true
-      - name: "质量目标指标"
-        required: true
-        description: "可测量的质量目标"
-        template_available: true
-      - name: "环境目标指标"
-        required: true
-        description: "可测量的环境目标"
-        template_available: true
-      - name: "职业健康安全目标指标"
-        required: true
-        description: "可测量的安全目标"
-        template_available: true
-
-# ==================== 软件可提供的模板 ====================
+    - name: 管理体系运行情况说明
+      required: true
+      description: 描述体系建立和运行情况
+      template_available: true
+    - name: 质量目标指标
+      required: true
+      description: 可测量的质量目标
+      template_available: true
+    - name: 环境目标指标
+      required: true
+      description: 可测量的环境目标
+      template_available: true
+    - name: 职业健康安全目标指标
+      required: true
+      description: 可测量的安全目标
+      template_available: true
 software_templates:
   system_documents:
-    description: "体系文件模板，根据行业自动生成"
+    description: 体系文件模板，根据行业自动生成
     items:
-      - "一级文件：管理手册模板"
-      - "二级文件：26个程序文件模板"
-      - "三级文件：行业特定的作业指导书模板"
-      - "四级文件：记录表格模板"
-  
+    - 一级文件：管理手册模板
+    - 二级文件：26个程序文件模板
+    - 三级文件：行业特定的作业指导书模板
+    - 四级文件：记录表格模板
   company_materials:
-    description: "企业资料填写模板"
+    description: 企业资料填写模板
     items:
-      - name: "组织架构图模板"
-        description: "标准组织架构图，用户填写部门名称和人员"
-      - name: "岗位说明书模板"
-        description: "各岗位任职要求和工作职责"
-      - name: "目标指标模板"
-        description: "质量/环境/安全目标分解表"
-      - name: "环境因素识别表"
-        description: "环境因素识别与评价模板"
-      - name: "危险源识别表"
-        description: "危险源辨识与风险评价模板"
-      - name: "法律法规清单模板"
-        description: "适用法律法规识别清单"
-  
+    - name: 组织架构图模板
+      description: 标准组织架构图，用户填写部门名称和人员
+    - name: 岗位说明书模板
+      description: 各岗位任职要求和工作职责
+    - name: 目标指标模板
+      description: 质量/环境/安全目标分解表
+    - name: 环境因素识别表
+      description: 环境因素识别与评价模板
+    - name: 危险源识别表
+      description: 危险源辨识与风险评价模板
+    - name: 法律法规清单模板
+      description: 适用法律法规识别清单
   operation_records:
-    description: "运行记录模板"
+    description: 运行记录模板
     items:
-      - name: "内部审核记录"
-        description: "内审计划、检查表、不符合报告"
-      - name: "管理评审记录"
-        description: "管评计划、输入资料、报告"
-      - name: "培训记录"
-        description: "培训计划、培训记录表"
-      - name: "设备管理记录"
-        description: "设备台账、维保记录"
-      - name: "应急预案"
-        description: "各类应急预案及演练记录"
-
-# ==================== 缺失材料提醒配置 ====================
+    - name: 内部审核记录
+      description: 内审计划、检查表、不符合报告
+    - name: 管理评审记录
+      description: 管评计划、输入资料、报告
+    - name: 培训记录
+      description: 培训计划、培训记录表
+    - name: 设备管理记录
+      description: 设备台账、维保记录
+    - name: 应急预案
+      description: 各类应急预案及演练记录
 missing_materials_config:
-  # 提醒级别
   alert_levels:
     critical:
-      description: "关键材料缺失，无法生成体系文件"
-      action: "必须提醒用户补充"
+      description: 关键材料缺失，无法生成体系文件
+      action: 必须提醒用户补充
     warning:
-      description: "重要材料缺失，影响体系完整性"
-      action: "提醒用户补充或提供模板"
+      description: 重要材料缺失，影响体系完整性
+      action: 提醒用户补充或提供模板
     info:
-      description: "可选材料缺失"
-      action: "提供模板供用户选择填写"
-  
-  # 缺失材料处理流程
+      description: 可选材料缺失
+      action: 提供模板供用户选择填写
   workflow:
-    - step: 1
-      name: "材料清单检查"
-      description: "根据行业类型生成必需材料清单"
-    - step: 2
-      name: "用户材料上传"
-      description: "用户上传已有材料"
-    - step: 3
-      name: "缺失材料识别"
-      description: "系统自动识别缺失材料"
-    - step: 4
-      name: "模板提供"
-      description: "为缺失材料提供填写模板"
-    - step: 5
-      name: "材料完善"
-      description: "用户填写并上传缺失材料"
-    - step: 6
-      name: "体系文件生成"
-      description: "所有材料齐全后生成体系文件"
+  - step: 1
+    name: 材料清单检查
+    description: 根据行业类型生成必需材料清单
+  - step: 2
+    name: 用户材料上传
+    description: 用户上传已有材料
+  - step: 3
+    name: 缺失材料识别
+    description: 系统自动识别缺失材料
+  - step: 4
+    name: 模板提供
+    description: 为缺失材料提供填写模板
+  - step: 5
+    name: 材料完善
+    description: 用户填写并上传缺失材料
+  - step: 6
+    name: 体系文件生成
+    description: 所有材料齐全后生成体系文件
