@@ -12,10 +12,9 @@ from typing import Optional, List, Dict, Any
 from pathlib import Path
 import yaml
 
-router = APIRouter(prefix="/templates", tags=["模板管理"])
+from app.core.constants import TEMPLATE_DIR
 
-# 初始化模板管理器
-TEMPLATE_DIR = Path(__file__).parent.parent.parent.parent / "templates_wuxing"
+router = APIRouter(prefix="/templates", tags=["模板管理"])
 
 
 class TemplateListResponse(BaseModel):
