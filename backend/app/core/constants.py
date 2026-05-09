@@ -12,7 +12,7 @@ from enum import Enum
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 # 模板目录
-TEMPLATE_DIR = PROJECT_ROOT / "templates_wuxing"
+TEMPLATE_DIR = PROJECT_ROOT / "templates_industry"
 BASE_TEMPLATE_DIR = PROJECT_ROOT / "templates"
 DOWNLOAD_TEMPLATE_DIR = PROJECT_ROOT / "download_templates"
 
