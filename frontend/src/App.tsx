@@ -7,6 +7,7 @@ import ProjectCreatePage from './pages/project/create';
 import ProjectDetailPage from './pages/project/detail';
 import ProjectDocumentsPage from './pages/project/documents';
 import UploadPage from './pages/upload';
+import MaterialsPage from './pages/materials';
 
 /**
  * 根组件
@@ -29,6 +30,8 @@ const App: React.FC = () => {
         <Route path="/project/:id/documents" element={<ProjectDocumentsPage />} />
         {/* 文件上传 */}
         <Route path="/upload" element={<UploadPage />} />
+        {/* 模板下载 */}
+        <Route path="/materials" element={<MaterialsPage />} />
         {/* 未匹配路由重定向到首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
