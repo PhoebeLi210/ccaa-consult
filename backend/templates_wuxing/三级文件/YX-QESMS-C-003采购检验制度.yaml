@@ -1,0 +1,74 @@
+metadata:
+  name: 采购检验制度
+  code: YX-QESMS-C-003
+  version: A/0
+  level: 3
+  industry: environmental_technology
+  effective_date: "{{effective_date}}"
+  department: "{{responsible_department}}"
+
+sections:
+  - title: 1. 目的
+    content: |
+      确保进货的产品质量状况符合规定的质量要求，防止不合格的产品流入。
+
+  - title: 2. 适用范围
+    content: |
+      本程序适用于包括采购进货的所有产品的检验。
+
+  - title: 3. 职责
+    content: |
+      3.1 行政部
+          - 负责产品进货检验
+      
+      3.2 仓库管理员
+          - 负责产品贮存、标识和管理
+          - 负责标识待验品并通知行政部
+
+  - title: 4. 进货检验流程
+    content: |
+      4.1 进货通知
+          - 管理员负责标识待验品并通知行政部
+          - 若技术协议或验收协议规定供方提供材料试样或合格证据，则应在通知行政部检验前索取
+      
+      4.2 质量控制方法
+          对进货物品质量控制可采用以下一种或多种方法：
+          - 在客户处验收
+          - 在供方处进行第二方或第三方评定审核
+          - 供方的担保或合格证书
+
+  - title: 5. 取样、检验和验证
+    content: |
+      5.1 检验员按管理员的通知到指定地点取样进行检验，或对供方的担保或合格证进行验证。
+      
+      5.2 行政部检验员检验产品名称、型号规格、外观或包装、质量证明等。
+      
+      5.3 将检验和验证的相关数据和结论记录于《采购验收记录》上。
+
+  - title: 6. 检验结果处理
+    content: |
+      6.1 合格品
+          - 管理人员根据检验的合格结论，办理该批物资入库手续
+      
+      6.2 不合格品
+          - 协商供方返修或者退换货处理
+          - 记录不合格情况
+
+  - title: 7. 相关文件
+    content: |
+      - 《文件控制程序》
+      - 《记录控制程序》
+      - 《外部提供过程、产品和服务的控制程序》
+
+  - title: 8. 相关记录
+    content: |
+      - 《采购验收记录》
+
+variables:
+  - name: effective_date
+    description: 制度生效日期
+    default: "{{company.establishment_date}}"
+  
+  - name: responsible_department
+    description: 责任部门
+    default: "行政部"
