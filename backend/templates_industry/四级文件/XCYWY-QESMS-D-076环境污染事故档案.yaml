@@ -1,0 +1,46 @@
+document_info:
+  document_type: 四级文件
+  document_name: 环境污染事故档案
+  document_code: ''
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 10
+      columns: 8
+    headers:
+    - 事故地点
+    - 发生时间
+    - 污染物名称
+    - 污染范围
+    - 污染范围
+    - 财产损失情况
+    - 财产损失情况
+    - 备注
+    sample_data:
+    - - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+    - - 事故责任者
+      - 事故责任者
+      - 事故责任者
+      - 人员伤亡情况
+      - 人员伤亡情况
+      - 人员伤亡情况
+      - 人员伤亡情况
+      - 人员伤亡情况
+    - - 姓 名
+      - 年  龄
+      - 工  种
+      - 姓名
+      - 年龄
+      - 工种
+      - 伤害程度（轻、重、死）
+      - 伤害程度（轻、重、死）
