@@ -1,0 +1,38 @@
+document_info:
+  document_type: 四级文件
+  document_name: 设备台账
+  document_code: XCYWY-QESMS-D-018
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 9
+      columns: 6
+    headers:
+    - 设备名称
+    - 型号
+    - 数量
+    - 使用部门
+    - 使用责任人
+    - 备注
+    sample_data:
+    - - 打印机
+      - ''
+      - '1'
+      - 综合部
+      - 周曼
+      - ''
+    - - 文件柜
+      - ''
+      - '4'
+      - 综合部
+      - 周曼
+      - ''
+    - - 会议桌
+      - ''
+      - '1'
+      - 综合部
+      - 周曼
+      - ''
