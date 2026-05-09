@@ -1,0 +1,42 @@
+document_info:
+  document_type: 四级文件
+  document_name: 顾客财产登记表
+  document_code: XCYWY-QESMS-D-052
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 15
+      columns: 7
+    headers:
+    - 日 期
+    - 客 户 名 称
+    - 财产名称
+    - 数量
+    - 发出数量
+    - 确认人
+    - 备 注
+    sample_data:
+    - - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+    - - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+    - - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
