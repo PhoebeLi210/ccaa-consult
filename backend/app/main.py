@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.api.v1 import templates, generator, company
+from app.api.v1 import templates, generator, company, materials
 
 # 尝试导入现有路由
 try:
@@ -51,6 +51,7 @@ app.add_middleware(
 app.include_router(templates.router, prefix="/api/v1")
 app.include_router(generator.router, prefix="/api/v1")
 app.include_router(company.router, prefix="/api/v1")
+app.include_router(materials.router, prefix="/api/v1")
 
 # 注册现有路由
 if HAS_EXISTING_ROUTES:
@@ -70,6 +71,7 @@ async def root():
             "templates": "/api/v1/templates",
             "generator": "/api/v1/generator",
             "company": "/api/v1/company",
+            "materials": "/api/v1/materials",
         }
     }
 
