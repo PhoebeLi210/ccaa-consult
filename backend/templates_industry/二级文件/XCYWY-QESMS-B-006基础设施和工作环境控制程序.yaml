@@ -1,0 +1,20 @@
+document_info:
+  document_type: 二级文件
+  document_name: 基础设施和工作环境控制程序
+  document_code: XCYWY-QESMS-B-006
+  version: A/0
+purpose: 确定、提供并维护为达到产品和服务符合要求所需要的基础设施，确定并管理为达到产品和服务符合要求所需的工作环境。
+scope: 适用于对为实现产品和服务符合性所需的基础设施和工作环境的控制。
+responsibilities:
+- '3.1综合部负责对实现产品和服务符合性所需的基础设施进行控制。
+
+  3.2综合部负责对实现产品和服务符合性所需的工作环境进行控制。'
+procedure_steps: []
+records:
+- '《设备台账》
+
+  《设备点检表》
+
+  《设备报废申请单》
+
+  《设备维护保养计划》'
