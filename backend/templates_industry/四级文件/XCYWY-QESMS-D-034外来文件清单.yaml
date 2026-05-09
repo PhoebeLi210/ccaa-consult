@@ -1,0 +1,42 @@
+document_info:
+  document_type: 四级文件
+  document_name: 外来文件清单
+  document_code: XCYWY-QESMS-D-034
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 31
+      columns: 7
+    headers:
+    - 文件名称
+    - 来文期
+    - 存放地点
+    - 发布期
+    - 实施期
+    - 发布单位
+    - 备注
+    sample_data:
+    - - 中华人民共和国劳动法
+      - '2025-06-13'
+      - 综合部
+      - 1995-1-1
+      - '2018-12-29'
+      - 全国人民代表大会
+      - ''
+    - - 中华人民共和国清洁生产促进法
+      - '2025-06-13'
+      - 综合部
+      - 2002-6-29
+      - 2012-7-1
+      - 全国人民代表大会常务委员会
+      - ''
+    - - 中华人民共和国消防法
+      - '2025-06-13'
+      - 综合部
+      - 1998-4-29
+      - 2021-4-29
+      - 全国人民代表大会常务委员会
+      - ''
