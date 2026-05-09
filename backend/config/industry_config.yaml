@@ -68,6 +68,172 @@ industries:
       - name: 研发场地照片
         required: false
         description: 展示研发环境和设备
+  software_development:
+    name: 软件开发行业
+    code: SOFTWARE_DEV
+    description: 计算机软件开发、软件设计研发、技术服务
+    representative_company: 武汉泰迦科技有限公司
+    business_characteristics:
+    - 计算机软件开发
+    - 软件设计研发
+    - 技术服务
+    - 项目制管理
+    - 技术文档管理
+    special_requirements:
+      procedures:
+      - code: B-016
+        name: 产品和服务的设计开发程序
+        required: true
+        description: 软件开发行业必备，控制软件设计开发过程
+      - code: B-020
+        name: 设计研发控制程序
+        required: true
+        description: 软件开发核心程序，管理研发流程
+      instructions:
+      - name: 软件设计开发管理制度
+        required: true
+      - name: 技术文件管理制度
+        required: true
+      - name: 软件测试管理制度
+        required: true
+      - name: 知识产权管理制度
+        required: false
+      - name: 源代码管理制度
+        required: true
+      - name: 版本控制管理制度
+        required: true
+      forms:
+      - name: 设计开发计划书
+        code: D-001
+      - name: 设计开发任务书
+        code: D-002
+      - name: 软件需求规格说明书
+        code: D-003
+      - name: 软件设计说明书
+        code: D-004
+      - name: 软件测试计划
+        code: D-005
+      - name: 软件测试报告
+        code: D-006
+      - name: 设计开发评审报告
+        code: D-009
+      - name: 设计开发更改记录
+        code: D-007
+      - name: 软件版本发布记录
+        code: D-008
+      - name: 设备台账
+        code: D-018
+      - name: 设备维修保养记录
+        code: D-079
+    required_company_materials:
+      basic:
+      - name: 营业执照
+        required: true
+        description: 必备，用于确认企业名称、统一社会信用代码、经营范围需包含软件开发
+      - name: 组织架构图
+        required: true
+        description: 必备，显示部门设置和汇报关系
+      - name: 员工花名册
+        required: true
+        description: 必备，包含姓名、部门、岗位、入职时间
+      business:
+      - name: 软件产品清单
+        required: true
+        description: 必备，明确认证范围和软件产品类型
+      - name: 设计开发项目案例
+        required: true
+        description: 至少1-2个完整的软件设计开发项目资料
+      - name: 软件著作权或专利证书
+        required: false
+        description: 如有，提供知识产权证明
+      site:
+      - name: 场地租赁合同或产权证明
+        required: true
+        description: 必备，证明经营场所合法性
+      - name: 研发场地照片
+        required: false
+        description: 展示研发环境和设备
+      personnel:
+      - name: 设计开发人员能力要求
+        required: true
+        description: 软件开发人员需具备相关技术能力
+  software_sales:
+    name: 软件销售/教育科技行业
+    code: SOFTWARE_SALES
+    description: 计算机应用软件销售、教育技术服务、售前售后服务
+    representative_company: 武汉学映教育科技有限公司
+    business_characteristics:
+    - 计算机应用软件销售
+    - 教育技术服务
+    - 售前技术支持
+    - 售后服务
+    - 贸易型业务
+    special_requirements:
+      procedures:
+      - code: B-015
+        name: 与客户有关的过程控制程序
+        required: true
+        description: 销售行业必备，管理客户需求和合同
+      - code: B-021
+        name: 客户满意度监测控制程序
+        required: true
+        description: 销售行业核心程序，监测客户满意度
+      instructions:
+      - name: 销售管理制度
+        required: true
+      - name: 售前支持服务规范
+        required: true
+      - name: 售后服务管理制度
+        required: true
+      - name: 合同管理制度
+        required: true
+      - name: 销售人员考核制度
+        required: true
+      forms:
+      - name: 合同评审记录
+        code: D-001
+      - name: 客户满意度调查表
+        code: D-002
+      - name: 销售服务过程确认记录
+        code: D-003
+      - name: 合格供方名单
+        code: D-050
+      - name: 供方评价表
+        code: D-051
+      - name: 供应商定期评估表
+        code: D-052
+    required_company_materials:
+      basic:
+      - name: 营业执照
+        required: true
+        description: 必备，经营范围需包含软件销售或教育技术服务
+      - name: 组织架构图
+        required: true
+        description: 必备，显示各部门设置
+      - name: 员工花名册
+        required: true
+        description: 必备，包含销售人员、技术支持人员
+      business:
+      - name: 软件销售合同
+        required: true
+        description: 至少2-3份，证明销售业务
+      - name: 软件采购合同
+        required: true
+        description: 至少2-3份，证明采购渠道
+      - name: 销售产品清单
+        required: true
+        description: 主要销售的软件产品和规格
+      site:
+      - name: 场地租赁合同
+        required: true
+        description: 必备
+      - name: 办公场所照片
+        required: false
+        description: 展示办公环境
+      personnel:
+      - name: 销售人员任职要求
+        required: true
+        description: 销售人员需具备产品知识和沟通能力
   electromechanical_equipment:
     name: 机电设备行业
     code: ELECTROMECHANICAL
