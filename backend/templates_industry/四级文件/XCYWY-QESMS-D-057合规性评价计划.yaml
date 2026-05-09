@@ -1,0 +1,26 @@
+document_info:
+  document_type: 四级文件
+  document_name: 合规性评价计划
+  document_code: XCYWY-QESMS-D-057
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 6
+      columns: 3
+    headers:
+    - 姓  名
+    - 部  门
+    - 职  务
+    sample_data:
+    - - 邵道鹏
+      - 管理层
+      - 总经理
+    - - 周曼
+      - 综合部
+      - 经理
+    - - 高良
+      - 项目部
+      - 经理,管理者代表
