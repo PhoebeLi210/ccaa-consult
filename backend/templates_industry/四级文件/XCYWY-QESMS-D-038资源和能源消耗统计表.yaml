@@ -1,0 +1,66 @@
+document_info:
+  document_type: 四级文件
+  document_name: 年度水电消耗统计记录
+  document_code: XCYWY-QESMS-D-038
+  version: A/0
+form_structure:
+  total_tables: 1
+  tables:
+  - table_index: 1
+    dimensions:
+      rows: 5
+      columns: 13
+    headers:
+    - ''
+    - 1月
+    - 2月
+    - 3月
+    - 4月
+    - 5月
+    - 6月
+    - 7月
+    - 8月
+    - 9月
+    - 10月
+    - 11月
+    - 12月
+    sample_data:
+    - - 用电量（千瓦时）
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+    - - 用水量（吨）
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+    - - 用气量（千克）
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
+      - ''
