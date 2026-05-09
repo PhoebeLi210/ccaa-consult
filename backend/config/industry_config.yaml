@@ -549,6 +549,102 @@ industries:
       - name: 电工证
         required: true
         description: 维修电工需持证
+  environmental_technology:
+    name: 环保科技行业
+    code: ENV_TECH
+    description: 环保设备销售、安装调试、运维服务、环保技术咨询
+    representative_company: 恩施越鑫环保科技有限公司
+    business_characteristics:
+    - 环保设备销售
+    - 环保设备安装调试
+    - 环保设备运维服务
+    - 环保技术咨询
+    - 水污染源在线监测系统
+    - 危险废弃物管理
+    special_requirements:
+      procedures:
+      - code: B-015
+        name: 与客户有关的过程控制程序
+        required: true
+        description: 销售行业必备，管理客户需求和合同
+      - code: B-018
+        name: 服务提供控制程序
+        required: true
+        description: 环保服务行业核心程序，管理服务提供过程
+      - code: B-021
+        name: 合规义务管理及合规性评价控制程序
+        required: true
+        description: 环保行业必备，管理环保法规合规性
+      instructions:
+      - name: 销售过程管理制度
+        required: true
+      - name: 售后服务管理制度
+        required: true
+      - name: 采购检验制度
+        required: true
+      - name: 废弃物管理制度
+        required: true
+      - name: 节能降耗管理制度
+        required: true
+      - name: 消防管理制度
+        required: true
+      forms:
+      - name: 合同评审记录
+        code: D-001
+      - name: 客户满意度调查表
+        code: D-002
+      - name: 售后服务记录
+        code: D-003
+      - name: 采购验收记录
+        code: D-004
+      - name: 危险源识别与评价表
+        code: D-009
+      - name: 环境因素识别与评价表
+        code: D-006
+      - name: 合规性评价表
+        code: D-005
+      - name: 法律法规清单
+        code: D-007
+      - name: 应急预案演练记录
+        code: D-008
+    required_company_materials:
+      basic:
+      - name: 营业执照
+        required: true
+        description: 必备，经营范围需包含环保设备销售或环保技术服务
+      - name: 组织架构图
+        required: true
+        description: 必备
+      - name: 员工花名册
+        required: true
+        description: 必备
+      business:
+      - name: 环保设备销售合同
+        required: true
+        description: 至少2-3份，证明销售业务
+      - name: 环保设备采购合同
+        required: true
+        description: 至少2-3份，证明采购渠道
+      - name: 运维服务合同
+        required: false
+        description: 如有运维业务，提供服务合同
+      - name: 环保设备清单
+        required: true
+        description: 主要销售的环保设备类型和规格
+      site:
+      - name: 场地租赁合同
+        required: true
+        description: 必备
+      - name: 办公场所照片
+        required: false
+        description: 展示办公环境
+      personnel:
+      - name: 销售人员任职要求
+        required: true
+        description: 销售人员需具备环保技术知识和现场服务能力
+      - name: 技术人员资质证书
+        required: false
+        description: 如有环保工程师等技术资质
 common:
   standard_documents:
     level1:
