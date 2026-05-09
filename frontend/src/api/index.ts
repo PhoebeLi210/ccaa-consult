@@ -181,4 +181,50 @@ export function getUploadedFiles(params?: { projectId?: string }) {
   return request.get<unknown, UploadFileInfo[]>('/files', { params });
 }
 
+/* ==================== 材料管理相关API ==================== */
+
+/** 行业信息类型 */
+export interface Industry {
+  code: string;
+  name: string;
+  description: string;
+}
+
+/** 材料项类型 */
+export interface MaterialItem {
+  name: string;
+  required: boolean;
+  description: string;
+  template_available: boolean;
+  template_file?: string;
+}
+
+/** 材料清单响应类型 */
+export interface MaterialListResponse {
+  industry_code: string;
+  industry_name: string;
+  materials: {
+    industry_specific: Record<string, MaterialItem[]>;
+    common: Record<string, MaterialItem[]>;
+  };
+}
+
+/** 获取行业列表 */
+export const getIndustries = () => request.get<unknown, Industry[]>('/v1/materials/industries');
+
+/** 获取材料清单 */
+export const getMaterialList = (industryCode: string) =>
+  request.get<unknown, MaterialListResponse>(`/v1/materials/list/${industryCode}`);
+
+/** 获取可下载的模板列表 */
+export const getDownloadableTemplates = (industryCode?: string) =>
+  request.get<unknown, MaterialItem[]>('/v1/materials/templates/downloadable', {
+    params: { industry_code: industryCode },
+  });
+
+/** 下载模板文件（直接浏览器下载） */
+export const downloadTemplate = (materialName: string) => {
+  window.open(`/api/v1/materials/template/download/${encodeURIComponent(materialName)}`, '_blank');
+};
+
 export default request;
