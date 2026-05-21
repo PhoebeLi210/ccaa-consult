@@ -1,0 +1,78 @@
+metadata:
+  name: 节能降耗管理制度
+  code: YX-QESMS-C-002
+  version: A/0
+  level: 3
+  industry: environmental_technology
+  effective_date: "{{effective_date}}"
+  department: "{{responsible_department}}"
+
+sections:
+  - title: 1. 目的
+    content: |
+      为加强能源管理，科学合理利用水、电、纸张、油品等各种资源，减少资源浪费，降低成本，提高单位整体经济效益，特制定本程序。
+
+  - title: 2. 适用范围
+    content: |
+      本规定适用于管理部门用水、用电、纸张、用油等资源能源消耗的管理。
+
+  - title: 3. 职责
+    content: |
+      3.1 行政部
+          - 为本制度主控部门
+          - 负责检查与考核工作
+      
+      3.2 各部门
+          - 负责落实节水、节电措施
+
+  - title: 4. 节水管理措施
+    content: |
+      4.1 办公区域和服务现场用水，由部门负责检查用水情况，杜绝跑、冒、滴、漏的浪费现象。
+      
+      4.2 各部门要根据实际情况，节约用水用电，减少水资源浪费。
+
+  - title: 5. 节电管理措施
+    content: |
+      5.1 办公区域、会议室等应使用单独开关控制。
+      
+      5.2 上述场所用电负责人应随时检查人离机停、人走灯灭的节电情况。
+      
+      5.3 管理处各部门在设备更新时，要考虑淘汰耗能高的耗电设备，努力更换使用节能科技新产品。
+      
+      5.4 严禁私接电炉和其他电器。
+
+  - title: 6. 纸张节约管理措施
+    content: |
+      6.1 尽可能使用电子文件，减少纸质版文件的使用。
+      
+      6.2 信息传递时可以考虑邮件等电子文档，避免大量用纸。
+      
+      6.3 原则上公司文件全部双面打印。
+
+  - title: 7. 节油管理措施
+    content: |
+      7.1 对公司车辆的管理制度进一步完善，杜绝跑私车现象。
+      
+      7.2 对使用车辆经常检查，以防零部件出现松动，导致漏油发生。
+
+  - title: 8. 监督检查
+    content: |
+      行政部定期对各部门节能降耗情况进行检查，发现问题及时纠正。
+
+  - title: 9. 相关文件
+    content: |
+      - 《文件控制程序》
+      - 《记录控制程序》
+
+  - title: 10. 相关记录
+    content: |
+      - 《能源消耗统计表》
+
+variables:
+  - name: effective_date
+    description: 制度生效日期
+    default: "{{company.establishment_date}}"
+  
+  - name: responsible_department
+    description: 责任部门
+    default: "行政部"

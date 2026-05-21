@@ -15,6 +15,8 @@ def replace_variables(content: Any, variables: Dict[str, Any]) -> Any:
     """
     递归替换内容中的变量占位符
     
+    支持英文和中文变量名，英文变量名会自动映射到中文变量名进行查找。
+    
     Args:
         content: 需要替换的内容（字符串、字典、列表）
         variables: 变量字典
@@ -22,20 +24,72 @@ def replace_variables(content: Any, variables: Dict[str, Any]) -> Any:
     Returns:
         替换后的内容
     """
+    # 英文变量名到中文变量名的映射
+    EN_TO_CN_VAR_MAP = {
+        "company_code": "公司代号",
+        "company_name": "公司名称",
+        "legal_representative": "法定代表人",
+        "established_date": "成立日期",
+        "registered_address": "注册地址",
+        "business_scope": "经营范围",
+        "office_address": "办公地址",
+        "issue_date": "发布日期",
+        "implementation_date": "生效日期",
+        "company_introduction": "公司简介",
+        "general_manager": "总经理",
+        "sign_date": "签署日期",
+        "management_representative": "管理者代表",
+        "employee_representative": "员工代表",
+        "industry": "行业",
+        "employee_count": "员工人数",
+        "office_area_sqm": "办公面积",
+        "certification_type": "认证类型",
+        "address": "地址",
+        "contact_person": "联系人",
+        "contact_phone": "联系电话",
+        "file_version": "文件版本",
+        "year": "年份",
+        "date": "日期",
+        "target_standards": "目标标准",
+        "departments": "部门列表",
+        "main_equipment": "主要设备",
+        "main_processes": "主要过程",
+        "quality_goals": "质量目标",
+        "environment_goals": "环境目标",
+        "safety_goals": "安全目标",
+    }
+
     if isinstance(content, str):
         # 使用正则表达式替换 {{variable}} 格式的变量
         def replace_match(match):
             var_name = match.group(1).strip()
-            return str(variables.get(var_name, match.group(0)))
-        
+
+            # 直接查找
+            if var_name in variables:
+                return str(variables[var_name])
+
+            # 英文→中文映射查找
+            cn_name = EN_TO_CN_VAR_MAP.get(var_name)
+            if cn_name and cn_name in variables:
+                return str(variables[cn_name])
+
+            # 带{{}}包裹的中文键名查找
+            if f"{{{{{var_name}}}}}" in variables:
+                return str(variables[f"{{{{{var_name}}}}}"])
+            if cn_name and f"{{{{{cn_name}}}}}" in variables:
+                return str(variables[f"{{{{{cn_name}}}}}"])
+
+            # 未找到，保留原始占位符
+            return match.group(0)
+
         return re.sub(r'\{\{\s*([^}]+)\s*\}\}', replace_match, content)
-    
+
     elif isinstance(content, dict):
         return {k: replace_variables(v, variables) for k, v in content.items()}
-    
+
     elif isinstance(content, list):
         return [replace_variables(item, variables) for item in content]
-    
+
     return content
 
 
@@ -87,18 +141,38 @@ def get_template_metadata(template_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     获取模板元数据
     
+    兼容两种模板格式：
+    1. metadata格式：顶层有 metadata: 键
+    2. document_info格式：顶层有 document_info: 键
+    
     Args:
         template_data: 模板数据
         
     Returns:
         元数据字典
     """
+    # 优先从 metadata 读取
     metadata = template_data.get("metadata", {})
+    
+    # 如果 metadata 为空，尝试从 document_info 读取
+    if not metadata:
+        doc_info = template_data.get("document_info", {})
+        if doc_info:
+            metadata = {
+                "name": doc_info.get("title", doc_info.get("name", "")),
+                "code": doc_info.get("file_code", doc_info.get("code", "")),
+                "level": doc_info.get("level", 0),
+                "industry": doc_info.get("industry"),
+                "version": doc_info.get("version", "A/0"),
+                "standard": doc_info.get("standard", ""),
+                "department": doc_info.get("department", ""),
+            }
+    
     return {
         "name": metadata.get("name", ""),
         "code": metadata.get("code", ""),
         "level": metadata.get("level", 0),
-        "industry": metadata.get("industry"),  # 行业标记
+        "industry": metadata.get("industry"),
         "version": metadata.get("version", "A/0"),
         "standard": metadata.get("standard", ""),
         "department": metadata.get("department", ""),

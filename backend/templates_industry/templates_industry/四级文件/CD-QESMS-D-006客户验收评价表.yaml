@@ -1,0 +1,117 @@
+# 客户验收评价表
+# 行业: 档案整理及数字化加工服务
+# 文件级别: 四级文件（记录表单）
+
+metadata:
+  industry: archive_service
+  file_code: CD-QESMS-D-006
+  version: "V1.0"
+  effective_date: "{{effective_date}}"
+  form_type: record
+  
+header:
+  company_name: "{{company_name}}"
+  title: "客户验收评价表"
+  subtitle: "Customer Acceptance Evaluation Form"
+  
+content:
+  basic_info:
+    title: "基本信息"
+    fields:
+      - name: "项目名称"
+        type: text
+        required: true
+      - name: "客户名称"
+        type: text
+        required: true
+      - name: "合同编号"
+        type: text
+        required: true
+      - name: "服务类型"
+        type: checkbox
+        options:
+          - "档案整理"
+          - "档案数字化"
+          - "档案咨询"
+          - "其他"
+      - name: "完成日期"
+        type: date
+        required: true
+        
+  service_content:
+    title: "服务内容"
+    fields:
+      - name: "档案数量"
+        type: text
+        required: true
+      - name: "服务说明"
+        type: textarea
+        required: true
+        
+  evaluation:
+    title: "服务评价"
+    fields:
+      - name: "服务质量"
+        type: rating
+        options: ["非常满意", "满意", "一般", "不满意"]
+        required: true
+      - name: "工作效率"
+        type: rating
+        options: ["非常满意", "满意", "一般", "不满意"]
+        required: true
+      - name: "服务态度"
+        type: rating
+        options: ["非常满意", "满意", "一般", "不满意"]
+        required: true
+      - name: "专业水平"
+        type: rating
+        options: ["非常满意", "满意", "一般", "不满意"]
+        required: true
+      - name: "综合评价"
+        type: rating
+        options: ["非常满意", "满意", "一般", "不满意"]
+        required: true
+        
+  feedback:
+    title: "意见建议"
+    fields:
+      - name: "客户意见"
+        type: textarea
+        required: false
+      - name: "改进建议"
+        type: textarea
+        required: false
+        
+  acceptance:
+    title: "验收确认"
+    fields:
+      - name: "验收结果"
+        type: select
+        options: ["验收合格", "验收不合格"]
+        required: true
+      - name: "不合格说明"
+        type: textarea
+        required: false
+      - name: "客户代表签字"
+        type: signature
+        required: true
+      - name: "客户代表姓名"
+        type: text
+        required: true
+      - name: "客户联系电话"
+        type: text
+        required: true
+      - name: "验收日期"
+        type: date
+        required: true
+      - name: "服务人员签字"
+        type: signature
+        required: true
+        
+  notes:
+    title: "填表说明"
+    text: |
+      1. 本表用于客户对服务完成情况进行验收评价。
+      2. 请根据实际服务情况如实填写评价内容。
+      3. 如有不满意之处，请详细说明以便改进。
+      4. 双方签字确认后作为服务完成的依据。

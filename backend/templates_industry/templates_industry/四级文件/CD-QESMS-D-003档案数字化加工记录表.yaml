@@ -1,0 +1,102 @@
+# 档案数字化加工记录表
+# 行业: 档案整理及数字化加工服务
+# 文件级别: 四级文件（记录表单）
+
+metadata:
+  industry: archive_service
+  file_code: CD-QESMS-D-003
+  version: "V1.0"
+  effective_date: "{{effective_date}}"
+  form_type: record
+  
+header:
+  company_name: "{{company_name}}"
+  title: "档案数字化加工记录表"
+  subtitle: "Archive Digitization Processing Record"
+  
+content:
+  basic_info:
+    title: "基本信息"
+    fields:
+      - name: "记录日期"
+        type: date
+        required: true
+      - name: "项目名称"
+        type: text
+        required: true
+      - name: "客户名称"
+        type: text
+        required: true
+      - name: "加工人员"
+        type: text
+        required: true
+      - name: "设备编号"
+        type: text
+        required: true
+        
+  processing_params:
+    title: "加工参数"
+    fields:
+      - name: "扫描分辨率"
+        type: select
+        options: ["200dpi", "300dpi", "400dpi", "600dpi"]
+        required: true
+      - name: "色彩模式"
+        type: select
+        options: ["黑白", "灰度", "彩色"]
+        required: true
+      - name: "存储格式"
+        type: select
+        options: ["TIFF", "JPEG", "PDF", "双层PDF"]
+        required: true
+        
+  processing_content:
+    title: "加工内容"
+    table:
+      headers: ["序号", "档号", "题名", "页数", "图像数", "质检结果", "备注"]
+      rows: 15
+      
+  quality_check:
+    title: "质量检查"
+    fields:
+      - name: "检查项目"
+        type: checkbox
+        options:
+          - "图像清晰"
+          - "页面完整"
+          - "无明显噪点"
+          - "偏斜度合格"
+          - "数据挂接准确"
+      - name: "抽检比例"
+        type: select
+        options: ["10%", "30%", "50%", "100%"]
+        required: true
+      - name: "合格率"
+        type: text
+        unit: "%"
+        required: true
+      - name: "检查结果"
+        type: select
+        options: ["合格", "不合格"]
+        required: true
+        
+  confirmation:
+    title: "确认签字"
+    fields:
+      - name: "加工人签字"
+        type: signature
+        required: true
+      - name: "质检员签字"
+        type: signature
+        required: true
+      - name: "日期"
+        type: date
+        required: true
+        
+  notes:
+    title: "填表说明"
+    text: |
+      1. 本表用于记录档案数字化加工过程。
+      2. 加工参数应根据档案类型和客户需求选择。
+      3. 质量检查应按检查项目逐项检查。
+      4. 不合格数据应及时返工并记录。

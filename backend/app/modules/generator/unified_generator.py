@@ -27,6 +27,8 @@ from app.utils.template_utils import (
     get_all_templates
 )
 from app.core.constants import TEMPLATE_DIR
+from app.modules.generator.docx_exporter import DocxExporter, DocumentPackager
+from app.core.config import settings
 
 
 class UnifiedDocumentGenerator:
@@ -34,19 +36,27 @@ class UnifiedDocumentGenerator:
     
     整合所有层级的文档生成功能，提供统一的生成接口
     支持按行业过滤模板，确保生成的文档符合行业特点
+    支持AI扩写描述性内容
     """
     
-    def __init__(self, template_dir: Optional[str] = None):
+    def __init__(self, template_dir: Optional[str] = None, output_dir: Optional[str] = None,
+                 use_ai_expansion: bool = False):
         """
         初始化生成器
         
         Args:
             template_dir: 模板目录路径，None则使用默认路径
+            output_dir: 输出目录路径，None则使用默认路径
+            use_ai_expansion: 是否启用AI扩写描述性内容
         """
         self.template_dir = Path(template_dir) if template_dir else TEMPLATE_DIR
         self.template_manager = TemplateManager(str(self.template_dir))
         self.template_engine = TemplateEngine()
         self.generated_documents: List[GeneratedDocument] = []
+        self.output_dir = output_dir or "./output"
+        self.exporter = DocxExporter(self.output_dir)
+        self.packager = DocumentPackager(self.exporter)
+        self.use_ai_expansion = use_ai_expansion
     
     def generate_from_template(
         self,
@@ -88,10 +98,19 @@ class UnifiedDocumentGenerator:
                 print(f"跳过模板 {template_id}: 行业不匹配 (模板: {template_industry}, 企业: {company_industry})")
                 return None
             
-            # 获取内容
+            # 获取内容（兼容 metadata/content 和 document_info 两种格式）
             content = template_data.get("content", template_data.get("sections", {}))
             if not content:
                 content = template_data.get("form_structure", {})
+            if not content:
+                # document_info 格式：整个 document_info 就是内容
+                doc_info = template_data.get("document_info", {})
+                if doc_info:
+                    content = doc_info
+            if not content:
+                # 最后尝试：把整个 template_data 作为内容（去掉 metadata/document_info）
+                content = {k: v for k, v in template_data.items() 
+                          if k not in ("metadata", "document_info", "__comments__")}
             
             # 合并变量
             all_vars = {**company_info}
@@ -100,6 +119,12 @@ class UnifiedDocumentGenerator:
             
             # 渲染内容（使用重构后的工具函数）
             rendered_content = replace_variables(content, all_vars)
+            
+            # AI扩写描述性内容（可选）
+            if self.use_ai_expansion and settings.LLM_API_KEY:
+                rendered_content = self._ai_expand_content(
+                    rendered_content, metadata, company_info
+                )
             
             # 确定文件层级
             level_str = self._get_level_str_from_metadata(metadata)
@@ -312,6 +337,59 @@ class UnifiedDocumentGenerator:
             "generated_at": datetime.now().isoformat(),
         }
     
+    def export_to_docx(self, company_name: str = "") -> List[Path]:
+        """导出所有生成的文档为.docx文件
+        
+        Args:
+            company_name: 公司名称，用于创建子目录
+            
+        Returns:
+            导出文件的路径列表
+        """
+        return self.exporter.export_batch(self.generated_documents, company_name)
+    
+    def export_single_to_docx(self, doc: GeneratedDocument, company_name: str = "") -> Path:
+        """导出单个文档为.docx文件
+        
+        Args:
+            doc: 要导出的文档
+            company_name: 公司名称
+            
+        Returns:
+            导出文件的路径
+        """
+        return self.exporter.export(doc, company_name)
+    
+    def export_to_zip(self, company_name: str) -> Path:
+        """将所有文档打包为ZIP文件
+        
+        Args:
+            company_name: 公司名称
+            
+        Returns:
+            ZIP文件路径
+        """
+        return self.packager.create_package(self.generated_documents, company_name)
+    
+    def get_docx_bytes(self, doc: GeneratedDocument) -> bytes:
+        """获取单个文档的字节流（用于API下载）
+        
+        Args:
+            doc: 文档对象
+            
+        Returns:
+            文档的字节内容
+        """
+        return self.exporter.export_to_bytes(doc)
+    
+    def get_zip_bytes(self) -> bytes:
+        """获取所有文档打包后的字节流（用于API下载）
+        
+        Returns:
+            ZIP文件的字节内容
+        """
+        return self.packager.create_package_bytes(self.generated_documents)
+    
     # ============ 私有辅助方法 ============
     
     def _get_level_str_from_metadata(self, metadata: Dict[str, Any]) -> str:
@@ -354,6 +432,121 @@ class UnifiedDocumentGenerator:
             FileLevel.LEVEL_4: "四级文件",
         }
         return name_map.get(file_level, "四级文件")
+    
+    def _ai_expand_content(
+        self,
+        content: Any,
+        metadata: Dict[str, Any],
+        company_info: Dict[str, Any]
+    ) -> Any:
+        """使用AI扩写描述性内容
+        
+        对模板中标记为需要AI扩写的章节，使用LLM生成更丰富的内容。
+        四级文件（记录表单）不进行AI扩写。
+        
+        Args:
+            content: 模板渲染后的内容
+            metadata: 模板元数据
+            company_info: 企业信息
+            
+        Returns:
+            扩写后的内容
+        """
+        # 四级文件不扩写
+        level = metadata.get("level", 4)
+        if level >= 4:
+            return content
+        
+        # 如果内容是字符串，检查是否需要扩写
+        if isinstance(content, str):
+            # 检查是否有AI扩写标记 {{ai_expand:...}}
+            if "{{ai_expand:" not in content:
+                return content
+            
+            try:
+                import re
+                import httpx
+                
+                # 查找所有AI扩写标记
+                pattern = r'\{\{ai_expand:(.*?)\}\}'
+                matches = re.findall(pattern, content)
+                
+                if not matches:
+                    return content
+                
+                # 检查API配置
+                api_key = settings.LLM_API_KEY
+                api_url = settings.LLM_API_URL
+                model = settings.LLM_MODEL
+                
+                if not api_key:
+                    return content
+                
+                company_name = company_info.get("company_name", "企业")
+                industry = company_info.get("industry", "")
+                
+                for prompt_hint in matches:
+                    expand_prompt = f"""请为"{company_name}"（{industry}行业）生成以下内容，要求专业、具体、符合ISO体系文件规范：
+
+{prompt_hint}
+
+要求：
+1. 内容专业、具体，不要过于笼统
+2. 符合ISO9001/14001/45001标准要求
+3. 适合{industry}行业特点
+4. 字数200-500字"""
+                    
+                    try:
+                        headers = {
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json"
+                        }
+                        payload = {
+                            "model": model,
+                            "messages": [
+                                {"role": "system", "content": "你是一个ISO体系文件编写专家，擅长编写质量、环境、职业健康安全管理体系文件。"},
+                                {"role": "user", "content": expand_prompt}
+                            ],
+                            "temperature": 0.7,
+                            "max_tokens": 2000
+                        }
+                        
+                        with httpx.Client(timeout=30.0) as client:
+                            response = client.post(
+                                f"{api_url}/chat/completions",
+                                headers=headers,
+                                json=payload
+                            )
+                            response.raise_for_status()
+                            data = response.json()
+                            result = data["choices"][0]["message"]["content"]
+                            
+                            if result:
+                                content = content.replace(
+                                    f"{{{{ai_expand:{prompt_hint}}}}}",
+                                    result.strip()
+                                )
+                    except Exception as e:
+                        print(f"AI扩写失败: {e}")
+                        # 扩写失败时保留原始标记
+                        pass
+                
+                return content
+                
+            except Exception as e:
+                print(f"AI扩写处理失败: {e}")
+                return content
+        
+        # 如果内容是字典，递归处理
+        if isinstance(content, dict):
+            return {k: self._ai_expand_content(v, metadata, company_info) for k, v in content.items()}
+        
+        # 如果内容是列表，递归处理
+        if isinstance(content, list):
+            return [self._ai_expand_content(item, metadata, company_info) for item in content]
+        
+        return content
+    
 
 
 # ============================================================

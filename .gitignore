@@ -1,4 +1,4 @@
-# Python
+﻿# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -47,3 +47,11 @@ outputs/
 # Logs
 *.log
 logs/
+
+# Node
+node_modules/
+package-lock.json
+
+# Output files
+backend/output/
+*.docx

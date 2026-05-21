@@ -409,6 +409,103 @@ MaterialTemplateRegistry.register(MaterialTemplate(
     standards=["ISO14001"],
 ))
 
+# === 档案服务行业特有材料 ===
+MaterialTemplateRegistry.register(MaterialTemplate(
+    template_id="archive_service_contract",
+    name="档案服务合同",
+    category=MaterialCategory.CONTRACT,
+    required=True,
+    description="档案整理、数字化服务合同（至少3份）",
+    template_url="/templates/forms/archive_service_contract_template.docx",
+    template_fields=["甲方名称", "乙方名称", "服务内容", "服务期限", "服务费用", "质量要求"],
+    industries=["archive_service"],
+    standards=["ISO9001"],
+))
+
+MaterialTemplateRegistry.register(MaterialTemplate(
+    template_id="customer_acceptance_evaluation",
+    name="客户验收评价表",
+    category=MaterialCategory.CONTRACT,
+    required=True,
+    description="客户对档案服务完成情况的验收评价",
+    template_url="/templates/forms/customer_acceptance_evaluation_template.docx",
+    template_fields=["客户名称", "项目名称", "服务内容", "服务质量评价", "客户意见", "签字确认"],
+    industries=["archive_service"],
+    standards=["ISO9001"],
+))
+
+MaterialTemplateRegistry.register(MaterialTemplate(
+    template_id="archive_confidentiality_agreement",
+    name="档案保密协议",
+    category=MaterialCategory.CONTRACT,
+    required=True,
+    description="档案服务人员保密协议",
+    template_url="/templates/forms/archive_confidentiality_agreement_template.docx",
+    template_fields=["甲方名称", "乙方名称", "保密范围", "保密期限", "违约责任"],
+    industries=["archive_service"],
+    standards=["ISO9001", "ISO14001", "ISO45001"],
+))
+
+MaterialTemplateRegistry.register(MaterialTemplate(
+    template_id="archive_equipment_list",
+    name="档案数字化设备清单",
+    category=MaterialCategory.EQUIPMENT,
+    required=True,
+    description="档案数字化设备清单（扫描仪、电脑等）",
+    template_url="/templates/forms/archive_equipment_list_template.xlsx",
+    template_fields=["序号", "设备名称", "型号规格", "数量", "购置日期", "状态", "保管人"],
+    industries=["archive_service"],
+    standards=["ISO9001"],
+))
+
+MaterialTemplateRegistry.register(MaterialTemplate(
+    template_id="personnel_capability_record",
+    name="人员能力考核记录",
+    category=MaterialCategory.PERSONNEL,
+    required=True,
+    description="档案服务人员能力考核记录",
+    template_url="/templates/forms/personnel_capability_record_template.xlsx",
+    template_fields=["姓名", "岗位", "考核项目", "考核结果", "考核日期", "考核人"],
+    industries=["archive_service"],
+    standards=["ISO9001", "ISO45001"],
+))
+
+MaterialTemplateRegistry.register(MaterialTemplate(
+    template_id="training_plan_record",
+    name="培训计划及记录",
+    category=MaterialCategory.TRAINING,
+    required=True,
+    description="档案业务培训计划和记录",
+    template_url="/templates/forms/training_plan_record_template.docx",
+    template_fields=["培训主题", "培训对象", "培训时间", "培训内容", "考核结果"],
+    industries=["archive_service"],
+    standards=["ISO9001", "ISO45001"],
+))
+
+MaterialTemplateRegistry.register(MaterialTemplate(
+    template_id="archive_receiving_register",
+    name="档案接收登记记录",
+    category=MaterialCategory.CONTRACT,
+    required=True,
+    description="档案接收登记表",
+    template_url="/templates/forms/archive_receiving_register_template.xlsx",
+    template_fields=["接收日期", "客户名称", "档案类型", "档案数量", "移交人", "接收人"],
+    industries=["archive_service"],
+    standards=["ISO9001"],
+))
+
+MaterialTemplateRegistry.register(MaterialTemplate(
+    template_id="archive_handover_register",
+    name="档案交接登记记录",
+    category=MaterialCategory.CONTRACT,
+    required=True,
+    description="档案交接登记表",
+    template_url="/templates/forms/archive_handover_register_template.xlsx",
+    template_fields=["交接日期", "客户名称", "档案类型", "档案数量", "移交人", "接收人"],
+    industries=["archive_service"],
+    standards=["ISO9001"],
+))
+
 
 class MissingMaterialAnalyzer:
     """缺失材料分析器"""

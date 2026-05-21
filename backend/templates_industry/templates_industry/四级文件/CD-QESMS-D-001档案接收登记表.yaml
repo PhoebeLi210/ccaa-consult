@@ -1,0 +1,74 @@
+# 档案接收登记表
+# 行业: 档案整理及数字化加工服务
+# 文件级别: 四级文件（记录表单）
+
+metadata:
+  industry: archive_service
+  file_code: CD-QESMS-D-001
+  version: "V1.0"
+  effective_date: "{{effective_date}}"
+  form_type: record
+  
+header:
+  company_name: "{{company_name}}"
+  title: "档案接收登记表"
+  subtitle: "Archive Receiving Registration Form"
+  
+content:
+  basic_info:
+    title: "基本信息"
+    fields:
+      - name: "接收日期"
+        type: date
+        required: true
+      - name: "客户名称"
+        type: text
+        required: true
+      - name: "项目名称"
+        type: text
+        required: true
+      - name: "档案类型"
+        type: select
+        options: ["文书档案", "科技档案", "会计档案", "人事档案", "其他"]
+        required: true
+      - name: "档案数量"
+        type: number
+        unit: "卷/件"
+        required: true
+      - name: "档案状态"
+        type: select
+        options: ["完好", "部分损坏", "严重损坏"]
+        required: true
+        
+  detail_list:
+    title: "档案明细"
+    table:
+      headers: ["序号", "档号/编号", "题名/名称", "年度", "页数", "备注"]
+      rows: 10
+      
+  confirmation:
+    title: "交接确认"
+    fields:
+      - name: "移交人"
+        type: text
+        required: true
+      - name: "移交人签字"
+        type: signature
+        required: true
+      - name: "接收人"
+        type: text
+        required: true
+      - name: "接收人签字"
+        type: signature
+        required: true
+      - name: "备注"
+        type: textarea
+        required: false
+        
+  notes:
+    title: "填表说明"
+    text: |
+      1. 本表用于档案接收时的登记记录。
+      2. 接收时应仔细清点档案数量和检查档案状态。
+      3. 如有损坏或缺失，应在备注栏详细说明。
+      4. 双方签字确认后各执一份。

@@ -47,6 +47,7 @@ class CompanyInfo:
     """企业信息结构"""
     company_name: Optional[str] = None
     industry: Optional[str] = None
+    industry_code: Optional[str] = None  # 行业代码（与 parse.py 中的 INDUSTRY_CODE_MAP 保持一致）
     sub_industry: Optional[str] = None
     employee_count: Optional[int] = None
     office_area_sqm: Optional[float] = None
@@ -83,15 +84,14 @@ class CompanyInfo:
 class NaturalLanguageParser:
     """自然语言解析器"""
 
-    # 行业关键词映射
+    # 行业关键词映射（行业代码与 parse.py 中的 INDUSTRY_CODE_MAP 保持一致）
     INDUSTRY_KEYWORDS = {
-        IndustryType.MANUFACTURING: ["制造", "生产", "加工", "工厂", "注塑", "焊接", "喷涂", "装配"],
-        IndustryType.CONSTRUCTION: ["建筑", "施工", "工程", "装修", "市政"],
-        IndustryType.SERVICE: ["服务", "咨询", "物业", "保洁", "餐饮"],
-        IndustryType.TRADE: ["贸易", "销售", "批发", "零售", "经销"],
-        IndustryType.IT: ["软件", "IT", "互联网", "科技", "信息"],
-        IndustryType.MEDICAL: ["医疗", "医院", "诊所", "制药", "器械"],
-        IndustryType.PROPERTY: ["物业", "房地产", "小区", "写字楼"],
+        "intelligent_technology": ["制造", "生产", "加工", "工厂", "注塑", "焊接", "喷涂", "装配", "智能", "人工智能", "AI", "建筑", "施工", "医疗"],
+        "software_development": ["软件", "IT", "互联网", "科技", "信息", "程序", "代码"],
+        "software_sales": ["贸易", "销售", "批发", "零售", "经销", "教育"],
+        "property_service": ["物业", "房地产", "小区", "写字楼", "保洁", "餐饮"],
+        "environmental_technology": ["环保", "环境"],
+        "archive_service": ["档案", "数字化加工"],
     }
 
     # 设备关键词
@@ -150,7 +150,8 @@ class NaturalLanguageParser:
         info = CompanyInfo(raw_text=free_text)
 
         # 1. 提取行业
-        info.industry = self._extract_industry(free_text)
+        info.industry_code = self._extract_industry(free_text)
+        info.industry = info.industry_code  # _extract_industry 现在返回行业代码
 
         # 2. 提取员工人数
         info.employee_count = self._extract_employee_count(free_text)
@@ -182,11 +183,11 @@ class NaturalLanguageParser:
         return info
 
     def _extract_industry(self, text: str) -> Optional[str]:
-        """提取行业"""
-        for industry, keywords in self.INDUSTRY_KEYWORDS.items():
+        """提取行业代码（与 parse.py 中的 INDUSTRY_CODE_MAP 保持一致）"""
+        for industry_code, keywords in self.INDUSTRY_KEYWORDS.items():
             for keyword in keywords:
                 if keyword in text:
-                    return industry.value
+                    return industry_code
         return None
 
     def _extract_employee_count(self, text: str) -> Optional[int]:
@@ -334,7 +335,7 @@ class NaturalLanguageParser:
                 questions.append(question_templates[field])
 
         # 特殊过程追问
-        if not info.special_processes and info.industry == IndustryType.MANUFACTURING.value:
+        if not info.special_processes and info.industry in ("intelligent_technology",):
             questions.append({
                 "question": "是否有特殊过程需要特别管控？",
                 "example": "例如：焊接、热处理、喷涂等",
@@ -368,6 +369,7 @@ class NaturalLanguageParser:
             info.departments = re.split(r"[、，,]", answer)
         elif field == "industry":
             info.industry = answer
+            info.industry_code = answer  # industry 字段现在存储行业代码
         elif field == "special_processes":
             info.special_processes = re.split(r"[、，,]", answer)
 
