@@ -3,6 +3,7 @@ document_info:
   document_name: 监视和测量设备控制程序
   document_code: XCYWY-QESMS-B-007
   version: A/0
+  industry: property_service
 purpose: 对用于确保产品和服务和过程符合规定要求的监视和测量设备进行控制，满足监视和测量的要求并确保测量结果的有效性。
 scope: 适用于对产品和服务和管理过程进行监视和测量设备，特别是需要确保有效结果的测量设备。
 responsibilities:

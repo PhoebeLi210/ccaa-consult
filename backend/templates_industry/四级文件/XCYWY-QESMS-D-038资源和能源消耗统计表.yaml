@@ -3,6 +3,7 @@ document_info:
   document_name: 年度水电消耗统计记录
   document_code: XCYWY-QESMS-D-038
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

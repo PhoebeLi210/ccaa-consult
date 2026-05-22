@@ -3,6 +3,7 @@ document_info:
   document_name: 改进措施计划及实验验证
   document_code: XCYWY-QESMS-D-071
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

@@ -3,6 +3,7 @@ document_info:
   document_name: 火灾应急预案
   document_code: XCYWY-QESMS-D-040-02
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

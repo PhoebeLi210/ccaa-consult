@@ -3,6 +3,7 @@ document_info:
   document_name: XCYWY-QESMS-D-026培训记录表
   document_code: ''
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 14
   tables:
@@ -41,8 +42,7 @@ form_structure:
       - '培训
 
         课题'
-      - 质量管理体系(GB/T 19001—2016 idt ISO 9001:2015)&环境管理体系(GB/T 24001—2016 idt ISO 14001:2015)&职业健康安全管理体系(GB/T
-        45001—2020 idt ISO 45001:2018)版标准培训
+      - 质量管理体系(GB/T 19001—2016 idt ISO 9001:2015)&环境管理体系(GB/T 24001—2016 idt ISO 14001:2015)&职业健康安全管理体系(GB/T 45001—2020 idt ISO 45001:2018)版标准培训
       - 培训教师
       - 咨询顾问
     - - 组织部门
@@ -50,8 +50,7 @@ form_structure:
       - '培训
 
         课题'
-      - 质量管理体系(GB/T 19001—2016 idt ISO 9001:2015)&环境管理体系(GB/T 24001—2016 idt ISO 14001:2015)&职业健康安全管理体系(GB/T
-        45001—2020 idt ISO 45001:2018)版标准培训
+      - 质量管理体系(GB/T 19001—2016 idt ISO 9001:2015)&环境管理体系(GB/T 24001—2016 idt ISO 14001:2015)&职业健康安全管理体系(GB/T 45001—2020 idt ISO 45001:2018)版标准培训
       - 培训方式
       - 培训考核
     - - "参加培训人员：\n  邵道鹏,高良,范火炬,周曼"

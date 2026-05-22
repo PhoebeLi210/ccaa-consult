@@ -3,6 +3,7 @@ document_info:
   document_name: 安全运行检查记录
   document_code: XCYWY-QESMS-D-039
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 10
   tables:

@@ -3,6 +3,7 @@ document_info:
   document_name: 高空坠落事故预案及演练记录
   document_code: XCYWY-QESMS-D-047-03
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 2
   tables:

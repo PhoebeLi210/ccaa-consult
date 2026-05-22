@@ -645,6 +645,225 @@ industries:
       - name: 技术人员资质证书
         required: false
         description: 如有环保工程师等技术资质
+  archive_service:
+    name: 档案整理及数字化加工服务行业
+    code: ARCHIVE_SERVICE
+    description: 档案整理服务、档案数字化加工、档案信息系统服务、档案咨询与培训
+    representative_company: 武汉楚档信息技术有限公司
+    business_characteristics:
+    - 档案整理服务
+    - 档案数字化加工
+    - 档案信息系统服务
+    - 档案咨询与培训
+    - 项目制服务
+    - 客户现场服务
+    special_requirements:
+      procedures:
+      - code: B-015
+        name: 与客户有关的过程控制程序
+        required: true
+        description: 档案服务行业必备，管理客户需求和合同
+      - code: B-018
+        name: 服务提供控制程序
+        required: true
+        description: 档案服务行业核心程序，控制服务提供过程
+      - code: B-021
+        name: 合规义务管理及合规性评价控制程序
+        required: true
+        description: 档案服务行业必备，管理档案法规合规性
+      instructions:
+      - name: 档案整理服务规范
+        required: true
+        category: 档案服务
+      - name: 档案数字化加工操作规程
+        required: true
+        category: 档案服务
+      - name: 档案保密管理制度
+        required: true
+        category: 档案服务
+      - name: 档案安全管理制度
+        required: true
+        category: 档案服务
+      - name: 档案质量检查制度
+        required: true
+        category: 档案服务
+      - name: 档案交接登记制度
+        required: true
+        category: 档案服务
+      - name: 客户现场服务规范
+        required: true
+        category: 服务管理
+      - name: 项目管理制度
+        required: true
+        category: 服务管理
+      - name: 销售管理制度
+        required: true
+        category: 销售管理
+      - name: 售后服务管理制度
+        required: true
+        category: 销售管理
+      - name: 设备操作规程
+        required: true
+        category: 设备管理
+      - name: 设备维护保养规程
+        required: true
+        category: 设备管理
+      forms:
+      - name: 合同评审记录
+        code: D-001
+        category: 销售管理
+      - name: 客户满意度调查表
+        code: D-002
+        category: 销售管理
+      - name: 档案接收登记表
+        code: D-DA-001
+        category: 档案服务
+      - name: 档案整理加工记录表
+        code: D-DA-002
+        category: 档案服务
+      - name: 档案数字化加工记录表
+        code: D-DA-003
+        category: 档案服务
+      - name: 档案质量检查记录表
+        code: D-DA-004
+        category: 档案服务
+      - name: 档案交接登记表
+        code: D-DA-005
+        category: 档案服务
+      - name: 客户验收评价表
+        code: D-DA-006
+        category: 档案服务
+      - name: 项目进度跟踪表
+        code: D-DA-007
+        category: 档案服务
+      - name: 供方评价表
+        code: D-051
+        category: 采购管理
+      - name: 设备台账
+        code: D-018
+        category: 设备管理
+      - name: 设备维修保养记录
+        code: D-079
+        category: 设备管理
+      - name: 环境因素识别与评价表
+        code: D-006
+        category: 环境管理
+      - name: 危险源识别与评价表
+        code: D-009
+        category: 安全管理
+      emergency_plans:
+      - name: 火灾应急预案
+        required: true
+      - name: 档案损毁应急预案
+        required: true
+      - name: 信息泄露应急预案
+        required: true
+      - name: 触电应急预案
+        required: true
+      - name: 交通事故应急预案
+        required: true
+    required_company_materials:
+      basic:
+      - name: 营业执照
+        required: true
+        description: 必备，经营范围需包含档案整理、档案数字化或相关服务
+      - name: 组织机构代码证
+        required: false
+        description: 如已三证合一则不需要
+      - name: 税务登记证
+        required: false
+        description: 如已三证合一则不需要
+      - name: 组织架构图
+        required: true
+        description: 必备，显示各部门设置
+      - name: 员工花名册
+        required: true
+        description: 必备，包含档案整理人员、数字化加工人员
+      business:
+      - name: 档案服务合同
+        required: true
+        description: 至少3份，证明档案服务业务（销售合同）
+      - name: 采购合同
+        required: true
+        description: 至少2份，证明采购渠道
+      - name: 客户验收评价表
+        required: true
+        description: 客户对服务的验收评价
+      - name: 服务验收单
+        required: true
+        description: 档案服务完成验收单
+      site:
+      - name: 场地租赁合同或产权证明
+        required: true
+        description: 必备，证明经营场所合法性
+      - name: 消防验收合格证明
+        required: true
+        description: 必备，档案场所消防安全
+      - name: 办公场所照片
+        required: false
+        description: 展示办公环境和档案存储条件
+      personnel:
+      - name: 人员能力考核记录
+        required: true
+        description: 档案服务人员需具备相关能力
+      - name: 培训计划及记录
+        required: true
+        description: 档案业务培训记录
+      equipment:
+      - name: 设备清单
+        required: true
+        description: 档案数字化设备（扫描仪、电脑等）
+      - name: 设备维修保养记录
+        required: true
+        description: 设备维护记录
+      quality:
+      - name: 合同评审记录
+        required: true
+        description: 销售合同评审
+      - name: 顾客满意度调查
+        required: true
+        description: 客户满意度调查记录
+      - name: 供方评价记录
+        required: true
+        description: 供应商评价
+      - name: 供方名册
+        required: true
+        description: 合格供应商名单
+      environment_safety:
+      - name: 环境因素识别评价表
+        required: true
+        description: 环境因素识别
+      - name: 危险源辨识与风险评价表
+        required: true
+        description: 危险源识别
+      - name: 应急预案
+        required: true
+        description: 火灾、触电等应急预案
+      - name: 应急演练记录
+        required: true
+        description: 应急演练记录
+      - name: 劳保用品发放记录
+        required: true
+        description: 劳动保护用品发放
+      - name: 环境和职业健康安全方面资金投入清单
+        required: true
+        description: 安全环保投入记录
+      archive_special:
+      - name: 档案保密管理制度
+        required: true
+        description: 档案保密管理
+      - name: 档案安全管理制度
+        required: true
+        description: 档案安全管理
+      - name: 数字化加工流程规范
+        required: true
+        description: 数字化加工流程
+      - name: 档案质量检查制度
+        required: true
+        description: 档案质量检查
+      - name: 档案交接登记记录
+        required: true
+        description: 档案交接登记
 common:
   standard_documents:
     level1:

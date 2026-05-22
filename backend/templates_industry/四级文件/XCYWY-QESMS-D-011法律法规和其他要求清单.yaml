@@ -3,6 +3,7 @@ document_info:
   document_name: 法律法规和其他要求清单
   document_code: XCYWY-QESMS-D-011
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

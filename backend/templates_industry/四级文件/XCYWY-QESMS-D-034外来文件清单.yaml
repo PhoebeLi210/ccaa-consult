@@ -3,6 +3,7 @@ document_info:
   document_name: 外来文件清单
   document_code: XCYWY-QESMS-D-034
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

@@ -3,6 +3,7 @@ document_info:
   document_name: 记录控制一览表
   document_code: XCYWY-QESMS-D-029
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

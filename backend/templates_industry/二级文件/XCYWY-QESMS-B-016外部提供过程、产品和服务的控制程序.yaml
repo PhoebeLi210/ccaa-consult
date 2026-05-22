@@ -3,6 +3,7 @@ document_info:
   document_name: 外部提供过程、产品和服务的控制程序
   document_code: XCYWY-QESMS-B-016
   version: A/0
+  industry: property_service
 purpose: 对采购活动和供应商活动进行控制，确保所采购物资符合规定的质量、环保和安全要求。
 scope: 适用于对产品和服务所需材料、设备、办公劳保用品、耗材等的控制。
 responsibilities:

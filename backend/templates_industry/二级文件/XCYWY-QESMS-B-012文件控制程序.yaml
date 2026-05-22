@@ -3,6 +3,7 @@ document_info:
   document_name: 文件控制程序
   document_code: XCYWY-QESMS-B-012
   version: A/0
+  industry: property_service
 purpose: 确保各相关场所及时得到并使用适用的、有效版本文件，保证文件和资料的适用性、系统性、协调性和完整性。
 scope: 适用于质量、环境、职业健康安全管理体系所要求的所有文件的控制，包括适当的外来文件和资料，也适用于呈硬拷贝、电子媒体形式的文件。
 responsibilities:

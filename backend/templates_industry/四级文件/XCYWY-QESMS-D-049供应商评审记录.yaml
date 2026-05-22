@@ -3,6 +3,7 @@ document_info:
   document_name: 供应商评审记录
   document_code: XCYWY-QESMS-D-049
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

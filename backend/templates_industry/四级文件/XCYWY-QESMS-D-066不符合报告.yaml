@@ -3,6 +3,7 @@ document_info:
   document_name: 不符合报告
   document_code: XCYWY-QESMS-D-066                                             序号：03
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 3
   tables:

@@ -3,6 +3,7 @@ document_info:
   document_name: 设备报废申请单
   document_code: XCYWY-QESMS-D-020
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

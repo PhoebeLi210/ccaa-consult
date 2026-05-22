@@ -181,7 +181,263 @@ export function getUploadedFiles(params?: { projectId?: string }) {
   return request.get<unknown, UploadFileInfo[]>('/files', { params });
 }
 
-/* ==================== 材料管理相关API ==================== */
+/* ==================== 多轮对话API (V1.1) ==================== */
+
+/** 追问问题类型 */
+export interface FollowUpQuestion {
+  field: string;
+  question: string;
+  example?: string;
+  reason?: string;
+}
+
+/** 对话响应类型 */
+export interface ConversationResponse {
+  sessionId: string;
+  status: 'collecting' | 'complete';
+  parsedInfo: Record<string, any>;
+  missingFields: string[];
+  followUpQuestions: FollowUpQuestion[];
+  progressPercent: number;
+  message: string;
+}
+
+/** 开始多轮对话 */
+export function startConversation(initialText: string, projectId?: string) {
+  return request.post<unknown, ConversationResponse>('/v1/conversation/start', {
+    initial_text: initialText,
+    project_id: projectId,
+  });
+}
+
+/** 继续对话 */
+export function continueConversation(sessionId: string, answer: string) {
+  return request.post<unknown, ConversationResponse>('/v1/conversation/continue', {
+    session_id: sessionId,
+    answer,
+  });
+}
+
+/** 获取会话状态 */
+export function getConversationStatus(sessionId: string) {
+  return request.get<unknown, {
+    sessionId: string;
+    status: string;
+    createdAt: string;
+    lastUpdated: string;
+    messageCount: number;
+    currentInfo: Record<string, any>;
+  }>(`/v1/conversation/${sessionId}/status`);
+}
+
+/** 完成对话 */
+export function completeConversation(sessionId: string, projectId?: string) {
+  return request.post<unknown, {
+    message: string;
+    sessionId: string;
+    projectId: string;
+    finalInfo: Record<string, any>;
+    remainingMissing: string[];
+  }>(`/v1/conversation/${sessionId}/complete`, { project_id: projectId });
+}
+
+/* ==================== 补充材料API (V1.1) ==================== */
+
+/** 材料类型配置 */
+export interface MaterialTypeConfig {
+  type: string;
+  name: string;
+  description: string;
+  allowed_extensions: string[];
+  max_size_mb: number;
+  extract_fields: string[];
+}
+
+/** 材料信息类型 */
+export interface MaterialInfo {
+  materialId: string;
+  materialType: string;
+  fileName: string;
+  fileSize: number;
+  status: string;
+  extractedInfo?: Record<string, any>;
+  uploadedAt: string;
+}
+
+/** 材料上传响应 */
+export interface MaterialUploadResponse {
+  materialId: string;
+  materialType: string;
+  fileName: string;
+  fileSize: number;
+  status: string;
+  extractedInfo?: Record<string, any>;
+  message: string;
+}
+
+/** 获取材料类型列表 */
+export function getMaterialTypes() {
+  return request.get<unknown, MaterialTypeConfig[]>('/v1/materials/types');
+}
+
+/** 上传补充材料 */
+export function uploadMaterial(
+  projectId: string,
+  materialType: string,
+  file: File,
+  onProgress?: (progress: number) => void
+) {
+  const formData = new FormData();
+  formData.append('project_id', projectId);
+  formData.append('material_type', materialType);
+  formData.append('file', file);
+  
+  return request.post<unknown, MaterialUploadResponse>('/v1/materials/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: (event) => {
+      if (event.total && onProgress) {
+        onProgress(Math.round((event.loaded * 100) / event.total));
+      }
+    },
+  });
+}
+
+/** 获取项目材料列表 */
+export function getProjectMaterials(projectId: string, materialType?: string) {
+  return request.get<unknown, { projectId: string; materials: MaterialInfo[]; totalCount: number }>(
+    `/v1/materials/project/${projectId}`,
+    { params: { material_type: materialType } }
+  );
+}
+
+/** 获取材料详情 */
+export function getMaterialDetail(materialId: string) {
+  return request.get<unknown, MaterialInfo>(`/v1/materials/${materialId}`);
+}
+
+/** 删除材料 */
+export function deleteMaterial(materialId: string) {
+  return request.delete<unknown, { message: string; materialId: string }>(`/v1/materials/${materialId}`);
+}
+
+/** 重新处理材料 */
+export function reprocessMaterial(materialId: string) {
+  return request.post<unknown, MaterialUploadResponse>(`/v1/materials/${materialId}/reprocess`);
+}
+
+/* ==================== 缺失项分析API (V1.1) ==================== */
+
+/** 条款覆盖分析响应 */
+export interface CoverageAnalysisResponse {
+  projectId: string;
+  projectName: string;
+  standards: string[];
+  summary: {
+    totalClauses: number;
+    covered: number;
+    partial: number;
+    missing: number;
+    coverageRate: number;
+  };
+  clauses: Array<{
+    clause: string;
+    title: string;
+    status: 'covered' | 'partial' | 'missing';
+    relatedDocuments: string[];
+  }>;
+  suggestions: string[];
+}
+
+/** 快速覆盖检查响应 */
+export interface QuickCoverageResponse {
+  projectId: string;
+  standard: string;
+  totalClauses: number;
+  covered: number;
+  partial: number;
+  missing: number;
+  coverageRate: number;
+  documentCount: number;
+}
+
+/** 分析条款覆盖情况 */
+export function analyzeCoverage(projectId: string, standards?: string[]) {
+  return request.post<unknown, CoverageAnalysisResponse>(`/v1/analyzer/coverage/${projectId}`, {
+    standards,
+  });
+}
+
+/** 快速覆盖检查 */
+export function quickCoverageCheck(projectId: string, standard: string = 'ISO9001') {
+  return request.post<unknown, QuickCoverageResponse>('/v1/analyzer/coverage/quick', {
+    project_id: projectId,
+    standard,
+  });
+}
+
+/** 获取支持的标准列表 */
+export function getSupportedStandards() {
+  return request.get<unknown, {
+    standards: Array<{
+      code: string;
+      name: string;
+      totalClauses: number;
+      description: string;
+    }>;
+  }>('/v1/analyzer/standards');
+}
+
+/* ==================== 环境/安全评估报告解析API (V1.2) ==================== */
+
+/** 环境评估报告解析响应 */
+export interface EnvironmentalReportResponse {
+  companyName: string;
+  aspectsCount: number;
+  significantAspectsCount: number;
+  complianceRate: number;
+  environmentalAspects: Array<{
+    activity: string;
+    aspect: string;
+    impact: string;
+    significance: string;
+  }>;
+  generatedDocuments?: Record<string, any>;
+}
+
+/** 安全评估报告解析响应 */
+export interface SafetyAssessmentResponse {
+  companyName: string;
+  hazardsCount: number;
+  significantHazardsCount: number;
+  incidentsCount: number;
+  complianceRate: number;
+  hazards: Array<{
+    activity: string;
+    hazardSource: string;
+    riskDescription: string;
+    riskScore: number;
+    riskLevel: string;
+  }>;
+  generatedDocuments?: Record<string, any>;
+}
+
+/** 解析环境评估报告 */
+export function analyzeEnvironmentalReport(reportText: string, generateDocuments: boolean = true) {
+  return request.post<unknown, EnvironmentalReportResponse>('/v1/analyzer/environmental-report', {
+    report_text: reportText,
+    generate_documents: generateDocuments,
+  });
+}
+
+/** 解析安全评估报告 */
+export function analyzeSafetyAssessment(reportText: string, generateDocuments: boolean = true) {
+  return request.post<unknown, SafetyAssessmentResponse>('/v1/analyzer/safety-assessment', {
+    report_text: reportText,
+    generate_documents: generateDocuments,
+  });
+}
+
+/* ==================== 材料管理相关API (V1.0) ==================== */
 
 /** 行业信息类型 */
 export interface Industry {

@@ -3,6 +3,7 @@ document_info:
   document_name: 记录控制程序
   document_code: XCYWY-QESMS-B-011
   version: A/0
+  industry: property_service
 purpose: 对质量、环境、职业健康安全管理体系所要求的记录予以控制，以提供质量、环境、职业健康安全管理体系符合要求和有效运行的证据。
 scope: 适用于质量、环境、职业健康安全管理体系所要求的所有记录。
 responsibilities:

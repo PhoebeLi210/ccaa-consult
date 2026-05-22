@@ -3,6 +3,7 @@ document_info:
   document_name: 设备点检表
   document_code: XCYWY-QESMS-D-019
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 2
   tables:

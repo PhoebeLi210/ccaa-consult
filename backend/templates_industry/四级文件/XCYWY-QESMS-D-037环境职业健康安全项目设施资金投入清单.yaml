@@ -3,6 +3,7 @@ document_info:
   document_name: 环境职业健康安全资金投入清单
   document_code: ''
   version: A/0
+  industry: property_service
 form_structure:
   total_tables: 1
   tables:

@@ -8,13 +8,61 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
 
 from app.core.database import get_db
 from app.models.models import Project, Document
 from app.modules.analyzer.missing_item_analyzer import MissingItemAnalyzer, analyze_coverage
+from app.modules.analyzer.environment_analyzer import (
+    parse_environmental_report, 
+    generate_iso14001_documents,
+    EnvironmentalAssessment
+)
+from app.modules.analyzer.safety_analyzer import (
+    parse_safety_assessment,
+    generate_iso45001_documents,
+    SafetyAssessment
+)
 
 router = APIRouter(prefix="/analyzer", tags=["缺失项分析"])
 
+
+# ============ 请求/响应模型 ============
+
+class EnvironmentalReportRequest(BaseModel):
+    """环境评估报告解析请求"""
+    report_text: str = Field(..., description="环境评估报告全文")
+    generate_documents: bool = Field(True, description="是否生成ISO14001文档内容")
+
+
+class EnvironmentalReportResponse(BaseModel):
+    """环境评估报告解析响应"""
+    company_name: str
+    aspects_count: int
+    significant_aspects_count: int
+    compliance_rate: float
+    environmental_aspects: List[dict]
+    generated_documents: Optional[dict] = None
+
+
+class SafetyAssessmentRequest(BaseModel):
+    """安全评估报告解析请求"""
+    report_text: str = Field(..., description="职业健康安全评估报告全文")
+    generate_documents: bool = Field(True, description="是否生成ISO45001文档内容")
+
+
+class SafetyAssessmentResponse(BaseModel):
+    """安全评估报告解析响应"""
+    company_name: str
+    hazards_count: int
+    significant_hazards_count: int
+    incidents_count: int
+    compliance_rate: float
+    hazards: List[dict]
+    generated_documents: Optional[dict] = None
+
+
+# ============ API路由 ============
 
 @router.post("/coverage/{project_id}", summary="分析文档条款覆盖情况")
 async def analyze_clause_coverage(
@@ -147,3 +195,106 @@ async def list_standards():
             },
         ]
     }
+
+
+# ============ V1.2 新增：环境评估报告解析 ============
+
+@router.post("/environmental-report", response_model=EnvironmentalReportResponse, summary="解析环境评估报告")
+async def analyze_environmental_report(request: EnvironmentalReportRequest):
+    """
+    解析 ISO14001 环境评估报告，提取环境因素、合规性评价等信息
+    
+    支持从环境评估报告文本中自动提取：
+    - 环境因素识别
+    - 重要环境因素
+    - 合规性评价
+    - 目标指标
+    - 管理方案
+    
+    并可生成 ISO14001 体系文件所需内容
+    """
+    try:
+        # 解析报告
+        assessment = parse_environmental_report(request.report_text)
+        
+        # 生成文档内容（如果需要）
+        generated_docs = None
+        if request.generate_documents:
+            generated_docs = generate_iso14001_documents(assessment)
+        
+        return EnvironmentalReportResponse(
+            company_name=assessment.company_name,
+            aspects_count=len(assessment.environmental_aspects),
+            significant_aspects_count=len(assessment.significant_aspects),
+            compliance_rate=_calculate_compliance_rate(assessment.compliance_items),
+            environmental_aspects=[
+                {
+                    "activity": a.activity,
+                    "aspect": a.aspect_name,
+                    "impact": a.environmental_impact,
+                    "significance": a.significance,
+                }
+                for a in assessment.environmental_aspects
+            ],
+            generated_documents=generated_docs,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"解析失败: {str(e)}")
+
+
+# ============ V1.2 新增：安全评估报告解析 ============
+
+@router.post("/safety-assessment", response_model=SafetyAssessmentResponse, summary="解析职业健康安全评估报告")
+async def analyze_safety_assessment(request: SafetyAssessmentRequest):
+    """
+    解析 ISO45001 职业健康安全评估报告，提取危险源、事故记录等信息
+    
+    支持从安全评估报告文本中自动提取：
+    - 危险源识别
+    - 重大危险源
+    - 事故/事件记录
+    - 法规合规性
+    - 目标指标
+    - 应急程序
+    
+    并可生成 ISO45001 体系文件所需内容
+    """
+    try:
+        # 解析报告
+        assessment = parse_safety_assessment(request.report_text)
+        
+        # 生成文档内容（如果需要）
+        generated_docs = None
+        if request.generate_documents:
+            generated_docs = generate_iso45001_documents(assessment)
+        
+        return SafetyAssessmentResponse(
+            company_name=assessment.company_name,
+            hazards_count=len(assessment.hazards),
+            significant_hazards_count=len(assessment.significant_hazards),
+            incidents_count=len(assessment.incidents),
+            compliance_rate=_calculate_compliance_rate(assessment.legal_requirements),
+            hazards=[
+                {
+                    "activity": h.activity,
+                    "hazard_source": h.hazard_source,
+                    "risk_description": h.risk_description,
+                    "risk_score": h.likelihood * h.severity,
+                    "risk_level": h.risk_level,
+                }
+                for h in assessment.hazards
+            ],
+            generated_documents=generated_docs,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"解析失败: {str(e)}")
+
+
+# ============ 辅助函数 ============
+
+def _calculate_compliance_rate(items: list) -> float:
+    """计算合规率"""
+    if not items:
+        return 100.0
+    compliant = sum(1 for item in items if getattr(item, 'compliance_status', None) == "合规" or item.get('status') == "合规")
+    return round(compliant / len(items) * 100, 1)
