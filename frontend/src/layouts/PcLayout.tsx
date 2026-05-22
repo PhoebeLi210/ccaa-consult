@@ -6,6 +6,7 @@ import {
   FolderOpenOutlined,
   CloudUploadOutlined,
   FileTextOutlined,
+  BranchesOutlined,
 } from '@ant-design/icons';
 
 const { Sider, Content, Header } = Layout;
@@ -32,6 +33,11 @@ const menuItems = [
     icon: <CloudUploadOutlined />,
     label: '文件上传',
   },
+  {
+    key: '/flowcharts',
+    icon: <BranchesOutlined />,
+    label: '流程图设计',
+  },
 ];
 
 /**
@@ -55,6 +61,9 @@ const PcLayout: React.FC<PcLayoutProps> = ({ children }) => {
   const getSelectedKey = () => {
     if (location.pathname.startsWith('/project/') && location.pathname !== '/project/create') {
       return '/project/create';
+    }
+    if (location.pathname.startsWith('/flowcharts')) {
+      return '/flowcharts';
     }
     return location.pathname;
   };

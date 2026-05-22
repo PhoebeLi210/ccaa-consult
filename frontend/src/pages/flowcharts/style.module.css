@@ -1,0 +1,288 @@
+.container {
+  padding: 0;
+}
+
+.detailContent {
+  padding: 16px 0;
+}
+
+.detailContent p {
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+/* 编辑器样式 */
+.editorContainer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px);
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #262626;
+}
+
+.mainContent {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 节点面板 */
+.nodePanel {
+  width: 200px;
+  background-color: #fff;
+  border-right: 1px solid #e8e8e8;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.panelTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.nodeList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nodeItem {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #e8e8e8;
+}
+
+.nodeItem:hover {
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.nodeItemIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.nodeItemLabel {
+  font-size: 14px;
+  color: #262626;
+}
+
+.helpText {
+  font-size: 12px;
+  color: #8c8c8c;
+  line-height: 1.8;
+}
+
+.helpText p {
+  margin-bottom: 4px;
+}
+
+/* 画布区域 */
+.canvas {
+  flex: 1;
+  position: relative;
+  background-color: #fafafa;
+  background-image:
+    linear-gradient(#e8e8e8 1px, transparent 1px),
+    linear-gradient(90deg, #e8e8e8 1px, transparent 1px);
+  background-size: 20px 20px;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+.svgLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.svgLayer path {
+  pointer-events: stroke;
+}
+
+/* 节点样式 */
+.node {
+  position: absolute;
+  width: 120px;
+  min-height: 60px;
+  background-color: #fff;
+  border: 2px solid;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  padding: 8px;
+}
+
+.node:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.node.selected {
+  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.3);
+  z-index: 20;
+}
+
+.node.connecting {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(24, 144, 255, 0);
+  }
+}
+
+.nodeIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.nodeLabel {
+  font-size: 12px;
+  color: #262626;
+  text-align: center;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.nodeActions {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background-color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 连线样式 */
+.edge {
+  fill: none;
+  stroke: #8c8c8c;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edge:hover {
+  stroke: #1890ff;
+  stroke-width: 3;
+}
+
+.selectedEdge {
+  stroke: #1890ff;
+  stroke-width: 3;
+}
+
+.edgeLabel {
+  font-size: 12px;
+  fill: #595959;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  background-color: #fff;
+}
+
+.edgeActions {
+  z-index: 30;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .nodePanel {
+    width: 160px;
+    padding: 12px;
+  }
+
+  .nodeItem {
+    padding: 8px;
+  }
+
+  .nodeItemLabel {
+    font-size: 12px;
+  }
+
+  .node {
+    width: 100px;
+    min-height: 50px;
+  }
+
+  .nodeLabel {
+    font-size: 11px;
+  }
+}
+
+/* 滚动条样式 */
+.nodePanel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.nodePanel::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.nodePanel::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.nodePanel::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

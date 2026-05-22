@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-智质通·咨询版 - 主入口
+鏅鸿川閫毬峰挩璇㈢増 - 涓诲叆鍙?
 
-FastAPI应用入口
+FastAPI搴旂敤鍏ュ彛
 """
 
 from fastapi import FastAPI
@@ -12,30 +12,30 @@ from contextlib import asynccontextmanager
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation
+from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, flowcharts
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """应用生命周期"""
-    # 启动时初始化数据库
-    print("智质通·咨询版 启动中...")
-    print("初始化数据库...")
+    """搴旂敤鐢熷懡鍛ㄦ湡"""
+    # 鍚姩鏃跺垵濮嬪寲鏁版嵁搴?
+    print("鏅鸿川閫毬峰挩璇㈢増 鍚姩涓?..")
+    print("鍒濆鍖栨暟鎹簱...")
     init_db()
-    print("数据库初始化完成")
+    print("鏁版嵁搴撳垵濮嬪寲瀹屾垚")
     yield
-    # 关闭时
-    print("智质通·咨询版 关闭中...")
+    # 鍏抽棴鏃?
+    print("鏅鸿川閫毬峰挩璇㈢増 鍏抽棴涓?..")
 
 
 app = FastAPI(
-    title="智质通·咨询版 API",
-    description="面向ISO咨询顾问的AI智能文书工作站",
+    title="鏅鸿川閫毬峰挩璇㈢増 API",
+    description="闈㈠悜ISO鍜ㄨ椤鹃棶鐨凙I鏅鸿兘鏂囦功宸ヤ綔绔?,
     version="1.0.0",
     lifespan=lifespan,
 )
 
-# CORS配置
+# CORS閰嶇疆
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -44,7 +44,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 注册路由
+# 娉ㄥ唽璺敱
 app.include_router(templates.router, prefix="/api/v1")
 app.include_router(generator.router, prefix="/api/v1")
 app.include_router(company.router, prefix="/api/v1")
@@ -55,45 +55,47 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(analyzer.router, prefix="/api/v1")
 app.include_router(uploads.router, prefix="/api/v1")
 app.include_router(conversation.router, prefix="/api/v1")
+app.include_router(flowcharts.router, prefix="/api/v1")
 
 
 @app.get("/")
 async def root():
-    """根路径"""
+    """鏍硅矾寰?""
     return {
-        "name": "智质通·咨询版",
+        "name": "鏅鸿川閫毬峰挩璇㈢増",
         "version": "1.0.0",
-        "description": "面向ISO咨询顾问的AI智能文书工作站",
+        "description": "闈㈠悜ISO鍜ㄨ椤鹃棶鐨凙I鏅鸿兘鏂囦功宸ヤ綔绔?,
         "endpoints": {
-            "auth": "/api/v1/auth - 用户认证（注册/登录）",
-            "projects": "/api/v1/projects - 项目管理",
-            "generator": "/api/v1/generator - 文档生成与导出",
-            "templates": "/api/v1/templates - 模板管理",
-            "materials": "/api/v1/materials - 材料管理",
-            "parse": "/api/v1/parse - 自然语言解析",
-            "analyzer": "/api/v1/analyzer - 缺失项分析",
-            "uploads": "/api/v1/uploads - 文件上传与Excel解析",
-            "company": "/api/v1/company - 企业管理",
+            "auth": "/api/v1/auth - 鐢ㄦ埛璁よ瘉锛堟敞鍐?鐧诲綍锛?,
+            "projects": "/api/v1/projects - 椤圭洰绠＄悊",
+            "generator": "/api/v1/generator - 鏂囨。鐢熸垚涓庡鍑?,
+            "templates": "/api/v1/templates - 妯℃澘绠＄悊",
+            "materials": "/api/v1/materials - 鏉愭枡绠＄悊",
+            "parse": "/api/v1/parse - 鑷劧璇█瑙ｆ瀽",
+            "analyzer": "/api/v1/analyzer - 缂哄け椤瑰垎鏋?,
+            "uploads": "/api/v1/uploads - 鏂囦欢涓婁紶涓嶦xcel瑙ｆ瀽",
+            "company": "/api/v1/company - 浼佷笟绠＄悊",
         },
         "features": [
-            "JWT用户认证",
-            "数据库持久化（SQLite）",
-            "LLM自然语言解析（DeepSeek）",
-            "AI扩写描述性内容",
-            "行业模板自动匹配（7个行业）",
-            "文档导出为.docx/ZIP",
-            "Excel收集表上传解析",
-            "ISO条款覆盖检查",
+            "JWT鐢ㄦ埛璁よ瘉",
+            "鏁版嵁搴撴寔涔呭寲锛圫QLite锛?,
+            "LLM鑷劧璇█瑙ｆ瀽锛圖eepSeek锛?,
+            "AI鎵╁啓鎻忚堪鎬у唴瀹?,
+            "琛屼笟妯℃澘鑷姩鍖归厤锛?涓涓氾級",
+            "鏂囨。瀵煎嚭涓?docx/ZIP",
+            "Excel鏀堕泦琛ㄤ笂浼犺В鏋?,
+            "ISO鏉℃瑕嗙洊妫€鏌?,
         ]
     }
 
 
 @app.get("/health")
 async def health():
-    """健康检查"""
+    """鍋ュ悍妫€鏌?""
     return {"status": "healthy"}
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

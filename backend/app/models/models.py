@@ -277,3 +277,6 @@ class Template(Base):
             "is_public": self.is_public,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+
+
+from app.models.flowchart_models import Flowchart, FlowchartTemplate, FlowchartNodeConfig

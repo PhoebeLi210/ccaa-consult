@@ -11,6 +11,8 @@ import MaterialsPage from './pages/materials';
 import MaterialsUploadPage from './pages/materials/upload';
 import ConversationPage from './pages/conversation';
 import AnalyzerPage from './pages/analyzer';
+import FlowchartListPage from './pages/flowcharts';
+import FlowchartEditorPage from './pages/flowcharts/editor';
 
 /**
  * 根组件
@@ -49,6 +51,12 @@ const App: React.FC = () => {
         
         {/* 评估报告解析 (V1.2) */}
         <Route path="/analyzer" element={<AnalyzerPage />} />
+        
+        {/* 流程图管理 */}
+        <Route path="/flowcharts" element={<FlowchartListPage />} />
+        
+        {/* 流程图编辑器 */}
+        <Route path="/flowcharts/editor" element={<FlowchartEditorPage />} />
         
         {/* 未匹配路由重定向到首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />

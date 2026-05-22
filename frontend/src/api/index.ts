@@ -483,4 +483,91 @@ export const downloadTemplate = (materialName: string) => {
   window.open(`/api/v1/materials/template/download/${encodeURIComponent(materialName)}`, '_blank');
 };
 
+/* ==================== 流程图API ==================== */
+
+/** 节点类型 */
+export type NodeType = 'start' | 'end' | 'process' | 'decision' | 'document';
+
+/** 流程图节点 */
+export interface FlowchartNode {
+  id: string;
+  type: NodeType;
+  label: string;
+  x: number;
+  y: number;
+  description?: string;
+}
+
+/** 流程图边 */
+export interface FlowchartEdge {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+}
+
+/** 流程图数据 */
+export interface FlowchartData {
+  nodes: FlowchartNode[];
+  edges: FlowchartEdge[];
+}
+
+/** 流程图信息 */
+export interface FlowchartInfo {
+  id: string;
+  name: string;
+  description?: string;
+  status: 'draft' | 'published';
+  nodes: FlowchartNode[];
+  edges: FlowchartEdge[];
+  nodeCount?: number;
+  edgeCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 创建流程图请求 */
+export interface CreateFlowchartRequest {
+  name: string;
+  description?: string;
+}
+
+/** 更新流程图请求 */
+export interface UpdateFlowchartRequest {
+  name?: string;
+  description?: string;
+  data?: FlowchartData;
+  status?: 'draft' | 'published';
+}
+
+/** 获取流程图列表 */
+export function getFlowchartList() {
+  return request.get<unknown, FlowchartInfo[]>('/v1/flowcharts');
+}
+
+/** 获取流程图详情 */
+export function getFlowchartDetail(id: string) {
+  return request.get<unknown, FlowchartInfo>(`/v1/flowcharts/${id}`);
+}
+
+/** 创建流程图 */
+export function createFlowchart(data: CreateFlowchartRequest) {
+  return request.post<unknown, FlowchartInfo>('/v1/flowcharts', data);
+}
+
+/** 更新流程图 */
+export function updateFlowchart(id: string, data: UpdateFlowchartRequest) {
+  return request.put<unknown, FlowchartInfo>(`/v1/flowcharts/${id}`, data);
+}
+
+/** 删除流程图 */
+export function deleteFlowchart(id: string) {
+  return request.delete<unknown, void>(`/v1/flowcharts/${id}`);
+}
+
+/** 发布流程图 */
+export function publishFlowchart(id: string) {
+  return request.post<unknown, FlowchartInfo>(`/v1/flowcharts/${id}/publish`);
+}
+
 export default request;
