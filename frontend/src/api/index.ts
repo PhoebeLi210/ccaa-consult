@@ -1,4 +1,5 @@
-﻿import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+﻿
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 /** 后端API基础URL */
 const BASE_URL = '/api';
@@ -70,6 +71,9 @@ export interface ProjectInfo {
   status: 'draft' | 'in_progress' | 'completed';
   createdAt: string;
   updatedAt: string;
+  // V1.4新增
+  certStage?: string;  // 认证阶段
+  selectedOptionalScopes?: string[];  // 选中的可选文件层级
 }
 
 /** AI解析结果类型 */
@@ -122,13 +126,42 @@ export function getProjectDetail(id: string) {
   return request.get<unknown, ProjectInfo>(`/projects/${id}`);
 }
 
+/** 创建项目请求参数 */
+export interface CreateProjectRequest {
+  name: string;
+  companyName: string;
+  industry: string;
+  employeeCount?: string;
+  registeredCapital?: string;
+  address?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  certStage?: string;  // 认证阶段
+  selectedOptionalScopes?: string[];  // 选中的可选文件层级
+}
+
 /** 创建项目 */
-export function createProject(data: Partial<ProjectInfo>) {
+export function createProject(data: CreateProjectRequest) {
   return request.post<unknown, ProjectInfo>('/projects', data);
 }
 
+/** 更新项目请求参数 */
+export interface UpdateProjectRequest {
+  name?: string;
+  companyName?: string;
+  industry?: string;
+  employeeCount?: string;
+  registeredCapital?: string;
+  address?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  status?: 'draft' | 'in_progress' | 'completed';
+  certStage?: string;  // 认证阶段
+  selectedOptionalScopes?: string[];  // 选中的可选文件层级
+}
+
 /** 更新项目 */
-export function updateProject(id: string, data: Partial<ProjectInfo>) {
+export function updateProject(id: string, data: UpdateProjectRequest) {
   return request.put<unknown, ProjectInfo>(`/projects/${id}`, data);
 }
 
@@ -571,158 +604,65 @@ export function publishFlowchart(id: string) {
 }
 
 
-/* ==================== 认证阶段API ==================== */
-
-/** 认证阶段类型 */
-export type CertStageType = 'initial' | 'surveillance_1' | 'surveillance_2' | 'recertification';
+/* ==================== 认证阶段API (V1.4) ==================== */
 
 /** 认证阶段选项 */
 export interface CertStageOption {
-  key: CertStageType;
-  name: string;
+  stage: string;
+  label: string;
   description: string;
   year: string;
-  documentScope: string[];
-  updateScope: string[];
-  requireOldFiles: boolean;
 }
 
-/** 文件范围信息 */
-export interface DocumentScopeInfo {
-  stage: CertStageType;
-  generateFiles: Array<{
-    category: string;
-    files: string[];
-  }>;
-  updateFiles: Array<{
-    category: string;
-    files: string[];
-  }>;
-  skipFiles: string[];
+/** 文件范围 */
+export interface DocumentScope {
+  level: string;
+  levelCode: string;
+  action: string;
+  documentTypes: string[];
+  optional?: boolean;
+  defaultSelected?: boolean;
 }
 
-/** 旧版文件提取结果 */
-export interface OldFileExtractionResult {
-  qualityPolicy: {
-    text: string;
-    source: string;
-  };
-  qualityObjectives: Array<{
-    id: string;
-    content: string;
-    department: string;
-    target: string;
-    period: string;
-  }>;
-  fileNamingRules: Array<{
-    prefix: string;
-    category: string;
-    format: string;
-    example: string;
-  }>;
-  departments: Array<{
-    name: string;
-    code: string;
-    description?: string;
-    functions?: string[];
-  }>;
-  companyInfo: {
-    companyName: string;
-    address: string;
-    legalPerson: string;
-    registeredCapital: string;
-    businessScope: string;
-    establishedDate: string;
-    unifiedSocialCreditCode: string;
-  };
-  rawFiles: Array<{
-    fileName: string;
-    fileType: string;
-    extractedFields: string[];
-  }>;
-}
-
-/** 文件分类结果 */
-export interface FileClassificationResult {
-  projectId: string;
-  totalFiles: number;
-  classifications: Array<{
-    fileName: string;
-    category: string;
-    confidence: number;
-    suggestedName?: string;
-  }>;
-  unclassifiedFiles: string[];
+/** 文件范围响应 */
+export interface DocumentScopeResponse {
+  stage: string;
+  stageLabel: string;
+  description: string;
+  scopes: DocumentScope[];
+  hasOptional: boolean;
+  optionalScopes: DocumentScope[];
 }
 
 /** 获取认证阶段选项 */
 export function getCertStageOptions() {
-  return request.get<unknown, CertStageOption[]>('/v1/cert-stages/options');
+  return request.get<unknown, CertStageOption[]>('/cert-stage/options');
 }
 
 /** 获取文件范围 */
-export function getDocumentScope(stage: CertStageType) {
-  return request.get<unknown, DocumentScopeInfo>(`/v1/cert-stages/${stage}/document-scope`);
+export function getDocumentScope(stage: string) {
+  return request.get<unknown, DocumentScopeResponse>(`/cert-stage/${stage}/document-scope`);
 }
 
-/** AI建议认证阶段 */
-export function suggestCertStage(companyInfo: {
+/** 建议认证阶段请求 */
+export interface CertStageSuggestRequest {
+  hasExistingCert?: boolean;
+  certIssueYear?: number;
+  certStandards?: string[];
   companyName?: string;
-  certStartDate?: string;
-  lastAuditDate?: string;
-  certCycle?: number;
-}) {
-  return request.post<unknown, { suggestedStage: CertStageType; reason: string }>(
-    '/v1/cert-stages/suggest',
-    companyInfo,
-  );
 }
 
-/** 上传旧版文件 */
-export function uploadOldFiles(
-  projectId: string,
-  files: File[],
-  onProgress?: (progress: number) => void,
-) {
-  const formData = new FormData();
-  files.forEach((file) => {
-    formData.append('files', file);
-  });
-  formData.append('project_id', projectId);
-
-  return request.post<unknown, { uploadedCount: number; fileIds: string[] }>(
-    '/v1/old-files/upload',
-    formData,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (event) => {
-        if (event.total && onProgress) {
-          onProgress(Math.round((event.loaded * 100) / event.total));
-        }
-      },
-    },
-  );
+/** 建议认证阶段响应 */
+export interface CertStageSuggestResponse {
+  suggestedStage: string;
+  stageLabel: string;
+  reason: string;
+  certYearInfo?: string;
 }
 
-/** 提取旧版文件信息 */
-export function extractOldFiles(projectId: string) {
-  return request.post<unknown, OldFileExtractionResult>(
-    `/v1/old-files/${projectId}/extract`,
-  );
-}
-
-/** 获取提取结果 */
-export function getExtractionResult(projectId: string) {
-  return request.get<unknown, OldFileExtractionResult>(
-    `/v1/old-files/${projectId}/result`,
-  );
-}
-
-/** 分类文件 */
-export function classifyFiles(projectId: string) {
-  return request.post<unknown, FileClassificationResult>(
-    `/v1/old-files/${projectId}/classify`,
-  );
+/** 建议认证阶段 */
+export function suggestCertStage(data: CertStageSuggestRequest) {
+  return request.post<unknown, CertStageSuggestResponse>('/cert-stage/suggest', data);
 }
 
 export default request;

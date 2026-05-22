@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 智质通·咨询版 - 认证阶段确认API
@@ -39,6 +39,8 @@ class DocumentScope(BaseModel):
     level_code: str         # 层级编码
     action: str             # 操作类型："生成" / "更新"
     document_types: List[str]  # 文件类型列表
+    optional: bool = Field(False, description="是否可选（询问用户）")
+    default_selected: bool = Field(True, description="默认是否选中")
 
 
 class DocumentScopeResponse(BaseModel):
@@ -47,6 +49,8 @@ class DocumentScopeResponse(BaseModel):
     stage_label: str
     description: str
     scopes: List[DocumentScope]
+    has_optional: bool = Field(False, description="是否包含可选文件层级")
+    optional_scopes: List[DocumentScope] = Field([], description="可选文件层级列表")
 
 
 class CertStageSuggestRequest(BaseModel):
@@ -164,9 +168,48 @@ STAGE_DOCUMENT_SCOPES: Dict[CertStage, List[Dict[str, Any]]] = {
     ],
     CertStage.SUPERVISION_1: [
         {
+            "level": "一级文件",
+            "level_code": "level_1",
+            "action": "更新",
+            "optional": True,
+            "default_selected": False,
+            "document_types": [
+                "质量管理手册",
+                "环境管理手册",
+                "职业健康安全管理手册",
+            ],
+        },
+        {
+            "level": "二级文件",
+            "level_code": "level_2",
+            "action": "更新",
+            "optional": True,
+            "default_selected": False,
+            "document_types": [
+                "文件控制程序",
+                "记录控制程序",
+                "内部审核程序",
+                "管理评审程序",
+                "纠正措施程序",
+                "培训控制程序",
+                "合同评审程序",
+                "采购控制程序",
+                "生产和服务提供控制程序",
+                "产品检验控制程序",
+                "顾客满意度测量程序",
+                "环境因素识别与评价程序",
+                "法律法规获取与更新程序",
+                "应急准备和响应程序",
+                "危险源辨识与风险评价程序",
+                "事件调查与处理程序",
+            ],
+        },
+        {
             "level": "三级文件",
             "level_code": "level_3",
             "action": "更新",
+            "optional": False,
+            "default_selected": True,
             "document_types": [
                 "管理制度（更新版）",
                 "作业指导书（更新版）",
@@ -177,6 +220,8 @@ STAGE_DOCUMENT_SCOPES: Dict[CertStage, List[Dict[str, Any]]] = {
             "level": "四级文件",
             "level_code": "level_4",
             "action": "更新",
+            "optional": False,
+            "default_selected": True,
             "document_types": [
                 "培训记录表",
                 "检验记录表",
@@ -192,9 +237,48 @@ STAGE_DOCUMENT_SCOPES: Dict[CertStage, List[Dict[str, Any]]] = {
     ],
     CertStage.SUPERVISION_2: [
         {
+            "level": "一级文件",
+            "level_code": "level_1",
+            "action": "更新",
+            "optional": True,
+            "default_selected": False,
+            "document_types": [
+                "质量管理手册",
+                "环境管理手册",
+                "职业健康安全管理手册",
+            ],
+        },
+        {
+            "level": "二级文件",
+            "level_code": "level_2",
+            "action": "更新",
+            "optional": True,
+            "default_selected": False,
+            "document_types": [
+                "文件控制程序",
+                "记录控制程序",
+                "内部审核程序",
+                "管理评审程序",
+                "纠正措施程序",
+                "培训控制程序",
+                "合同评审程序",
+                "采购控制程序",
+                "生产和服务提供控制程序",
+                "产品检验控制程序",
+                "顾客满意度测量程序",
+                "环境因素识别与评价程序",
+                "法律法规获取与更新程序",
+                "应急准备和响应程序",
+                "危险源辨识与风险评价程序",
+                "事件调查与处理程序",
+            ],
+        },
+        {
             "level": "三级文件",
             "level_code": "level_3",
             "action": "更新",
+            "optional": False,
+            "default_selected": True,
             "document_types": [
                 "管理制度（更新版）",
                 "作业指导书（更新版）",
@@ -205,6 +289,8 @@ STAGE_DOCUMENT_SCOPES: Dict[CertStage, List[Dict[str, Any]]] = {
             "level": "四级文件",
             "level_code": "level_4",
             "action": "更新",
+            "optional": False,
+            "default_selected": True,
             "document_types": [
                 "培训记录表",
                 "检验记录表",
@@ -295,10 +381,10 @@ async def get_cert_stage_options() -> List[CertStageOption]:
     获取所有可用的认证阶段选项。
 
     返回四个阶段：
-    - 初次认证（第1年）
-    - 监督审核1（第2年）
-    - 监督审核2（第3年）
-    - 再认证（第4年）
+    初次认证（第1年）
+    监督审核1（第2年）
+    监督审核2（第3年）
+    再认证（第4年）
     """
     return [
         CertStageOption(
@@ -316,10 +402,10 @@ async def get_document_scope(stage: CertStage) -> DocumentScopeResponse:
     """
     获取指定认证阶段需要生成或更新的文件范围。
 
-    - **initial**: 一级~四级全部生成
-    - **supervision_1**: 仅三级（管理制度）和四级（记录表格）更新
-    - **supervision_2**: 仅三级（管理制度）和四级（记录表格）更新
-    - **recertification**: 一级~四级全部更新
+    initial: 一级~四级全部生成
+    supervision_1: 三级（管理制度）和四级（记录表格）必须更新，一级和二级可选
+    supervision_2: 三级（管理制度）和四级（记录表格）必须更新，一级和二级可选
+    recertification: 一级~四级全部更新
     """
     stage_info = None
     for opt in CERT_STAGE_OPTIONS:
@@ -330,21 +416,30 @@ async def get_document_scope(stage: CertStage) -> DocumentScopeResponse:
     if not stage_info:
         raise HTTPException(status_code=400, detail=f"未知的认证阶段: {stage}")
 
-    scopes = STAGE_DOCUMENT_SCOPES.get(stage, [])
+    scopes_data = STAGE_DOCUMENT_SCOPES.get(stage, [])
+    
+    scopes = []
+    for s in scopes_data:
+        scope = DocumentScope(
+            level=s["level"],
+            level_code=s["level_code"],
+            action=s["action"],
+            document_types=s["document_types"],
+            optional=s.get("optional", False),
+            default_selected=s.get("default_selected", True),
+        )
+        scopes.append(scope)
+    
+    optional_scopes = [s for s in scopes if s.optional]
+    has_optional = len(optional_scopes) > 0
 
     return DocumentScopeResponse(
         stage=stage,
         stage_label=stage_info["label"],
         description=stage_info["description"],
-        scopes=[
-            DocumentScope(
-                level=s["level"],
-                level_code=s["level_code"],
-                action=s["action"],
-                document_types=s["document_types"],
-            )
-            for s in scopes
-        ],
+        scopes=scopes,
+        has_optional=has_optional,
+        optional_scopes=optional_scopes,
     )
 
 
@@ -352,14 +447,6 @@ async def get_document_scope(stage: CertStage) -> DocumentScopeResponse:
 async def suggest_cert_stage(request: CertStageSuggestRequest) -> CertStageSuggestResponse:
     """
     根据企业已有认证信息，智能建议当前应选择的认证阶段。
-
-    判断逻辑：
-    1. 无认证证书 -> 初次认证
-    2. 有认证证书，根据发证年份计算当前处于哪个阶段：
-       - 发证第1年 -> 监督审核1
-       - 发证第2年 -> 监督审核2
-       - 发证第3年 -> 再认证
-       - 超过3年 -> 再认证
     """
     from datetime import datetime
     current_year = datetime.now().year
@@ -393,23 +480,20 @@ async def suggest_cert_stage(request: CertStageSuggestRequest) -> CertStageSugge
         return CertStageSuggestResponse(
             suggested_stage=CertStage.SUPERVISION_1,
             stage_label="监督审核1",
-            reason=f"证书于{request.cert_issue_year}年发证，距今{years_since_issue}年，处于第2年监督审核阶段。"
-                   f"建议更新三级文件（管理制度）和四级文件（记录表格）。",
+            reason=f"证书于{request.cert_issue_year}年发证，距今{years_since_issue}年，处于第2年监督审核阶段。建议更新三级文件（管理制度）和四级文件（记录表格），一级和二级文件可选更新。",
             cert_year_info=f"发证年份: {request.cert_issue_year}，认证周期第{years_since_issue + 1}年",
         )
     elif years_since_issue == 2:
         return CertStageSuggestResponse(
             suggested_stage=CertStage.SUPERVISION_2,
             stage_label="监督审核2",
-            reason=f"证书于{request.cert_issue_year}年发证，距今{years_since_issue}年，处于第3年监督审核阶段。"
-                   f"建议更新三级文件（管理制度）和四级文件（记录表格）。",
+            reason=f"证书于{request.cert_issue_year}年发证，距今{years_since_issue}年，处于第3年监督审核阶段。建议更新三级文件（管理制度）和四级文件（记录表格），一级和二级文件可选更新。",
             cert_year_info=f"发证年份: {request.cert_issue_year}，认证周期第{years_since_issue + 1}年",
         )
     else:
         return CertStageSuggestResponse(
             suggested_stage=CertStage.RECERTIFICATION,
             stage_label="再认证",
-            reason=f"证书于{request.cert_issue_year}年发证，距今{years_since_issue}年，"
-                   f"证书三年有效期已届满，需要进行再认证审核。建议全面更新所有体系文件（一级~四级）。",
+            reason=f"证书于{request.cert_issue_year}年发证，距今{years_since_issue}年，证书三年有效期已届满，需要进行再认证审核。建议全面更新所有体系文件（一级~四级）。",
             cert_year_info=f"发证年份: {request.cert_issue_year}，认证周期第{years_since_issue + 1}年（需再认证）",
         )

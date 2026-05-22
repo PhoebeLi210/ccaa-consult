@@ -152,6 +152,8 @@ class Project(Base):
             "quality_goals_verified": self.quality_goals_verified,
             "key_customers": self.key_customers,
             "status": self.status,
+            "cert_stage": self.config.get("cert_stage") if self.config else None,
+            "selected_optional_scopes": self.config.get("selected_optional_scopes", []) if self.config else [],
             "config": self.config or {},
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,

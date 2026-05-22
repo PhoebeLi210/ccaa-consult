@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Radio, Tag, Typography, Space, Spin, Alert, Tooltip } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Card, Radio, Tag, Typography, Space, Spin, Alert, Tooltip, Checkbox } from 'antd';
 import {
   FileTextOutlined,
   AuditOutlined,
@@ -28,6 +28,8 @@ export interface CertStageOption {
   documentScope: string[];
   /** 需要更新的文件范围 */
   updateScope: string[];
+  /** 可选文件范围（询问用户） */
+  optionalScope?: string[];
   /** 是否需要上传旧版文件 */
   requireOldFiles: boolean;
 }
@@ -54,9 +56,9 @@ interface CertStageSelectorProps {
   /** 当前选中的阶段 */
   value?: CertStageType;
   /** 选择变更回调 */
-  onChange?: (stage: CertStageType, stageInfo: CertStageOption) => void;
+  onChange?: (stage: CertStageType, stageInfo: CertStageOption, selectedOptionalScopes?: string[]) => void;
   /** 确认回调 */
-  onConfirm?: (stage: CertStageType, stageInfo: CertStageOption) => void;
+  onConfirm?: (stage: CertStageType, stageInfo: CertStageOption, selectedOptionalScopes?: string[]) => void;
   /** 是否显示确认按钮 */
   showConfirmButton?: boolean;
   /** 确认按钮文字 */
@@ -74,6 +76,8 @@ interface CertStageSelectorProps {
   };
   /** 是否显示文件范围详情 */
   showScopeDetail?: boolean;
+  /** 已选中的可选范围 */
+  selectedOptionalScopes?: string[];
 }
 
 // ============ 阶段配置 ============
@@ -118,6 +122,7 @@ const getStageOptions = (): CertStageOption[] => [
       '程序文件（修订记录）',
       '质量目标完成情况统计',
     ],
+    optionalScope: ['level_1', 'level_2'],
     requireOldFiles: true,
   },
   {
@@ -140,6 +145,7 @@ const getStageOptions = (): CertStageOption[] => [
       '质量目标完成情况统计',
       '上年度不符合项关闭情况',
     ],
+    optionalScope: ['level_1', 'level_2'],
     requireOldFiles: true,
   },
   {
@@ -188,6 +194,7 @@ const CertStageSelector: React.FC<CertStageSelectorProps> = ({
   className = '',
   companyInfo,
   showScopeDetail = true,
+  selectedOptionalScopes,
 }) => {
   // ============ 状态 ============
   const [selectedStage, setSelectedStage] = useState<CertStageType | undefined>(value);
@@ -195,11 +202,21 @@ const CertStageSelector: React.FC<CertStageSelectorProps> = ({
   const [loading, setLoading] = useState(false);
   const [suggestedStage, setSuggestedStage] = useState<CertStageType | null>(null);
   const [expandedStage, setExpandedStage] = useState<CertStageType | null>(null);
+  const [selectedOptional, setSelectedOptional] = useState<string[]>(selectedOptionalScopes || []);
 
   // ============ 初始化 ============
 
   useEffect(() => {
     setSelectedStage(value);
+  }, [value]);
+
+  // 当选择监督审核时，默认不选中一级和二级
+  useEffect(() => {
+    if (value?.startsWith('surveillance')) {
+      setSelectedOptional([]);  // 默认都不选
+    } else {
+      setSelectedOptional([]);
+    }
   }, [value]);
 
   // ============ 事件处理 ============
@@ -211,10 +228,10 @@ const CertStageSelector: React.FC<CertStageSelectorProps> = ({
       setSelectedStage(stageKey);
       const stageInfo = stageOptions.find((s) => s.key === stageKey);
       if (stageInfo) {
-        onChange?.(stageKey, stageInfo);
+        onChange?.(stageKey, stageInfo, selectedOptional);
       }
     },
-    [disabled, stageOptions, onChange],
+    [disabled, stageOptions, onChange, selectedOptional],
   );
 
   /** 确认选择 */
@@ -222,15 +239,24 @@ const CertStageSelector: React.FC<CertStageSelectorProps> = ({
     if (!selectedStage) return;
     const stageInfo = stageOptions.find((s) => s.key === selectedStage);
     if (stageInfo) {
-      onConfirm?.(selectedStage, stageInfo);
+      onConfirm?.(selectedStage, stageInfo, selectedOptional);
     }
-  }, [selectedStage, stageOptions, onConfirm]);
+  }, [selectedStage, stageOptions, onConfirm, selectedOptional]);
 
   /** 切换展开/收起文件范围 */
   const toggleExpand = useCallback((stageKey: CertStageType, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedStage((prev) => (prev === stageKey ? null : stageKey));
   }, []);
+
+  // 切换可选范围选择
+  const toggleOptionalScope = (scope: string) => {
+    setSelectedOptional(prev => 
+      prev.includes(scope) 
+        ? prev.filter(s => s !== scope)
+        : [...prev, scope]
+    );
+  };
 
   // ============ 渲染 ============
 
@@ -380,6 +406,22 @@ const CertStageSelector: React.FC<CertStageSelectorProps> = ({
                           需要更新：
                         </Text>
                         {renderScopeTags(stage.updateScope, 'default')}
+                      </div>
+                    )}
+
+                    {/* 可选范围选择（仅监督审核阶段） */}
+                    {stage.key.startsWith('surveillance') && (
+                      <div className="optional-scope-section" style={{ marginTop: 12, padding: '8px', backgroundColor: '#f6ffed', borderRadius: '4px' }}>
+                        <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>以下文件可选择是否更新：</Text>
+                        <Checkbox.Group 
+                          options={[
+                            { label: '一级文件（管理手册）', value: 'level_1' },
+                            { label: '二级文件（程序文件）', value: 'level_2' },
+                          ]}
+                          value={selectedOptional}
+                          onChange={(values) => setSelectedOptional(values as string[])}
+                          disabled={!isSelected}
+                        />
                       </div>
                     )}
 

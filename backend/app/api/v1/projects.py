@@ -40,6 +40,8 @@ class ProjectCreateRequest(BaseModel):
     legal_representative: Optional[str] = Field(None, description="法定代表人")
     contact_person: Optional[str] = Field(None, description="联系人")
     contact_phone: Optional[str] = Field(None, description="联系电话")
+    cert_stage: Optional[str] = Field(None, description="认证阶段")
+    selected_optional_scopes: Optional[List[str]] = Field([], description="选中的可选文件层级")
 
 
 class ProjectUpdateRequest(BaseModel):
@@ -60,6 +62,8 @@ class ProjectUpdateRequest(BaseModel):
     contact_person: Optional[str] = None
     contact_phone: Optional[str] = None
     status: Optional[str] = None
+    cert_stage: Optional[str] = None
+    selected_optional_scopes: Optional[List[str]] = None
 
 
 class ProjectResponse(BaseModel):
@@ -120,6 +124,8 @@ async def create_project(request: ProjectCreateRequest, db: Session = Depends(ge
             "legal_representative": request.legal_representative,
             "contact_person": request.contact_person,
             "contact_phone": request.contact_phone,
+            "cert_stage": request.cert_stage,
+            "selected_optional_scopes": request.selected_optional_scopes or [],
         }
     )
     
@@ -203,6 +209,17 @@ async def update_project(
         if not project.config:
             project.config = {}
         project.config["industry_code"] = update_data.pop("industry_code")
+    
+    # 处理 cert_stage 和 selected_optional_scopes
+    if "cert_stage" in update_data:
+        if not project.config:
+            project.config = {}
+        project.config["cert_stage"] = update_data.pop("cert_stage")
+    
+    if "selected_optional_scopes" in update_data:
+        if not project.config:
+            project.config = {}
+        project.config["selected_optional_scopes"] = update_data.pop("selected_optional_scopes")
     
     for key, value in update_data.items():
         if hasattr(project, key):
