@@ -44,6 +44,30 @@ class DocumentType(enum.Enum):
     FORM = "form"  # 表单
 
 
+class DepartmentInfo(Base):
+    """部门/场所信息 - V1.4对齐audit模块"""
+    __tablename__ = "department_info"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    dept_id = Column(String(36), unique=True, nullable=False, index=True)
+    project_id = Column(String(36), ForeignKey("projects.project_id"), nullable=False, index=True)
+
+    name = Column(String(100), nullable=False)
+    address = Column(String(300), nullable=True)
+    is_site = Column(Boolean, default=False)
+
+    # 关联
+    project = relationship("Project", back_populates="departments_rel")
+
+    def to_dict(self):
+        return {
+            "dept_id": self.dept_id,
+            "name": self.name,
+            "address": self.address,
+            "is_site": self.is_site,
+        }
+
+
 class Project(Base):
     """项目表"""
     __tablename__ = "projects"
@@ -54,15 +78,23 @@ class Project(Base):
 
     # 企业基本信息
     company_name = Column(String(200), nullable=True)
+    credit_code = Column(String(50), nullable=True)  # 统一社会信用代码
     industry = Column(String(50), nullable=True)
     sub_industry = Column(String(100), nullable=True)
     employee_count = Column(Integer, nullable=True)
     office_area_sqm = Column(Float, nullable=True)
 
+    # 地址信息
+    reg_address = Column(String(300), nullable=True)  # 注册地址
+    office_address = Column(String(300), nullable=True)  # 办公地址
+    business_address = Column(String(300), nullable=True)  # 生产经营地址
+
     # 认证信息
     certification_type = Column(String(50), nullable=True)  # 初次认证/监督审核/再认证
     existing_standards = Column(JSON, nullable=True)  # 已有标准列表
     target_standards = Column(JSON, nullable=True)  # 目标标准列表
+    professional_code = Column(String(50), nullable=True)  # 认证业务范围专业代码
+    professional_code_name = Column(String(200), nullable=True)  # 专业代码名称
 
     # 组织信息
     departments = Column(JSON, nullable=True)  # 部门列表
@@ -72,6 +104,8 @@ class Project(Base):
 
     # 质量信息
     quality_goals = Column(Text, nullable=True)  # 质量目标
+    quality_policy = Column(Text, nullable=True)  # 质量方针
+    quality_goals_verified = Column(Boolean, default=False)  # 质量目标是否已验证
     key_customers = Column(Text, nullable=True)  # 主要客户
 
     # 项目状态
@@ -88,6 +122,7 @@ class Project(Base):
     raw_inputs = relationship("ProjectRawInput", back_populates="project", cascade="all, delete-orphan")
     documents = relationship("Document", back_populates="project", cascade="all, delete-orphan")
     uploads = relationship("Upload", back_populates="project", cascade="all, delete-orphan")
+    departments_rel = relationship("DepartmentInfo", back_populates="project", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -95,18 +130,26 @@ class Project(Base):
             "project_id": self.project_id,
             "user_id": self.user_id,
             "company_name": self.company_name,
+            "credit_code": self.credit_code,
             "industry": self.industry,
             "sub_industry": self.sub_industry,
             "employee_count": self.employee_count,
             "office_area_sqm": self.office_area_sqm,
+            "reg_address": self.reg_address,
+            "office_address": self.office_address,
+            "business_address": self.business_address,
             "certification_type": self.certification_type,
             "existing_standards": self.existing_standards or [],
             "target_standards": self.target_standards or [],
+            "professional_code": self.professional_code,
+            "professional_code_name": self.professional_code_name,
             "departments": self.departments or [],
             "main_equipment": self.main_equipment or [],
             "main_processes": self.main_processes or [],
             "special_processes": self.special_processes or [],
             "quality_goals": self.quality_goals,
+            "quality_policy": self.quality_policy,
+            "quality_goals_verified": self.quality_goals_verified,
             "key_customers": self.key_customers,
             "status": self.status,
             "config": self.config or {},
