@@ -1,0 +1,217 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.backButton {
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.projectTag {
+  flex-shrink: 0;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 992px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.uploadCard {
+  height: fit-content;
+}
+
+.typeSelector {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.label {
+  font-weight: 500;
+  color: #262626;
+  flex-shrink: 0;
+}
+
+.typeInfo {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f6ffed;
+  border-radius: 8px;
+  border: 1px solid #b7eb8f;
+}
+
+.typeDescription {
+  margin: 0 0 8px 0;
+  color: #595959;
+}
+
+.typeMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.extensions {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.dragger {
+  margin-top: 16px;
+}
+
+.dragger :global(.ant-upload-drag-icon) {
+  color: #1890ff;
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.dragger :global(.ant-upload-text) {
+  font-size: 16px;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+.dragger :global(.ant-upload-hint) {
+  color: #8c8c8c;
+}
+
+.progressItem {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.progressFileName {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #595959;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listCard {
+  min-height: 400px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.materialItem {
+  padding: 16px;
+  transition: background-color 0.3s;
+}
+
+.materialItem:hover {
+  background-color: #fafafa;
+}
+
+.materialIcon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 8px;
+}
+
+.materialTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fileName {
+  font-weight: 500;
+  color: #262626;
+}
+
+.materialMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8c8c8c;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.separator {
+  color: #d9d9d9;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 18px;
+    width: 100%;
+    order: -1;
+  }
+
+  .typeSelector {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .typeSelector .label {
+    margin-bottom: 4px;
+  }
+
+  .materialTitle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .materialMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .separator {
+    display: none;
+  }
+}

@@ -1,0 +1,187 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.backButton {
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.tabs {
+  background: white;
+  border-radius: 8px;
+}
+
+.tabs :global(.ant-tabs-nav) {
+  margin-bottom: 0;
+  padding: 16px 16px 0;
+  background: #fafafa;
+  border-radius: 8px 8px 0 0;
+}
+
+.tabs :global(.ant-tabs-content) {
+  padding: 24px;
+}
+
+.inputCard {
+  margin-bottom: 24px;
+}
+
+.inputSection h3 {
+  margin-bottom: 16px;
+  color: #262626;
+}
+
+.analyzeButton {
+  margin-top: 16px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  margin: 24px 0;
+}
+
+.resultContainer {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.resultAlert {
+  margin-bottom: 24px;
+}
+
+.statisticsRow {
+  margin-bottom: 24px;
+}
+
+.listCard {
+  margin-bottom: 24px;
+}
+
+.listCard :global(.ant-list-item) {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.listCard :global(.ant-list-item:last-child) {
+  border-bottom: none;
+}
+
+.aspectTitle,
+.hazardTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.aspectDescription,
+.hazardDescription {
+  color: #595959;
+  margin-top: 8px;
+}
+
+.aspectDescription p,
+.hazardDescription p {
+  margin: 4px 0;
+}
+
+.documentsCard {
+  margin-bottom: 24px;
+}
+
+.documentList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.documentItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+}
+
+.documentIcon {
+  font-size: 20px;
+  color: #52c41a;
+}
+
+.documentName {
+  flex: 1;
+  font-weight: 500;
+  color: #262626;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 18px;
+    width: 100%;
+    order: -1;
+  }
+
+  .tabs :global(.ant-tabs-content) {
+    padding: 16px;
+  }
+
+  .aspectTitle,
+  .hazardTitle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .documentList {
+    grid-template-columns: 1fr;
+  }
+
+  .documentItem {
+    flex-direction: column;
+    text-align: center;
+  }
+}

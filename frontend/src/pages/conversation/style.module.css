@@ -1,0 +1,256 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.backButton {
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.projectTag {
+  flex-shrink: 0;
+}
+
+.progressCard {
+  margin-bottom: 24px;
+  background: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progressTitle {
+  font-weight: 500;
+  color: #262626;
+}
+
+.missingFields {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #d9d9d9;
+}
+
+.missingLabel {
+  color: #595959;
+  margin-right: 8px;
+}
+
+.initialCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.initialInput {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.messagesContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  max-height: calc(100vh - 400px);
+}
+
+.messageItem {
+  display: flex;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.userMessage {
+  flex-direction: row-reverse;
+}
+
+.assistantMessage {
+  flex-direction: row;
+}
+
+.messageAvatar {
+  flex-shrink: 0;
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1890ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+.assistantAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #52c41a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.messageContent {
+  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+}
+
+.userMessage .messageContent {
+  align-items: flex-end;
+}
+
+.assistantMessage .messageContent {
+  align-items: flex-start;
+}
+
+.messageBubble {
+  padding: 12px 16px;
+  border-radius: 12px;
+  word-break: break-word;
+  line-height: 1.6;
+}
+
+.userMessage .messageBubble {
+  background: #1890ff;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.assistantMessage .messageBubble {
+  background: white;
+  color: #262626;
+  border: 1px solid #e8e8e8;
+  border-bottom-left-radius: 4px;
+}
+
+.messageTime {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.questionsContainer {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.questionCard {
+  margin-bottom: 8px;
+  border-left: 3px solid #1890ff;
+}
+
+.questionCard :global(.ant-card-head) {
+  background: #e6f7ff;
+  border-bottom: none;
+  min-height: 40px;
+}
+
+.questionCard :global(.ant-card-head-title) {
+  font-size: 14px;
+}
+
+.questionExample {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #f6ffed;
+  border-radius: 4px;
+}
+
+.inputArea {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.inputActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  gap: 12px;
+}
+
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 18px;
+    width: 100%;
+    order: -1;
+  }
+
+  .messageContent {
+    max-width: 85%;
+  }
+
+  .messagesContainer {
+    max-height: calc(100vh - 350px);
+    padding: 12px;
+  }
+
+  .inputActions {
+    flex-direction: column;
+  }
+
+  .inputActions button {
+    width: 100%;
+  }
+}

@@ -8,6 +8,9 @@ import ProjectDetailPage from './pages/project/detail';
 import ProjectDocumentsPage from './pages/project/documents';
 import UploadPage from './pages/upload';
 import MaterialsPage from './pages/materials';
+import MaterialsUploadPage from './pages/materials/upload';
+import ConversationPage from './pages/conversation';
+import AnalyzerPage from './pages/analyzer';
 
 /**
  * 根组件
@@ -22,16 +25,31 @@ const App: React.FC = () => {
       <Routes>
         {/* 首页 - 项目列表 */}
         <Route path="/" element={<HomePage />} />
+        
         {/* 创建项目 */}
         <Route path="/project/create" element={<ProjectCreatePage />} />
+        
         {/* 项目详情 */}
         <Route path="/project/:id" element={<ProjectDetailPage />} />
+        
         {/* 文档管理 */}
         <Route path="/project/:id/documents" element={<ProjectDocumentsPage />} />
+        
         {/* 文件上传 */}
         <Route path="/upload" element={<UploadPage />} />
+        
         {/* 模板下载 */}
         <Route path="/materials" element={<MaterialsPage />} />
+        
+        {/* 补充材料上传 (V1.1) */}
+        <Route path="/materials/upload" element={<MaterialsUploadPage />} />
+        
+        {/* 多轮对话 (V1.1) */}
+        <Route path="/conversation" element={<ConversationPage />} />
+        
+        {/* 评估报告解析 (V1.2) */}
+        <Route path="/analyzer" element={<AnalyzerPage />} />
+        
         {/* 未匹配路由重定向到首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

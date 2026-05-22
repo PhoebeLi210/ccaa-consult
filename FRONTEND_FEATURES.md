@@ -12,6 +12,7 @@
 - ✅ Ant Design (PC端) + Ant Design Mobile (移动端)
 - ✅ Axios HTTP请求封装
 - ✅ 响应式布局（PC/移动端双布局）
+- ✅ CSS Modules 样式管理
 
 ### 2. 页面结构
 ```
@@ -22,11 +23,87 @@ frontend/src/pages/
 │   ├── create/           # 创建项目
 │   ├── detail/           # 项目详情
 │   └── documents/        # 文档管理
-├── materials/            # 材料管理（V1.0）
+├── materials/            # 材料管理
+│   ├── index.tsx         # 材料清单页面 (V1.0)
+│   └── upload.tsx        # 补充材料上传 (V1.1) ✅
+├── conversation/         # 多轮对话 (V1.1) ✅
+│   ├── index.tsx
+│   └── style.module.css
+├── analyzer/             # 评估报告解析 (V1.2) ✅
+│   ├── index.tsx
+│   └── style.module.css
 └── upload/               # 文件上传
+    └── index.tsx
 ```
 
-### 3. API接口封装 (`src/api/index.ts`)
+### 3. 新增页面功能详情
+
+#### 3.1 多轮对话页面 (`/conversation`)
+
+**访问路径**: `/conversation?projectId=xxx`
+
+**功能特性**:
+- 💬 自然语言输入框（支持多行文本）
+- 🔄 对话历史展示（气泡式聊天界面）
+- ❓ 追问问题卡片展示（带示例回答）
+- 📊 信息收集进度条（实时显示百分比）
+- 🏷️ 缺失字段标签展示
+- ✨ 快速使用示例回答功能
+- ✅ 完成对话并保存到项目
+
+**使用流程**:
+1. 用户输入初始企业描述
+2. AI识别缺失字段，生成追问问题
+3. 用户回答追问，进度实时更新
+4. 信息收集完成后，点击"完成并保存"
+
+**响应式设计**:
+- PC端：左右分栏布局，消息最大宽度70%
+- 移动端：全屏布局，消息最大宽度85%
+
+#### 3.2 补充材料上传页面 (`/materials/upload`)
+
+**访问路径**: `/materials/upload?projectId=xxx`
+
+**功能特性**:
+- 📁 材料类型选择器（7种类型，带图标）
+- 🖱️ 拖拽上传区域（支持点击上传）
+- 📋 材料类型说明和格式限制提示
+- 📈 上传进度实时显示
+- 📄 已上传材料列表（带图标、大小、状态）
+- 🔄 重新处理功能
+- 🗑️ 删除功能（带确认弹窗）
+
+**支持的材料类型**:
+| 类型 | 图标 | 说明 |
+|------|------|------|
+| org_chart | TeamOutlined | 组织架构图 |
+| equipment_list | ToolOutlined | 设备清单 |
+| process_flow | NodeIndexOutlined | 工艺流程图 |
+| site_layout | EnvironmentOutlined | 厂区平面图 |
+| license_cert | SafetyCertificateOutlined | 资质证书 |
+| previous_cert | FileProtectOutlined | 历史认证证书 |
+| other | FileOutlined | 其他材料 |
+
+#### 3.3 评估报告解析页面 (`/analyzer`)
+
+**访问路径**: `/analyzer`
+
+**功能特性**:
+- 🌍 环境评估报告解析（ISO14001）
+- 🛡️ 职业健康安全评估解析（ISO45001）
+- 📝 报告文本粘贴区域
+- 📊 解析结果统计卡片
+- 📋 环境因素/危险源列表
+- 📄 生成的体系文件展示
+- ✅ 合规率可视化展示
+
+**解析结果展示**:
+- 统计概览（总数、重要项、合规率）
+- 详细列表（带风险等级标签）
+- 生成的文档清单
+
+### 4. API接口封装 (`src/api/index.ts`)
 
 #### V1.0 基础功能
 - ✅ 项目管理（CRUD）
@@ -43,7 +120,7 @@ frontend/src/pages/
 
 - ✅ **补充材料API**
   - `getMaterialTypes()` - 获取材料类型
-  - `uploadMaterial()` - 上传材料
+  - `uploadMaterial()` - 上传材料（带进度回调）
   - `getProjectMaterials()` - 获取项目材料
   - `deleteMaterial()` - 删除材料
   - `reprocessMaterial()` - 重新处理
@@ -60,157 +137,110 @@ frontend/src/pages/
 
 ---
 
-## 待实现前端页面
+## 页面路由汇总
 
-### V1.1 功能页面
-
-#### 1. 多轮对话页面
-**路径**: `/pages/conversation/index.tsx`
-
-**功能需求**:
-- 自然语言输入框（支持语音输入）
-- 对话历史展示（气泡式聊天界面）
-- 追问问题卡片展示
-- 信息完整度进度条
-- 完成对话按钮
-
-**参考组件**:
-```tsx
-// 需要创建的组件
-- ConversationChat.tsx      // 对话聊天界面
-- FollowUpQuestionCard.tsx  // 追问问题卡片
-- ProgressIndicator.tsx     // 进度指示器
-```
-
-**API调用流程**:
-1. 用户输入初始文本 → `startConversation()`
-2. 展示追问问题 → 用户回答 → `continueConversation()`
-3. 循环直到 `status === 'complete'`
-4. 点击完成 → `completeConversation()` → 跳转到项目详情
-
-#### 2. 补充材料上传页面（增强版）
-**路径**: `/pages/materials/upload/index.tsx`（现有页面需增强）
-
-**新增功能**:
-- 材料类型选择器（图标+文字）
-- 拖拽上传区域
-- 上传进度显示
-- 材料信息提取结果展示
-- 已上传材料列表
-
-**材料类型图标映射**:
-```
-org_chart      → 组织架构图  → TeamOutlined
-equipment_list → 设备清单    → ToolOutlined
-process_flow   → 工艺流程图  → NodeIndexOutlined
-site_layout    → 厂区平面图  → EnvironmentOutlined
-license_cert   → 资质证书    → SafetyCertificateOutlined
-previous_cert  → 历史认证    → FileProtectOutlined
-other          → 其他材料    → FileOutlined
-```
-
-### V1.2 功能页面
-
-#### 3. 环境评估报告解析页面
-**路径**: `/pages/analyzer/environmental/index.tsx`
-
-**功能需求**:
-- 报告文本粘贴区域
-- 解析按钮
-- 环境因素列表展示
-- 重要环境因素标记
-- 合规率图表
-- 生成的ISO14001文档预览
-
-#### 4. 安全评估报告解析页面
-**路径**: `/pages/analyzer/safety/index.tsx`
-
-**功能需求**:
-- 报告文本粘贴区域
-- 解析按钮
-- 危险源列表展示（风险等级颜色标识）
-- 事故记录时间线
-- 合规率图表
-- 生成的ISO45001文档预览
-
-### V1.3 功能页面
-
-#### 5. 文档确认页面（增强版）
-**路径**: `/pages/project/documents/index.tsx`（现有页面需增强）
-
-**新增功能**:
-- 文档树形结构展示
-- 确认状态批量操作
-- 确认进度统计
-- 强制确认提示
-
-#### 6. 个人中心页面
-**路径**: `/pages/profile/index.tsx`
-
-**功能需求**:
-- 用户信息展示
-- 修改密码
-- 我的模板管理
-- 使用统计
+| 路径 | 页面 | 功能版本 |
+|------|------|---------|
+| `/` | 首页 | V1.0 |
+| `/project/create` | 创建项目 | V1.0 |
+| `/project/:id` | 项目详情 | V1.0 |
+| `/project/:id/documents` | 文档管理 | V1.0 |
+| `/upload` | 文件上传 | V1.0 |
+| `/materials` | 材料清单 | V1.0 |
+| `/materials/upload` | 补充材料上传 | V1.1 ✅ |
+| `/conversation` | 多轮对话 | V1.1 ✅ |
+| `/analyzer` | 评估报告解析 | V1.2 ✅ |
 
 ---
 
-## 前端开发建议
+## 前端开发规范
 
-### 1. 状态管理
-建议使用以下方案之一：
-- **Zustand** - 轻量级状态管理
-- **React Query** - 服务端状态管理（推荐）
-
-### 2. 路由结构建议
+### 1. 组件结构
 ```tsx
-// App.tsx 路由配置建议
-<Routes>
-  <Route path="/" element={<Home />} />
-  <Route path="/project/create" element={<ProjectCreate />} />
-  <Route path="/project/:id" element={<ProjectDetail />} />
-  <Route path="/project/:id/documents" element={<ProjectDocuments />} />
+// 页面组件基本结构
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, Button } from 'antd';
+import { useResponsive } from '../../hooks/useResponsive';
+import { apiFunction } from '../../api';
+import styles from './style.module.css';
+
+const PageName: React.FC = () => {
+  const navigate = useNavigate();
+  const { isMobile } = useResponsive();
   
-  {/* V1.1 新增 */}
-  <Route path="/conversation" element={<Conversation />} />
-  <Route path="/conversation/:sessionId" element={<ConversationDetail />} />
-  <Route path="/materials/upload" element={<MaterialsUpload />} />
-  <Route path="/materials/list" element={<MaterialsList />} />
+  // 状态管理
+  const [loading, setLoading] = useState(false);
   
-  {/* V1.2 新增 */}
-  <Route path="/analyzer/environmental" element={<EnvironmentalAnalyzer />} />
-  <Route path="/analyzer/safety" element={<SafetyAnalyzer />} />
-  <Route path="/analyzer/coverage/:projectId" element={<CoverageAnalysis />} />
+  // 方法定义
+  const handleAction = async () => {
+    // ...
+  };
   
-  {/* V1.3 新增 */}
-  <Route path="/profile" element={<Profile />} />
-  <Route path="/templates/my" element={<MyTemplates />} />
-</Routes>
+  // 渲染
+  return (
+    <div className={styles.container}>
+      {/* 页面内容 */}
+    </div>
+  );
+};
+
+export default PageName;
 ```
 
-### 3. UI组件库使用
+### 2. 样式规范
+- 使用 CSS Modules (`style.module.css`)
+- 类名使用驼峰命名法
+- 响应式断点：`768px`
+- 颜色使用 Ant Design 变量
 
-#### PC端
-```tsx
-import { Button, Card, Form, Input, Upload, Progress, Timeline } from 'antd';
-```
-
-#### 移动端
-```tsx
-import { Button, Card, Form, Input, Uploader, Progress, Steps } from 'antd-mobile';
-```
-
-### 4. 响应式断点
+### 3. 响应式设计
 ```css
-/* 建议断点 */
-@media (max-width: 768px) {
-  /* 移动端样式 */
+/* PC端默认样式 */
+.container {
+  padding: 24px;
+  max-width: 1200px;
 }
 
-@media (min-width: 769px) {
-  /* PC端样式 */
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
 }
 ```
+
+---
+
+## 下一步开发建议
+
+### 高优先级
+1. **文档确认页面增强** (`/project/:id/documents`)
+   - 添加确认状态批量操作
+   - 确认进度可视化
+   - 文档对比功能
+
+2. **首页项目列表增强**
+   - 添加项目状态筛选
+   - 项目搜索功能
+   - 项目卡片信息展示优化
+
+### 中优先级
+3. **个人中心页面** (`/profile`)
+   - 用户信息展示
+   - 修改密码
+   - 使用统计
+
+4. **缺失项分析结果页面** (`/analyzer/coverage/:projectId`)
+   - 条款覆盖可视化
+   - 缺失项详细报告
+   - 补充建议展示
+
+### 低优先级
+5. **模板管理页面** (`/templates`)
+   - 个人模板上传
+   - 模板预览
+   - 模板版本管理
 
 ---
 
@@ -222,12 +252,11 @@ import { Button, Card, Form, Input, Uploader, Progress, Steps } from 'antd-mobil
 import { 
   startConversation, 
   uploadMaterial, 
-  analyzeCoverage,
   analyzeEnvironmentalReport 
 } from '@/api';
 
 // 示例：开始多轮对话
-const handleStartConversation = async (text: string) => {
+const handleStart = async (text: string) => {
   try {
     const response = await startConversation(text);
     console.log('会话ID:', response.sessionId);
@@ -236,17 +265,22 @@ const handleStartConversation = async (text: string) => {
     console.error('对话开始失败:', error);
   }
 };
+
+// 示例：上传材料
+const handleUpload = async (file: File) => {
+  try {
+    const response = await uploadMaterial(
+      projectId,
+      'org_chart',
+      file,
+      (progress) => console.log(`上传进度: ${progress}%`)
+    );
+    console.log('上传成功:', response.materialId);
+  } catch (error) {
+    console.error('上传失败:', error);
+  }
+};
 ```
-
----
-
-## 下一步开发优先级
-
-1. **高优先级** - 多轮对话页面（V1.1核心功能）
-2. **高优先级** - 补充材料上传页面增强
-3. **中优先级** - 环境/安全评估报告解析页面
-4. **中优先级** - 文档确认页面增强
-5. **低优先级** - 个人中心页面
 
 ---
 
@@ -255,3 +289,15 @@ const handleStartConversation = async (text: string) => {
 - [README.md](./README.md) - 项目整体说明
 - [MVP1.0_BUGFIX_SUMMARY.md](./MVP1.0_BUGFIX_SUMMARY.md) - MVP1.0修复总结
 - Backend API文档: http://localhost:8000/docs
+
+---
+
+## 更新日志
+
+### 2024-05-22
+- ✅ 新增多轮对话页面 (`/conversation`)
+- ✅ 新增补充材料上传页面 (`/materials/upload`)
+- ✅ 新增评估报告解析页面 (`/analyzer`)
+- ✅ 更新 API 接口封装（新增 V1.1/V1.2 API）
+- ✅ 更新路由配置
+- ✅ 更新本文档
