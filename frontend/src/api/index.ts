@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+﻿import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 /** 后端API基础URL */
 const BASE_URL = '/api';
@@ -568,6 +568,161 @@ export function deleteFlowchart(id: string) {
 /** 发布流程图 */
 export function publishFlowchart(id: string) {
   return request.post<unknown, FlowchartInfo>(`/v1/flowcharts/${id}/publish`);
+}
+
+
+/* ==================== 认证阶段API ==================== */
+
+/** 认证阶段类型 */
+export type CertStageType = 'initial' | 'surveillance_1' | 'surveillance_2' | 'recertification';
+
+/** 认证阶段选项 */
+export interface CertStageOption {
+  key: CertStageType;
+  name: string;
+  description: string;
+  year: string;
+  documentScope: string[];
+  updateScope: string[];
+  requireOldFiles: boolean;
+}
+
+/** 文件范围信息 */
+export interface DocumentScopeInfo {
+  stage: CertStageType;
+  generateFiles: Array<{
+    category: string;
+    files: string[];
+  }>;
+  updateFiles: Array<{
+    category: string;
+    files: string[];
+  }>;
+  skipFiles: string[];
+}
+
+/** 旧版文件提取结果 */
+export interface OldFileExtractionResult {
+  qualityPolicy: {
+    text: string;
+    source: string;
+  };
+  qualityObjectives: Array<{
+    id: string;
+    content: string;
+    department: string;
+    target: string;
+    period: string;
+  }>;
+  fileNamingRules: Array<{
+    prefix: string;
+    category: string;
+    format: string;
+    example: string;
+  }>;
+  departments: Array<{
+    name: string;
+    code: string;
+    description?: string;
+    functions?: string[];
+  }>;
+  companyInfo: {
+    companyName: string;
+    address: string;
+    legalPerson: string;
+    registeredCapital: string;
+    businessScope: string;
+    establishedDate: string;
+    unifiedSocialCreditCode: string;
+  };
+  rawFiles: Array<{
+    fileName: string;
+    fileType: string;
+    extractedFields: string[];
+  }>;
+}
+
+/** 文件分类结果 */
+export interface FileClassificationResult {
+  projectId: string;
+  totalFiles: number;
+  classifications: Array<{
+    fileName: string;
+    category: string;
+    confidence: number;
+    suggestedName?: string;
+  }>;
+  unclassifiedFiles: string[];
+}
+
+/** 获取认证阶段选项 */
+export function getCertStageOptions() {
+  return request.get<unknown, CertStageOption[]>('/v1/cert-stages/options');
+}
+
+/** 获取文件范围 */
+export function getDocumentScope(stage: CertStageType) {
+  return request.get<unknown, DocumentScopeInfo>(`/v1/cert-stages/${stage}/document-scope`);
+}
+
+/** AI建议认证阶段 */
+export function suggestCertStage(companyInfo: {
+  companyName?: string;
+  certStartDate?: string;
+  lastAuditDate?: string;
+  certCycle?: number;
+}) {
+  return request.post<unknown, { suggestedStage: CertStageType; reason: string }>(
+    '/v1/cert-stages/suggest',
+    companyInfo,
+  );
+}
+
+/** 上传旧版文件 */
+export function uploadOldFiles(
+  projectId: string,
+  files: File[],
+  onProgress?: (progress: number) => void,
+) {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  formData.append('project_id', projectId);
+
+  return request.post<unknown, { uploadedCount: number; fileIds: string[] }>(
+    '/v1/old-files/upload',
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (event) => {
+        if (event.total && onProgress) {
+          onProgress(Math.round((event.loaded * 100) / event.total));
+        }
+      },
+    },
+  );
+}
+
+/** 提取旧版文件信息 */
+export function extractOldFiles(projectId: string) {
+  return request.post<unknown, OldFileExtractionResult>(
+    `/v1/old-files/${projectId}/extract`,
+  );
+}
+
+/** 获取提取结果 */
+export function getExtractionResult(projectId: string) {
+  return request.get<unknown, OldFileExtractionResult>(
+    `/v1/old-files/${projectId}/result`,
+  );
+}
+
+/** 分类文件 */
+export function classifyFiles(projectId: string) {
+  return request.post<unknown, FileClassificationResult>(
+    `/v1/old-files/${projectId}/classify`,
+  );
 }
 
 export default request;
