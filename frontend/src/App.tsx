@@ -13,6 +13,8 @@ import ConversationPage from './pages/conversation';
 import AnalyzerPage from './pages/analyzer';
 import FlowchartListPage from './pages/flowcharts';
 import FlowchartEditorPage from './pages/flowcharts/editor';
+import IndustryExplorePage from './pages/knowledge/IndustryExplore';
+import IndustryDetailPage from './pages/knowledge/IndustryDetail';
 
 /**
  * 根组件
@@ -57,6 +59,12 @@ const App: React.FC = () => {
         
         {/* 流程图编辑器 */}
         <Route path="/flowcharts/editor" element={<FlowchartEditorPage />} />
+        
+        {/* 行业知识库浏览 */}
+        <Route path="/knowledge/industries" element={<IndustryExplorePage />} />
+        
+        {/* 行业知识库详情 */}
+        <Route path="/knowledge/industry/:code" element={<IndustryDetailPage />} />
         
         {/* 未匹配路由重定向到首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />

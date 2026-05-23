@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="智质通·咨询版 API",
     description="面向ISO认证咨询的AI智能文书工作端",
-    version="1.0.0",
+    version="1.5.0",
     lifespan=lifespan,
 )
 
@@ -71,7 +71,7 @@ async def root():
     """根路径"""
     return {
         "name": "智质通·咨询版",
-        "version": "1.0.0",
+        "version": "1.5.0",
         "description": "面向ISO认证咨询的AI智能文书工作端",
         "endpoints": {
             "auth": "/api/v1/auth - 用户认证（注册/登录）",
@@ -94,17 +94,21 @@ async def root():
         "features": [
             "JWT用户认证",
             "数据库持久化（SQLite）",
-            "LLM自然语言解析（DeepSeek）",
+            "LLM自然语言解析（DeepSeek/OpenAI/智谱/通义千问）",
             "AI扩充描述性内容",
-            "行业模板自动匹配（5行业）",
+            "行业模板自动匹配（39个CNAS行业）",
             "文档导出为docx/ZIP",
             "Excel收集表上传解析",
             "ISO条款覆盖检查",
             "ISO标准知识库查询",
-            "字段防编造验证",
+            "字段防编造验证（事实锁定+编造检测）",
             "文档引用关系管理",
             "行业知识库与文档生成上下文",
             "用户风格学习与个性化提示词",
+            "事实提取器（人名/编号/数据/条款/部门）",
+            "咨询Prompt模板（手册/程序/指导书/表单）",
+            "四层知识库架构（标准/经验/应用/用户）",
+            "内容差异化生成（解决雷同问题）",
         ]
     }
 
@@ -113,7 +117,6 @@ async def root():
 async def health():
     """健康检查"""
     return {"status": "healthy"}
-
 
 if __name__ == "__main__":
     import uvicorn
