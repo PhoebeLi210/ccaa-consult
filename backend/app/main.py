@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import init_db
 from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, flowcharts, cert_stage, old_files
+from app.api.v1 import iso_standards, field_validation, document_references
 
 
 @asynccontextmanager
@@ -58,6 +59,9 @@ app.include_router(conversation.router, prefix="/api/v1")
 app.include_router(flowcharts.router, prefix="/api/v1")
 app.include_router(cert_stage.router, prefix="/api/v1")
 app.include_router(old_files.router, prefix="/api/v1")
+app.include_router(iso_standards.router, prefix="/api/v1")
+app.include_router(field_validation.router, prefix="/api/v1")
+app.include_router(document_references.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -79,6 +83,9 @@ async def root():
             "company": "/api/v1/company - 企业管理",
             "cert_stage": "/api/v1/cert-stage - 认证阶段确认",
             "old_files": "/api/v1/old-files - 旧版文件上传和提取",
+            "iso_standards": "/api/v1/iso-standards - ISO标准知识库",
+            "field_validation": "/api/v1/field-validation - 字段验证",
+            "document_references": "/api/v1/document-references - 文档引用关系",
         },
         "features": [
             "JWT用户认证",
@@ -89,6 +96,9 @@ async def root():
             "文档导出为docx/ZIP",
             "Excel收集表上传解析",
             "ISO条款覆盖检查",
+            "ISO标准知识库查询",
+            "字段防编造验证",
+            "文档引用关系管理",
         ]
     }
 

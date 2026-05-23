@@ -25,6 +25,12 @@ class ValidationResult:
     message: str
     details: List[str]
     suggestions: List[str]
+    # 新增字段
+    field_name: str = ""  # 字段名称
+    field_value: str = ""  # 字段值
+    source: str = ""  # 信息来源 (P1/P2/P3)
+    needs_verification: bool = False  # 是否需要人工验证
+    verification_reason: str = ""  # 需要验证的原因
 
 
 class AntiFabricationValidator:
@@ -587,6 +593,143 @@ class AntiFabricationValidator:
         
         self.validation_history.append(result)
         return result
+    
+    def validate_with_source(
+        self, 
+        field_name: str, 
+        field_value: str, 
+        source: str,
+        source_file: Optional[str] = None
+    ) -> ValidationResult:
+        """
+        带来源信息的验证
+        
+        根据信息来源调整验证严格程度：
+        - P1(用户输入): 宽松验证，信任用户
+        - P2(文件提取): 中等验证，检查提取准确性
+        - P3(AI生成): 严格验证，必须人工确认
+        """
+        # 根据来源设置基础风险等级
+        if source == "P1":
+            base_risk = RiskLevel.LOW
+        elif source == "P2":
+            base_risk = RiskLevel.MEDIUM
+        else:  # P3或未知
+            base_risk = RiskLevel.HIGH
+        
+        # 执行具体字段验证
+        if field_name == "quality_policy":
+            result = self.validate_quality_policy(field_value)
+        elif field_name == "quality_objectives":
+            result = self.validate_quality_objectives(field_value)
+        elif field_name == "department":
+            result = self.validate_department_name(field_value)
+        elif field_name == "doc_number":
+            result = self.validate_document_number(field_value)
+        elif field_name == "person":
+            result = self.validate_person_name(field_value)
+        else:
+            # 未知字段类型，返回通用结果
+            return ValidationResult(
+                is_valid=True,
+                risk_level=base_risk,
+                message=f"未知字段类型: {field_name}",
+                details=["该字段没有专门的验证规则"],
+                suggestions=["使用通用验证规则"],
+                field_name=field_name,
+                field_value=field_value,
+                source=source,
+                needs_verification=source == "P3",
+                verification_reason="未知字段类型，建议人工确认" if source == "P3" else ""
+            )
+        
+        # 合并来源风险和验证结果风险
+        final_risk = self._merge_risk_levels(base_risk, result.risk_level)
+        
+        # P3来源必须标记为需要验证
+        needs_verification = (source == "P3") or (final_risk in [RiskLevel.HIGH, RiskLevel.CRITICAL])
+        
+        return ValidationResult(
+            is_valid=result.is_valid and not needs_verification,
+            risk_level=final_risk,
+            message=result.message,
+            details=result.details,
+            suggestions=result.suggestions,
+            field_name=field_name,
+            field_value=field_value,
+            source=source,
+            needs_verification=needs_verification,
+            verification_reason="AI生成内容必须人工确认" if source == "P3" else result.message
+        )
+    
+    def _merge_risk_levels(self, risk1: RiskLevel, risk2: RiskLevel) -> RiskLevel:
+        """合并两个风险等级，取较高者"""
+        risk_order = [RiskLevel.LOW, RiskLevel.MEDIUM, RiskLevel.HIGH, RiskLevel.CRITICAL]
+        idx1 = risk_order.index(risk1)
+        idx2 = risk_order.index(risk2)
+        return risk_order[max(idx1, idx2)]
+    
+    def validate_fields_batch(
+        self, 
+        fields: List[Dict[str, Any]]
+    ) -> List[ValidationResult]:
+        """
+        批量验证多个字段
+        
+        fields格式: [
+            {"field_name": "quality_policy", "value": "...", "source": "P3"},
+            {"field_name": "quality_objectives", "value": "...", "source": "P2", "source_file": "手册.docx"},
+        ]
+        """
+        results = []
+        for field in fields:
+            result = self.validate_with_source(
+                field["field_name"],
+                field["value"],
+                field.get("source", "P3"),
+                field.get("source_file")
+            )
+            results.append(result)
+        return results
+    
+    def generate_validation_report(
+        self, 
+        results: List[ValidationResult]
+    ) -> Dict[str, Any]:
+        """生成验证报告"""
+        total = len(results)
+        valid_count = sum(1 for r in results if r.is_valid)
+        needs_verification_count = sum(1 for r in results if r.needs_verification)
+        
+        risk_distribution = {
+            "low": sum(1 for r in results if r.risk_level == RiskLevel.LOW),
+            "medium": sum(1 for r in results if r.risk_level == RiskLevel.MEDIUM),
+            "high": sum(1 for r in results if r.risk_level == RiskLevel.HIGH),
+            "critical": sum(1 for r in results if r.risk_level == RiskLevel.CRITICAL),
+        }
+        
+        source_distribution = {
+            "P1": sum(1 for r in results if r.source == "P1"),
+            "P2": sum(1 for r in results if r.source == "P2"),
+            "P3": sum(1 for r in results if r.source == "P3"),
+        }
+        
+        return {
+            "total_fields": total,
+            "valid_fields": valid_count,
+            "needs_verification": needs_verification_count,
+            "valid_rate": valid_count / total if total > 0 else 0,
+            "risk_distribution": risk_distribution,
+            "source_distribution": source_distribution,
+            "critical_issues": [
+                {"field": r.field_name, "reason": r.verification_reason}
+                for r in results if r.risk_level == RiskLevel.CRITICAL
+            ],
+            "verification_required": [
+                {"field": r.field_name, "value": r.field_value, "reason": r.verification_reason}
+                for r in results if r.needs_verification
+            ],
+        }
     
     def validate_document(self, document: Dict[str, Any]) -> Dict[str, ValidationResult]:
         """

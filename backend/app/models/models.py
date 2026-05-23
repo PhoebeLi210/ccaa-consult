@@ -108,6 +108,14 @@ class Project(Base):
     quality_goals_verified = Column(Boolean, default=False)  # 质量目标是否已验证
     key_customers = Column(Text, nullable=True)  # 主要客户
 
+    # 字段来源追踪 - V1.5新增
+    quality_policy_source = Column(String(10), nullable=True)  # 质量方针来源 (P1/P2/P3)
+    quality_objectives_source = Column(String(10), nullable=True)  # 质量目标来源 (P1/P2/P3)
+    cert_scope = Column(Text, nullable=True)  # 认证范围
+    cert_scope_source = Column(String(10), nullable=True)  # 认证范围来源 (P1/P2/P3)
+    professional_code_source = Column(String(10), nullable=True)  # 专业代码来源 (P1/P2/P3)
+    field_sources = Column(JSON, nullable=True)  # 存储所有字段的来源信息
+
     # 项目状态
     status = Column(String(20), default=ProjectStatus.DRAFT.value)
 
@@ -151,6 +159,13 @@ class Project(Base):
             "quality_policy": self.quality_policy,
             "quality_goals_verified": self.quality_goals_verified,
             "key_customers": self.key_customers,
+            # 字段来源追踪 - V1.5新增
+            "quality_policy_source": self.quality_policy_source,
+            "quality_objectives_source": self.quality_objectives_source,
+            "cert_scope": self.cert_scope,
+            "cert_scope_source": self.cert_scope_source,
+            "professional_code_source": self.professional_code_source,
+            "field_sources": self.field_sources or {},
             "status": self.status,
             "cert_stage": self.config.get("cert_stage") if self.config else None,
             "selected_optional_scopes": self.config.get("selected_optional_scopes", []) if self.config else [],
