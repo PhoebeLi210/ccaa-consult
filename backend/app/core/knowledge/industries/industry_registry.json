@@ -1,0 +1,91 @@
+{
+  "source": "CNAS 管理体系认证活动相关业务范围分类手册（2016）",
+  "version": "1.0.0",
+  "created_at": "2026-05-23",
+  "description": "行业知识库注册表，包含39个CNAS大类行业信息",
+  "statistics": {
+    "total_industries": 39,
+    "industries_with_data": 13,
+    "industries_template_only": 26
+  },
+  "industries": [
+    {
+      "code": "01",
+      "name": "农业、林业和渔业",
+      "name_en": "Agriculture, Forestry and Fishing",
+      "sub_categories_count": 13,
+      "detail_categories_count": 39,
+      "keywords": ["农业", "林业", "渔业", "种植", "养殖", "畜牧", "造林", "伐木", "水产", "作物", "果园", "农场", "谷物", "蔬菜", "水果"],
+      "related_clauses_priority": ["8.5.1", "8.6", "7.1.5", "8.3", "7.1.6", "8.7", "8.5.2"],
+      "key_departments": ["生产部", "技术部", "质量部", "采购部", "仓储部", "销售部"],
+      "key_processes": ["种植管理", "养殖管理", "采收", "病虫害防治", "施肥灌溉", "农产品加工", "检验检疫", "仓储保鲜"],
+      "regulations": ["GB/T 19001", "GB/T 22000", "HACCP", "GAP良好农业规范", "农药管理条例", "兽药管理条例"],
+      "data_status": "partial"
+    },
+    {
+      "code": "02",
+      "name": "采矿业和采石业",
+      "name_en": "Mining and Quarrying",
+      "sub_categories_count": 10,
+      "detail_categories_count": 15,
+      "keywords": ["采矿", "采石", "煤矿", "铁矿", "石油", "天然气", "矿石", "矿山", "开采", "挖掘", "勘探"],
+      "related_clauses_priority": ["8.5.1", "8.6", "7.1.5", "8.8", "7.1.6", "8.5.2", "10.2"],
+      "key_departments": ["生产部", "安全部", "技术部", "设备部", "质量部", "环保部"],
+      "key_processes": ["钻探", "爆破", "开采", "选矿", "运输", "通风排水", "安全监测", "环境治理"],
+      "regulations": ["GB/T 19001", "GB/T 24001", "GB/T 45001", "矿山安全法", "矿产资源法", "安全生产许可证条例"],
+      "data_status": "template"
+    },
+    {
+      "code": "03",
+      "name": "食品、饮料和烟草",
+      "name_en": "Food, Beverages and Tobacco",
+      "sub_categories_count": 11,
+      "detail_categories_count": 33,
+      "keywords": ["食品", "饮料", "烟草", "肉制品", "乳制品", "烘焙", "饮料", "酒类", "饲料", "罐头", "调味品", "食用油", "糖果"],
+      "related_clauses_priority": ["8.5.1", "8.6", "7.1.5", "8.3", "7.1.6", "8.5.2", "8.7"],
+      "key_departments": ["生产部", "质量部", "品控部", "研发部", "采购部", "仓储部", "检验室"],
+      "key_processes": ["原料验收", "配料", "加工烹制", "杀菌", "包装", "检验", "冷链管理", "追溯管理"],
+      "regulations": ["GB/T 19001", "GB/T 22000", "HACCP", "GB 14881食品生产通用卫生规范", "食品安全法", "烟草专卖法"],
+      "data_status": "partial"
+    },
+    {
+      "code": "33",
+      "name": "信息技术",
+      "name_en": "Information Technology",
+      "sub_categories_count": 5,
+      "detail_categories_count": 8,
+      "keywords": ["软件", "IT", "信息技术", "互联网", "系统集成", "数据处理", "软件开发", "云服务"],
+      "related_clauses_priority": ["8.2", "8.3", "7.1.5", "8.5.1", "8.6"],
+      "key_departments": ["研发部", "技术部", "测试部", "运维部", "产品部", "项目部"],
+      "key_processes": ["需求分析", "设计", "开发", "测试", "部署", "运维", "项目管理"],
+      "regulations": ["GB/T 19001", "ISO/IEC 27001", "软件企业认定标准", "网络安全法", "数据安全法"],
+      "data_status": "enriched"
+    },
+    {
+      "code": "37",
+      "name": "教育",
+      "name_en": "Education",
+      "sub_categories_count": 5,
+      "detail_categories_count": 8,
+      "keywords": ["教育", "学校", "培训", "教学", "学历教育", "职业教育", "培训机构"],
+      "related_clauses_priority": ["8.2", "7.1.5", "8.3", "8.5.1"],
+      "key_departments": ["教务处", "教学部", "学生处", "行政部", "财务部", "招生办"],
+      "key_processes": ["招生", "教学", "考试", "学生管理", "课程开发", "质量评估"],
+      "regulations": ["GB/T 19001", "教育法", "民办教育促进法", "职业教育法"],
+      "data_status": "enriched"
+    },
+    {
+      "code": "39",
+      "name": "其他社会服务",
+      "name_en": "Other Social Services",
+      "sub_categories_count": 5,
+      "detail_categories_count": 8,
+      "keywords": ["社会服务", "社区服务", "慈善", "志愿服务", "家政", "殡葬", "社会组织"],
+      "related_clauses_priority": ["8.2", "7.1.5", "8.3"],
+      "key_departments": ["服务部", "项目部", "行政部", "财务部", "志愿者管理部"],
+      "key_processes": ["服务受理", "服务提供", "志愿者管理", "项目管理", "质量监控"],
+      "regulations": ["GB/T 19001", "慈善法", "志愿服务条例", "社会组织登记管理条例"],
+      "data_status": "enriched"
+    }
+  ]
+}

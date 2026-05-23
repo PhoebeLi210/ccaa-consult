@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import init_db
 from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, flowcharts, cert_stage, old_files
-from app.api.v1 import iso_standards, field_validation, document_references
+from app.api.v1 import iso_standards, field_validation, document_references, knowledge, style_learning
 
 
 @asynccontextmanager
@@ -62,6 +62,8 @@ app.include_router(old_files.router, prefix="/api/v1")
 app.include_router(iso_standards.router, prefix="/api/v1")
 app.include_router(field_validation.router, prefix="/api/v1")
 app.include_router(document_references.router, prefix="/api/v1")
+app.include_router(knowledge.router, prefix="/api/v1")
+app.include_router(style_learning.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -86,6 +88,8 @@ async def root():
             "iso_standards": "/api/v1/iso-standards - ISO标准知识库",
             "field_validation": "/api/v1/field-validation - 字段验证",
             "document_references": "/api/v1/document-references - 文档引用关系",
+            "knowledge": "/api/v1/knowledge - 知识库（行业、条款、文档上下文）",
+            "style_learning": "/api/v1/style-learning - 风格学习（用户画像、风格提示词）",
         },
         "features": [
             "JWT用户认证",
@@ -99,6 +103,8 @@ async def root():
             "ISO标准知识库查询",
             "字段防编造验证",
             "文档引用关系管理",
+            "行业知识库与文档生成上下文",
+            "用户风格学习与个性化提示词",
         ]
     }
 

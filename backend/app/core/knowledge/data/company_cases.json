@@ -1,0 +1,271 @@
+{
+  "version": "1.0",
+  "description": "ISO管理体系认证企业案例库",
+  "cases": [
+    {
+      "id": "CASE-001",
+      "company_name": "武汉楚天信息技术有限公司",
+      "industry": "软件和信息技术服务业",
+      "industry_code": "I65",
+      "company_scale": "中小型企业（50-200人）",
+      "certification_scope": "计算机软件开发、信息系统集成服务、技术咨询服务",
+      "standards": ["ISO9001", "ISO14001", "ISO45001"],
+      "departments": [
+        {"name": "总经理办公室", "functions": ["战略规划", "管理评审", "目标制定"], "headcount": 3},
+        {"name": "软件开发部", "functions": ["软件设计与开发", "代码评审", "技术文档编写"], "headcount": 45},
+        {"name": "系统集成部", "functions": ["系统集成实施", "现场安装调试", "客户培训"], "headcount": 25},
+        {"name": "质量管理部", "functions": ["质量管控", "内部审核", "过程监督"], "headcount": 4},
+        {"name": "人力资源部", "functions": ["人员招聘", "培训管理", "绩效考核"], "headcount": 3},
+        {"name": "行政后勤部", "functions": ["行政管理", "后勤保障", "环境安全管理"], "headcount": 5},
+        {"name": "市场营销部", "functions": ["市场开拓", "客户服务", "合同管理"], "headcount": 12}
+      ],
+      "key_processes": [
+        {"process_name": "软件开发过程", "process_type": "主过程", "inputs": "客户需求、技术规范、项目计划", "outputs": "软件产品、技术文档、验收报告", "control_methods": ["需求评审", "代码审查", "测试验证"]},
+        {"process_name": "系统集成服务过程", "process_type": "主过程", "inputs": "系统设计方案、硬件设备、软件系统", "outputs": "集成系统、验收报告、培训记录", "control_methods": ["方案评审", "现场检查", "客户验收"]},
+        {"process_name": "人力资源管理过程", "process_type": "支持过程", "inputs": "岗位需求、培训计划、绩效标准", "outputs": "合格人员、培训记录、考核结果", "control_methods": ["能力评价", "培训考核", "绩效评估"]}
+      ],
+      "document_characteristics": {
+        "manual_features": "采用过程方法，将软件开发、系统集成作为核心过程，强调客户需求识别和满意度监测",
+        "procedure_structure": "按ISO9001:2015标准条款编制程序文件，质量、环境、职业健康安全程序合并编写",
+        "level3_documents": "软件开发作业指导书、系统集成操作规程、设备维护规程、应急预案等",
+        "level4_records": "项目文档、测试记录、培训记录、内审记录、管理评审记录等",
+        "special_notes": "软件行业特点：强调配置管理、版本控制、知识产权保护"
+      }
+    },
+    {
+      "id": "CASE-002",
+      "company_name": "湖北恒通机械制造有限公司",
+      "industry": "通用设备制造业",
+      "industry_code": "C34",
+      "company_scale": "中型企业（200-500人）",
+      "certification_scope": "精密机械零部件的生产（机加工、热处理、表面处理）",
+      "standards": ["ISO9001", "ISO14001", "ISO45001"],
+      "departments": [
+        {"name": "总经理室", "functions": ["战略决策", "资源配置", "管理评审"], "headcount": 2},
+        {"name": "生产管理部", "functions": ["生产计划", "生产调度", "现场管理"], "headcount": 8},
+        {"name": "机加工车间", "functions": ["车削加工", "铣削加工", "磨削加工"], "headcount": 120},
+        {"name": "热处理车间", "functions": ["淬火", "回火", "渗碳"], "headcount": 25},
+        {"name": "表面处理车间", "functions": ["电镀", "喷涂", "氧化"], "headcount": 30},
+        {"name": "质量检验部", "functions": ["进货检验", "过程检验", "成品检验"], "headcount": 15},
+        {"name": "设备管理部", "functions": ["设备维护", "设备保养", "备件管理"], "headcount": 8},
+        {"name": "安全环保部", "functions": ["安全管理", "环保管理", "职业健康"], "headcount": 4},
+        {"name": "采购部", "functions": ["原材料采购", "供应商管理", "库存管理"], "headcount": 6},
+        {"name": "销售部", "functions": ["客户开发", "订单管理", "售后服务"], "headcount": 12}
+      ],
+      "key_processes": [
+        {"process_name": "机械加工过程", "process_type": "主过程", "inputs": "原材料、工艺文件、设备工装", "outputs": "加工件、检验记录、生产报表", "control_methods": ["首件检验", "巡检", "工序检验", "SPC控制"]},
+        {"process_name": "热处理过程", "process_type": "关键过程", "inputs": "待处理工件、热处理工艺参数", "outputs": "热处理件、硬度检测报告", "control_methods": ["工艺确认", "温度监控", "硬度检测"]},
+        {"process_name": "表面处理过程", "process_type": "关键过程", "inputs": "待处理工件、化学药剂、工艺参数", "outputs": "表面处理件、膜厚检测报告", "control_methods": ["工艺确认", "药液分析", "膜厚检测"]}
+      ],
+      "document_characteristics": {
+        "manual_features": "强调生产过程的策划和控制，突出关键过程（热处理、表面处理）的确认要求",
+        "procedure_structure": "生产过程控制程序、检验控制程序、不合格品控制程序为核心程序",
+        "level3_documents": "各工序作业指导书、设备操作规程、检验规程、安全操作规程",
+        "level4_records": "生产记录、检验记录、设备点检记录、环境监测记录",
+        "special_notes": "制造业特点：强调工艺控制、设备管理、检验把关、安全生产"
+      }
+    },
+    {
+      "id": "CASE-003",
+      "company_name": "武汉新创源物业服务有限公司",
+      "industry": "物业管理",
+      "industry_code": "K7020",
+      "company_scale": "小型企业（30-100人）",
+      "certification_scope": "写字楼、商业综合体的物业管理服务（保洁、安保、工程维修、客户服务）",
+      "standards": ["ISO9001", "ISO14001", "ISO45001"],
+      "departments": [
+        {"name": "总经理办公室", "functions": ["公司管理", "对外联络", "管理评审"], "headcount": 2},
+        {"name": "品质管理部", "functions": ["服务品质监督", "客户满意度调查", "投诉处理"], "headcount": 3},
+        {"name": "客户服务部", "functions": ["前台接待", "客户咨询", "报修受理", "费用收缴"], "headcount": 15},
+        {"name": "工程维修部", "functions": ["设施设备维护", "日常维修", "工程改造"], "headcount": 20},
+        {"name": "秩序维护部", "functions": ["门岗值守", "巡逻检查", "消防管理", "停车管理"], "headcount": 35},
+        {"name": "环境管理部", "functions": ["保洁服务", "绿化养护", "垃圾清运", "消杀服务"], "headcount": 40},
+        {"name": "行政人事部", "functions": ["行政管理", "人事管理", "培训管理"], "headcount": 4}
+      ],
+      "key_processes": [
+        {"process_name": "客户服务过程", "process_type": "主过程", "inputs": "客户需求、服务标准、人员配置", "outputs": "服务提供、客户反馈、满意度评价", "control_methods": ["服务规范", "定期回访", "满意度调查"]},
+        {"process_name": "工程维修服务过程", "process_type": "主过程", "inputs": "报修信息、维修人员、工具材料", "outputs": "维修服务、维修记录、客户确认", "control_methods": ["接单响应时限", "维修质量检查", "客户签字确认"]},
+        {"process_name": "秩序维护服务过程", "process_type": "主过程", "inputs": "安保制度、巡逻计划、应急预案", "outputs": "安全服务、巡逻记录、事件处理记录", "control_methods": ["岗位责任制", "巡逻签到", "应急演练"]}
+      ],
+      "document_characteristics": {
+        "manual_features": "以服务提供过程为核心，强调客户沟通和服务满意度监测，突出人员行为规范",
+        "procedure_structure": "服务提供控制程序、客户沟通过程控制程序、应急准备和响应程序为重点",
+        "level3_documents": "各岗位作业指导书（客服、工程、安保、保洁）、设备操作规程、应急预案",
+        "level4_records": "服务记录、巡检记录、培训记录、客户满意度调查记录",
+        "special_notes": "服务业特点：强调人员行为规范、服务礼仪、应急响应、客户沟通"
+      }
+    },
+    {
+      "id": "CASE-004",
+      "company_name": "湖北绿源建筑工程有限公司",
+      "industry": "房屋建筑业",
+      "industry_code": "E47",
+      "company_scale": "中型企业（100-300人）",
+      "certification_scope": "房屋建筑工程施工总承包（地基基础、主体结构、装饰装修、机电安装）",
+      "standards": ["ISO9001", "ISO14001", "ISO45001", "GB/T50430"],
+      "departments": [
+        {"name": "公司管理层", "functions": ["战略决策", "资源配置", "管理评审"], "headcount": 3},
+        {"name": "工程管理部", "functions": ["施工管理", "技术管理", "进度控制", "质量管理"], "headcount": 15},
+        {"name": "安全生产部", "functions": ["安全管理", "文明施工", "安全检查", "事故处理"], "headcount": 8},
+        {"name": "技术质量部", "functions": ["技术方案", "图纸会审", "质量检查", "试验检测"], "headcount": 10},
+        {"name": "经营合约部", "functions": ["招投标", "合同管理", "成本控制", "工程结算"], "headcount": 8},
+        {"name": "物资设备部", "functions": ["材料采购", "设备租赁", "材料管理", "设备维护"], "headcount": 6},
+        {"name": "人力资源部", "functions": ["人员管理", "劳务管理", "培训教育"], "headcount": 4},
+        {"name": "财务管理部", "functions": ["财务管理", "资金管理", "税务管理"], "headcount": 5},
+        {"name": "综合办公室", "functions": ["行政管理", "档案管理", "后勤保障"], "headcount": 4}
+      ],
+      "key_processes": [
+        {"process_name": "施工过程控制", "process_type": "主过程", "inputs": "施工图纸、施工方案、材料设备、人员", "outputs": "工程实体、施工记录、验收资料", "control_methods": ["技术交底", "样板引路", "三检制度", "隐蔽验收"]},
+        {"process_name": "分包管理过程", "process_type": "支持过程", "inputs": "分包需求、分包商选择、分包合同", "outputs": "分包服务、分包结算、分包评价", "control_methods": ["分包商评价", "现场管理", "质量验收"]},
+        {"process_name": "施工安全管理", "process_type": "关键过程", "inputs": "安全法规、安全方案、安全设施", "outputs": "安全施工、安全检查记录、事故处理", "control_methods": ["安全交底", "安全检查", "隐患排查", "应急演练"]}
+      ],
+      "document_characteristics": {
+        "manual_features": "按GB/T50430工程建设施工企业质量管理规范要求编制，强调项目管理和过程控制",
+        "procedure_structure": "施工策划控制程序、施工过程控制程序、分包管理控制程序、安全管理程序为核心",
+        "level3_documents": "各分部分项工程作业指导书、安全操作规程、试验检测规程",
+        "level4_records": "施工日志、检验批记录、隐蔽验收记录、安全检查记录",
+        "special_notes": "建筑业特点：强调项目管理、分包控制、安全管理、技术交底、过程检验"
+      }
+    },
+    {
+      "id": "CASE-005",
+      "company_name": "武汉康泰医疗器械有限公司",
+      "industry": "专用设备制造业（医疗器械）",
+      "industry_code": "C358",
+      "company_scale": "中小型企业（80-200人）",
+      "certification_scope": "医用超声诊断设备、医用电子仪器设备的生产（设计开发、生产、销售、售后服务）",
+      "standards": ["ISO9001", "ISO13485", "ISO14001", "ISO45001"],
+      "departments": [
+        {"name": "总经理办公室", "functions": ["公司管理", "管理评审", "法规事务"], "headcount": 2},
+        {"name": "研发部", "functions": ["产品设计开发", "技术文档", "设计变更"], "headcount": 25},
+        {"name": "生产部", "functions": ["生产计划", "生产组织", "生产过程控制"], "headcount": 60},
+        {"name": "质量部", "functions": ["质量管理", "检验检测", "不合格品控制", "上市后监督"], "headcount": 15},
+        {"name": "法规注册部", "functions": ["产品注册", "法规符合性", "不良事件监测"], "headcount": 4},
+        {"name": "采购部", "functions": ["供应商管理", "物料采购", "来料检验协调"], "headcount": 5},
+        {"name": "销售部", "functions": ["市场推广", "销售管理", "客户培训"], "headcount": 20},
+        {"name": "售后服务部", "functions": ["安装调试", "维修保养", "客户投诉处理"], "headcount": 12},
+        {"name": "人力资源部", "functions": ["人员管理", "培训管理", "洁净区人员管理"], "headcount": 3}
+      ],
+      "key_processes": [
+        {"process_name": "设计开发过程", "process_type": "主过程", "inputs": "市场需求、法规要求、技术规范", "outputs": "设计输出、设计验证确认报告、技术文档", "control_methods": ["设计评审", "设计验证", "设计确认", "设计变更控制"]},
+        {"process_name": "生产过程控制", "process_type": "主过程", "inputs": "生产计划、物料、作业指导书、设备", "outputs": "医疗器械产品、生产记录、检验记录", "control_methods": ["作业指导书", "过程检验", "关键工序控制", "可追溯性管理"]},
+        {"process_name": "灭菌过程（如适用）", "process_type": "特殊过程", "inputs": "待灭菌产品、灭菌工艺参数", "outputs": "灭菌产品、灭菌记录、无菌检测报告", "control_methods": ["灭菌确认", "过程参数监控", "无菌检测"]}
+      ],
+      "document_characteristics": {
+        "manual_features": "符合ISO13485医疗器械质量管理体系要求，强调法规符合性、风险管理、上市后监督",
+        "procedure_structure": "设计开发控制程序、生产过程控制程序、风险管理程序、上市后监督程序为核心",
+        "level3_documents": "产品技术文档、生产工艺规程、检验规程、设备操作规程、洁净区管理规程",
+        "level4_records": "设计开发文档、生产记录、检验记录、灭菌记录、不良事件报告",
+        "special_notes": "医疗器械行业特点：强调法规符合性、风险管理、设计控制、可追溯性、上市后监督"
+      }
+    },
+    {
+      "id": "CASE-006",
+      "company_name": "湖北鑫达物流有限公司",
+      "industry": "道路运输业",
+      "industry_code": "G54",
+      "company_scale": "中型企业（100-300人）",
+      "certification_scope": "普通货物运输、仓储服务、配送服务",
+      "standards": ["ISO9001", "ISO14001", "ISO45001"],
+      "departments": [
+        {"name": "总经理室", "functions": ["公司管理", "战略决策", "管理评审"], "headcount": 2},
+        {"name": "运营调度中心", "functions": ["运输调度", "车辆监控", "路线优化"], "headcount": 15},
+        {"name": "运输车队", "functions": ["货物运输", "车辆驾驶", "货物装卸"], "headcount": 120},
+        {"name": "仓储管理部", "functions": ["货物入库", "仓储保管", "货物出库", "库存管理"], "headcount": 30},
+        {"name": "安全管理部", "functions": ["交通安全管理", "消防安全", "安全培训", "事故处理"], "headcount": 5},
+        {"name": "车辆技术部", "functions": ["车辆维护", "车辆保养", "车辆年检", "维修管理"], "headcount": 8},
+        {"name": "客户服务部", "functions": ["业务受理", "客户沟通", "投诉处理", "运费结算"], "headcount": 10},
+        {"name": "人力资源部", "functions": ["驾驶员管理", "人员招聘", "培训考核"], "headcount": 4}
+      ],
+      "key_processes": [
+        {"process_name": "货物运输服务过程", "process_type": "主过程", "inputs": "运输订单、货物、车辆、驾驶员", "outputs": "货物运输服务、签收单、运输记录", "control_methods": ["派车审核", "GPS监控", "到货确认", "客户签收"]},
+        {"process_name": "仓储服务过程", "process_type": "主过程", "inputs": "入库货物、仓储设施、仓储管理系统", "outputs": "仓储服务、出库货物、库存记录", "control_methods": ["入库检验", "库位管理", "盘点制度", "出库复核"]},
+        {"process_name": "车辆安全管理", "process_type": "关键过程", "inputs": "车辆、驾驶员、安全制度", "outputs": "安全运输、安全检查记录、事故预防", "control_methods": ["车辆检查", "驾驶员培训", "动态监控", "违章处理"]}
+      ],
+      "document_characteristics": {
+        "manual_features": "以运输服务提供为核心，强调交通安全管理、车辆管理、驾驶员管理",
+        "procedure_structure": "运输服务控制程序、仓储服务控制程序、车辆安全管理程序、应急准备和响应程序为重点",
+        "level3_documents": "驾驶员操作规程、车辆维护保养规程、装卸作业指导书、应急预案",
+        "level4_records": "运输单据、车辆检查记录、驾驶员培训记录、安全检查记录",
+        "special_notes": "物流行业特点：强调交通安全、车辆管理、驾驶员资质、货物安全、应急响应"
+      }
+    },
+    {
+      "id": "CASE-007",
+      "company_name": "武汉华创档案数字化服务有限公司",
+      "industry": "商务服务业（档案服务）",
+      "industry_code": "L72",
+      "company_scale": "小型企业（20-80人）",
+      "certification_scope": "档案整理、档案数字化加工、档案咨询服务",
+      "standards": ["ISO9001", "ISO14001", "ISO45001", "DA/T31"],
+      "departments": [
+        {"name": "总经理办公室", "functions": ["公司管理", "管理评审", "保密管理"], "headcount": 2},
+        {"name": "项目管理部", "functions": ["项目承接", "项目计划", "项目监控", "客户沟通"], "headcount": 5},
+        {"name": "档案整理部", "functions": ["档案分类", "档案编目", "档案装订", "档案装盒"], "headcount": 25},
+        {"name": "数字化加工部", "functions": ["档案扫描", "图像处理", "数据录入", "数据质检"], "headcount": 35},
+        {"name": "质量检查部", "functions": ["过程检查", "成品检查", "质量统计", "问题反馈"], "headcount": 8},
+        {"name": "信息技术部", "functions": ["系统维护", "数据管理", "技术支持"], "headcount": 4},
+        {"name": "行政人事部", "functions": ["行政管理", "人员管理", "保密培训"], "headcount": 3}
+      ],
+      "key_processes": [
+        {"process_name": "档案整理服务过程", "process_type": "主过程", "inputs": "待整理档案、整理标准、人员", "outputs": "整理后档案、整理目录、整理记录", "control_methods": ["整理标准", "过程抽查", "成品检查", "客户验收"]},
+        {"process_name": "数字化加工过程", "process_type": "主过程", "inputs": "待数字化档案、扫描设备、软件系统", "outputs": "数字化成果（图像、数据）、质检报告", "control_methods": ["扫描参数设置", "图像处理标准", "数据录入校验", "成品质检"]},
+        {"process_name": "保密管理过程", "process_type": "关键过程", "inputs": "保密制度、涉密人员、涉密场所", "outputs": "保密管理、保密检查记录、泄密预防", "control_methods": ["人员审查", "保密培训", "场所管控", "设备管理"]}
+      ],
+      "document_characteristics": {
+        "manual_features": "以档案服务提供为核心，强调保密管理、质量控制、数据安全",
+        "procedure_structure": "档案整理服务控制程序、数字化加工控制程序、保密管理程序、数据安全管理程序为重点",
+        "level3_documents": "档案整理操作规程、数字化加工操作规程、质量检查规程、保密管理制度",
+        "level4_records": "项目记录、加工记录、质检记录、保密检查记录",
+        "special_notes": "档案服务行业特点：强调保密管理、数据安全、质量控制、人员审查、场所管控"
+      }
+    },
+    {
+      "id": "CASE-008",
+      "company_name": "湖北美味佳食品有限公司",
+      "industry": "食品制造业",
+      "industry_code": "C14",
+      "company_scale": "中型企业（150-400人）",
+      "certification_scope": "糕点、饼干的生产（原料验收、生产加工、包装、储存）",
+      "standards": ["ISO9001", "ISO22000", "ISO14001", "ISO45001", "HACCP"],
+      "departments": [
+        {"name": "总经理办公室", "functions": ["公司管理", "管理评审", "食品安全管理"], "headcount": 2},
+        {"name": "食品安全小组", "functions": ["HACCP计划", "危害分析", "关键控制点监控"], "headcount": 5},
+        {"name": "生产部", "functions": ["生产计划", "生产组织", "生产过程控制"], "headcount": 100},
+        {"name": "质量部", "functions": ["原料检验", "过程检验", "成品检验", "留样管理"], "headcount": 15},
+        {"name": "研发部", "functions": ["产品研发", "工艺改进", "配方管理"], "headcount": 8},
+        {"name": "采购部", "functions": ["原料采购", "供应商管理", "进货查验协调"], "headcount": 5},
+        {"name": "仓储物流部", "functions": ["原料仓储", "成品仓储", "物流配送"], "headcount": 20},
+        {"name": "设备工程部", "functions": ["设备维护", "设备保养", "水电气管理"], "headcount": 8},
+        {"name": "销售部", "functions": ["市场销售", "客户管理", "售后服务"], "headcount": 25}
+      ],
+      "key_processes": [
+        {"process_name": "生产加工过程", "process_type": "主过程", "inputs": "原料、配方、工艺参数、设备", "outputs": "食品产品、生产记录、检验记录", "control_methods": ["配方管理", "工艺参数控制", "CCP监控", "过程检验"]},
+        {"process_name": "原料验收过程", "process_type": "关键过程", "inputs": "采购原料、验收标准、检验设备", "outputs": "合格原料、验收记录、不合格处置", "control_methods": ["供应商评价", "进货查验", "检验检测", "合格放行"]},
+        {"process_name": "CCP监控过程", "process_type": "关键过程", "inputs": "CCP点、关键限值、监控设备", "outputs": "监控记录、纠偏记录、验证记录", "control_methods": ["实时监控", "记录审查", "纠偏措施", "验证确认"]}
+      ],
+      "document_characteristics": {
+        "manual_features": "符合ISO22000/HACCP食品安全管理体系要求，强调食品安全危害控制、前提方案、HACCP计划",
+        "procedure_structure": "前提方案（PRPs）、HACCP计划、产品追溯和召回程序、食品安全应急程序为核心",
+        "level3_documents": "各工序作业指导书、CCP监控规程、清洗消毒规程、设备操作规程",
+        "level4_records": "生产记录、检验记录、CCP监控记录、清洗消毒记录、培训记录",
+        "special_notes": "食品行业特点：强调食品安全、HACCP、原料控制、过程控制、产品追溯、人员卫生"
+      }
+    }
+  ],
+  "metadata": {
+    "created_date": "2026-05-23",
+    "total_cases": 8,
+    "industries_covered": [
+      "软件和信息技术服务业",
+      "通用设备制造业",
+      "物业管理",
+      "房屋建筑业",
+      "专用设备制造业（医疗器械）",
+      "道路运输业",
+      "商务服务业（档案服务）",
+      "食品制造业"
+    ],
+    "standards_covered": ["ISO9001", "ISO14001", "ISO45001", "ISO13485", "ISO22000", "HACCP", "GB/T50430"]
+  }
+}
