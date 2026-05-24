@@ -8,15 +8,43 @@
 - project_raw_inputs: 原始输入表
 - documents: 文档表
 - uploads: 上传文件表
+- custom_templates: 自定义模板表 (V1.3)
+- teams: 团队表 (V1.3)
+- team_members: 团队成员表 (V1.3)
+- project_configs: 项目配置表 (V1.3)
 """
 
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, JSON, ForeignKey, Enum
 from sqlalchemy.orm import relationship, declarative_base
 import enum
 
 Base = declarative_base()
+
+
+# V1.3: 团队角色枚举
+class TeamRole(enum.Enum):
+    """团队成员角色"""
+    OWNER = "owner"      # 所有者
+    ADMIN = "admin"      # 管理员
+    MEMBER = "member"    # 成员
+    VIEWER = "viewer"    # 观察者
+
+
+# V1.3: 模板状态枚举
+class TemplateStatus(enum.Enum):
+    """模板状态"""
+    ACTIVE = "active"      # 启用
+    DISABLED = "disabled"  # 禁用
+    ARCHIVED = "archived"  # 归档
+
+
+class UserStatus(enum.Enum):
+    """用户状态"""
+    ACTIVE = "active"      # 活跃
+    INACTIVE = "inactive"  # 停用
+    SUSPENDED = "suspended"  # 暂停
 
 
 class ProjectStatus(enum.Enum):
@@ -44,30 +72,6 @@ class DocumentType(enum.Enum):
     FORM = "form"  # 表单
 
 
-class DepartmentInfo(Base):
-    """部门/场所信息 - V1.4对齐audit模块"""
-    __tablename__ = "department_info"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    dept_id = Column(String(36), unique=True, nullable=False, index=True)
-    project_id = Column(String(36), ForeignKey("projects.project_id"), nullable=False, index=True)
-
-    name = Column(String(100), nullable=False)
-    address = Column(String(300), nullable=True)
-    is_site = Column(Boolean, default=False)
-
-    # 关联
-    project = relationship("Project", back_populates="departments_rel")
-
-    def to_dict(self):
-        return {
-            "dept_id": self.dept_id,
-            "name": self.name,
-            "address": self.address,
-            "is_site": self.is_site,
-        }
-
-
 class Project(Base):
     """项目表"""
     __tablename__ = "projects"
@@ -75,26 +79,19 @@ class Project(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     project_id = Column(String(36), unique=True, nullable=False, index=True)  # UUID
     user_id = Column(String(36), nullable=False, index=True)  # 用户ID
+    team_id = Column(String(36), nullable=True, index=True)  # V1.3: 所属团队ID
 
     # 企业基本信息
     company_name = Column(String(200), nullable=True)
-    credit_code = Column(String(50), nullable=True)  # 统一社会信用代码
     industry = Column(String(50), nullable=True)
     sub_industry = Column(String(100), nullable=True)
     employee_count = Column(Integer, nullable=True)
     office_area_sqm = Column(Float, nullable=True)
 
-    # 地址信息
-    reg_address = Column(String(300), nullable=True)  # 注册地址
-    office_address = Column(String(300), nullable=True)  # 办公地址
-    business_address = Column(String(300), nullable=True)  # 生产经营地址
-
     # 认证信息
     certification_type = Column(String(50), nullable=True)  # 初次认证/监督审核/再认证
     existing_standards = Column(JSON, nullable=True)  # 已有标准列表
     target_standards = Column(JSON, nullable=True)  # 目标标准列表
-    professional_code = Column(String(50), nullable=True)  # 认证业务范围专业代码
-    professional_code_name = Column(String(200), nullable=True)  # 专业代码名称
 
     # 组织信息
     departments = Column(JSON, nullable=True)  # 部门列表
@@ -104,17 +101,7 @@ class Project(Base):
 
     # 质量信息
     quality_goals = Column(Text, nullable=True)  # 质量目标
-    quality_policy = Column(Text, nullable=True)  # 质量方针
-    quality_goals_verified = Column(Boolean, default=False)  # 质量目标是否已验证
     key_customers = Column(Text, nullable=True)  # 主要客户
-
-    # 字段来源追踪 - V1.5新增
-    quality_policy_source = Column(String(10), nullable=True)  # 质量方针来源 (P1/P2/P3)
-    quality_objectives_source = Column(String(10), nullable=True)  # 质量目标来源 (P1/P2/P3)
-    cert_scope = Column(Text, nullable=True)  # 认证范围
-    cert_scope_source = Column(String(10), nullable=True)  # 认证范围来源 (P1/P2/P3)
-    professional_code_source = Column(String(10), nullable=True)  # 专业代码来源 (P1/P2/P3)
-    field_sources = Column(JSON, nullable=True)  # 存储所有字段的来源信息
 
     # 项目状态
     status = Column(String(20), default=ProjectStatus.DRAFT.value)
@@ -130,7 +117,7 @@ class Project(Base):
     raw_inputs = relationship("ProjectRawInput", back_populates="project", cascade="all, delete-orphan")
     documents = relationship("Document", back_populates="project", cascade="all, delete-orphan")
     uploads = relationship("Upload", back_populates="project", cascade="all, delete-orphan")
-    departments_rel = relationship("DepartmentInfo", back_populates="project", cascade="all, delete-orphan")
+    team = relationship("Team", back_populates="projects", foreign_keys="Project.team_id")
 
     def to_dict(self):
         return {
@@ -138,37 +125,20 @@ class Project(Base):
             "project_id": self.project_id,
             "user_id": self.user_id,
             "company_name": self.company_name,
-            "credit_code": self.credit_code,
             "industry": self.industry,
             "sub_industry": self.sub_industry,
             "employee_count": self.employee_count,
             "office_area_sqm": self.office_area_sqm,
-            "reg_address": self.reg_address,
-            "office_address": self.office_address,
-            "business_address": self.business_address,
             "certification_type": self.certification_type,
             "existing_standards": self.existing_standards or [],
             "target_standards": self.target_standards or [],
-            "professional_code": self.professional_code,
-            "professional_code_name": self.professional_code_name,
             "departments": self.departments or [],
             "main_equipment": self.main_equipment or [],
             "main_processes": self.main_processes or [],
             "special_processes": self.special_processes or [],
             "quality_goals": self.quality_goals,
-            "quality_policy": self.quality_policy,
-            "quality_goals_verified": self.quality_goals_verified,
             "key_customers": self.key_customers,
-            # 字段来源追踪 - V1.5新增
-            "quality_policy_source": self.quality_policy_source,
-            "quality_objectives_source": self.quality_objectives_source,
-            "cert_scope": self.cert_scope,
-            "cert_scope_source": self.cert_scope_source,
-            "professional_code_source": self.professional_code_source,
-            "field_sources": self.field_sources or {},
             "status": self.status,
-            "cert_stage": self.config.get("cert_stage") if self.config else None,
-            "selected_optional_scopes": self.config.get("selected_optional_scopes", []) if self.config else [],
             "config": self.config or {},
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
@@ -339,4 +309,207 @@ class Template(Base):
         }
 
 
-from app.models.flowchart_models import Flowchart, FlowchartTemplate, FlowchartNodeConfig
+class User(Base):
+    """用户表"""
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String(36), unique=True, nullable=False, index=True)
+
+    # 基本信息
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    email = Column(String(100), nullable=True, index=True)
+    hashed_password = Column(String(200), nullable=False)
+
+    # 个人信息
+    full_name = Column(String(100), nullable=True)
+    company = Column(String(200), nullable=True)
+    phone = Column(String(20), nullable=True)
+
+    # 状态
+    is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
+    status = Column(String(20), default=UserStatus.ACTIVE.value)
+
+    # 设置
+    settings = Column(JSON, nullable=True)  # 用户偏好设置
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_login = Column(DateTime, nullable=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "username": self.username,
+            "email": self.email,
+            "full_name": self.full_name,
+            "company": self.company,
+            "phone": self.phone,
+            "is_active": self.is_active,
+            "is_superuser": self.is_superuser,
+            "status": self.status,
+            "settings": self.settings or {},
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "last_login": self.last_login.isoformat() if self.last_login else None,
+        }
+
+
+# ==================== V1.3 新模型 ====================
+
+class CustomTemplate(Base):
+    """自定义模板表 - V1.3"""
+    __tablename__ = "custom_templates"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    template_id = Column(String(36), unique=True, nullable=False, index=True)
+    user_id = Column(String(36), nullable=False, index=True)
+
+    # 模板信息
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String(50), nullable=True)  # manual/procedure/record/instruction/form
+    industry = Column(String(50), nullable=True)
+
+    # 模板内容
+    content = Column(Text, nullable=False)  # YAML模板内容
+    variables = Column(JSON, nullable=True)  # 变量列表
+
+    # 版本管理
+    version = Column(String(10), default="1.0")  # 版本号
+    version_history = Column(JSON, nullable=True)  # 历史版本 [{version, content, updated_at}]
+
+    # 状态
+    status = Column(String(20), default=TemplateStatus.ACTIVE.value)
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "template_id": self.template_id,
+            "user_id": self.user_id,
+            "name": self.name,
+            "description": self.description,
+            "category": self.category,
+            "industry": self.industry,
+            "variables": self.variables or [],
+            "version": self.version,
+            "status": self.status,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class Team(Base):
+    """团队表 - V1.3"""
+    __tablename__ = "teams"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    team_id = Column(String(36), unique=True, nullable=False, index=True)
+
+    # 团队信息
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+
+    # 所有者
+    owner_id = Column(String(36), nullable=False, index=True)
+
+    # 设置
+    settings = Column(JSON, nullable=True)  # {allow_member_invite: bool, default_role: str}
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关联
+    members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
+    projects = relationship("Project", back_populates="team", foreign_keys="Project.team_id")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "team_id": self.team_id,
+            "name": self.name,
+            "description": self.description,
+            "owner_id": self.owner_id,
+            "settings": self.settings or {},
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class TeamMember(Base):
+    """团队成员表 - V1.3"""
+    __tablename__ = "team_members"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    team_id = Column(String(36), ForeignKey("teams.team_id"), nullable=False, index=True)
+    user_id = Column(String(36), nullable=False, index=True)
+
+    # 角色: owner/admin/member/viewer
+    role = Column(String(20), nullable=False, default=TeamRole.MEMBER.value)
+
+    # 权限缓存
+    permissions = Column(JSON, nullable=True)
+
+    # 加入时间
+    joined_at = Column(DateTime, default=datetime.utcnow)
+    invited_by = Column(String(36), nullable=True)
+
+    # 关联
+    team = relationship("Team", back_populates="members")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "team_id": self.team_id,
+            "user_id": self.user_id,
+            "role": self.role,
+            "permissions": self.permissions or {},
+            "joined_at": self.joined_at.isoformat() if self.joined_at else None,
+        }
+
+
+class ProjectConfig(Base):
+    """项目配置表 - V1.3"""
+    __tablename__ = "project_configs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    project_id = Column(String(36), ForeignKey("projects.project_id"), nullable=False, unique=True, index=True)
+
+    # AI生成配置
+    ai_config = Column(JSON, nullable=True)  # {temperature, max_tokens, style}
+
+    # 模板偏好
+    template_preferences = Column(JSON, nullable=True)  # {preferred_categories: [], auto_match: bool}
+
+    # 导出配置
+    export_config = Column(JSON, nullable=True)  # {default_format, include_logo, watermark}
+
+    # 通知配置
+    notification_config = Column(JSON, nullable=True)  # {email_notifications, webhook_url}
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关联
+    project = relationship("Project")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "ai_config": self.ai_config or {},
+            "template_preferences": self.template_preferences or {},
+            "export_config": self.export_config or {},
+            "notification_config": self.notification_config or {},
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

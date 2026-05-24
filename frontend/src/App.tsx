@@ -11,10 +11,9 @@ import MaterialsPage from './pages/materials';
 import MaterialsUploadPage from './pages/materials/upload';
 import ConversationPage from './pages/conversation';
 import AnalyzerPage from './pages/analyzer';
-import FlowchartListPage from './pages/flowcharts';
-import FlowchartEditorPage from './pages/flowcharts/editor';
-import IndustryExplorePage from './pages/knowledge/IndustryExplore';
-import IndustryDetailPage from './pages/knowledge/IndustryDetail';
+import TemplatesPage from './pages/templates';
+import TeamPage from './pages/team';
+import { KnowledgeBase, StandardDetail, KnowledgeDetail } from './pages/knowledge';
 
 /**
  * 根组件
@@ -53,19 +52,18 @@ const App: React.FC = () => {
         
         {/* 评估报告解析 (V1.2) */}
         <Route path="/analyzer" element={<AnalyzerPage />} />
-        
-        {/* 流程图管理 */}
-        <Route path="/flowcharts" element={<FlowchartListPage />} />
-        
-        {/* 流程图编辑器 */}
-        <Route path="/flowcharts/editor" element={<FlowchartEditorPage />} />
-        
-        {/* 行业知识库浏览 */}
-        <Route path="/knowledge/industries" element={<IndustryExplorePage />} />
-        
-        {/* 行业知识库详情 */}
-        <Route path="/knowledge/industry/:code" element={<IndustryDetailPage />} />
-        
+
+        {/* 模板管理 (V1.3) */}
+        <Route path="/templates" element={<TemplatesPage />} />
+
+        {/* 团队协作 (V1.3) */}
+        <Route path="/team" element={<TeamPage />} />
+
+        {/* 知识库 (V1.4) */}
+        <Route path="/knowledge" element={<KnowledgeBase />} />
+        <Route path="/knowledge/standard/:id" element={<StandardDetail />} />
+        <Route path="/knowledge/detail/:id" element={<KnowledgeDetail />} />
+
         {/* 未匹配路由重定向到首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

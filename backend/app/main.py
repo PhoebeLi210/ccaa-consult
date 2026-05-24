@@ -12,8 +12,7 @@ from contextlib import asynccontextmanager
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, flowcharts, cert_stage, old_files
-from app.api.v1 import iso_standards, field_validation, document_references, knowledge, style_learning
+from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, custom_templates, team, flowcharts
 
 
 @asynccontextmanager
@@ -31,7 +30,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="智质通·咨询版 API",
-    description="面向ISO认证咨询的AI智能文书工作端",
+    description="面向ISO咨询顾问的AI智能文书工作站",
     version="1.5.0",
     lifespan=lifespan,
 )
@@ -56,14 +55,9 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(analyzer.router, prefix="/api/v1")
 app.include_router(uploads.router, prefix="/api/v1")
 app.include_router(conversation.router, prefix="/api/v1")
+app.include_router(custom_templates.router, prefix="/api/v1")
+app.include_router(team.router, prefix="/api/v1")
 app.include_router(flowcharts.router, prefix="/api/v1")
-app.include_router(cert_stage.router, prefix="/api/v1")
-app.include_router(old_files.router, prefix="/api/v1")
-app.include_router(iso_standards.router, prefix="/api/v1")
-app.include_router(field_validation.router, prefix="/api/v1")
-app.include_router(document_references.router, prefix="/api/v1")
-app.include_router(knowledge.router, prefix="/api/v1")
-app.include_router(style_learning.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -71,8 +65,8 @@ async def root():
     """根路径"""
     return {
         "name": "智质通·咨询版",
-        "version": "1.5.0",
-        "description": "面向ISO认证咨询的AI智能文书工作端",
+        "version": "1.0.0",
+        "description": "面向ISO咨询顾问的AI智能文书工作站",
         "endpoints": {
             "auth": "/api/v1/auth - 用户认证（注册/登录）",
             "projects": "/api/v1/projects - 项目管理",
@@ -83,32 +77,20 @@ async def root():
             "analyzer": "/api/v1/analyzer - 缺失项分析",
             "uploads": "/api/v1/uploads - 文件上传与Excel解析",
             "company": "/api/v1/company - 企业管理",
-            "cert_stage": "/api/v1/cert-stage - 认证阶段确认",
-            "old_files": "/api/v1/old-files - 旧版文件上传和提取",
-            "iso_standards": "/api/v1/iso-standards - ISO标准知识库",
-            "field_validation": "/api/v1/field-validation - 字段验证",
-            "document_references": "/api/v1/document-references - 文档引用关系",
-            "knowledge": "/api/v1/knowledge - 知识库（行业、条款、文档上下文）",
-            "style_learning": "/api/v1/style-learning - 风格学习（用户画像、风格提示词）",
         },
         "features": [
             "JWT用户认证",
             "数据库持久化（SQLite）",
-            "LLM自然语言解析（DeepSeek/OpenAI/智谱/通义千问）",
-            "AI扩充描述性内容",
-            "行业模板自动匹配（39个CNAS行业）",
-            "文档导出为docx/ZIP",
+            "LLM自然语言解析（DeepSeek）",
+            "AI扩写描述性内容",
+            "行业模板自动匹配（7个行业）",
+            "文档导出为.docx/ZIP",
             "Excel收集表上传解析",
             "ISO条款覆盖检查",
-            "ISO标准知识库查询",
-            "字段防编造验证（事实锁定+编造检测）",
-            "文档引用关系管理",
-            "行业知识库与文档生成上下文",
-            "用户风格学习与个性化提示词",
-            "事实提取器（人名/编号/数据/条款/部门）",
-            "咨询Prompt模板（手册/程序/指导书/表单）",
-            "四层知识库架构（标准/经验/应用/用户）",
-            "内容差异化生成（解决雷同问题）",
+            "四层知识库架构（V1.5）",
+            "事实锁定与防编造（V1.5）",
+            "27个程序文件生成器（V1.5）",
+            "55个记录表单生成器（V1.5）",
         ]
     }
 
@@ -117,6 +99,7 @@ async def root():
 async def health():
     """健康检查"""
     return {"status": "healthy"}
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,4 +1,3 @@
-﻿
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 /** 后端API基础URL */
@@ -71,9 +70,6 @@ export interface ProjectInfo {
   status: 'draft' | 'in_progress' | 'completed';
   createdAt: string;
   updatedAt: string;
-  // V1.4新增
-  certStage?: string;  // 认证阶段
-  selectedOptionalScopes?: string[];  // 选中的可选文件层级
 }
 
 /** AI解析结果类型 */
@@ -126,42 +122,13 @@ export function getProjectDetail(id: string) {
   return request.get<unknown, ProjectInfo>(`/projects/${id}`);
 }
 
-/** 创建项目请求参数 */
-export interface CreateProjectRequest {
-  name: string;
-  companyName: string;
-  industry: string;
-  employeeCount?: string;
-  registeredCapital?: string;
-  address?: string;
-  contactPerson?: string;
-  contactPhone?: string;
-  certStage?: string;  // 认证阶段
-  selectedOptionalScopes?: string[];  // 选中的可选文件层级
-}
-
 /** 创建项目 */
-export function createProject(data: CreateProjectRequest) {
+export function createProject(data: Partial<ProjectInfo>) {
   return request.post<unknown, ProjectInfo>('/projects', data);
 }
 
-/** 更新项目请求参数 */
-export interface UpdateProjectRequest {
-  name?: string;
-  companyName?: string;
-  industry?: string;
-  employeeCount?: string;
-  registeredCapital?: string;
-  address?: string;
-  contactPerson?: string;
-  contactPhone?: string;
-  status?: 'draft' | 'in_progress' | 'completed';
-  certStage?: string;  // 认证阶段
-  selectedOptionalScopes?: string[];  // 选中的可选文件层级
-}
-
 /** 更新项目 */
-export function updateProject(id: string, data: UpdateProjectRequest) {
+export function updateProject(id: string, data: Partial<ProjectInfo>) {
   return request.put<unknown, ProjectInfo>(`/projects/${id}`, data);
 }
 
@@ -516,153 +483,313 @@ export const downloadTemplate = (materialName: string) => {
   window.open(`/api/v1/materials/template/download/${encodeURIComponent(materialName)}`, '_blank');
 };
 
-/* ==================== 流程图API ==================== */
+/* ==================== 自定义模板API (V1.3) ==================== */
 
-/** 节点类型 */
-export type NodeType = 'start' | 'end' | 'process' | 'decision' | 'document';
-
-/** 流程图节点 */
-export interface FlowchartNode {
-  id: string;
-  type: NodeType;
-  label: string;
-  x: number;
-  y: number;
-  description?: string;
-}
-
-/** 流程图边 */
-export interface FlowchartEdge {
-  id: string;
-  source: string;
-  target: string;
-  label?: string;
-}
-
-/** 流程图数据 */
-export interface FlowchartData {
-  nodes: FlowchartNode[];
-  edges: FlowchartEdge[];
-}
-
-/** 流程图信息 */
-export interface FlowchartInfo {
-  id: string;
+/** 自定义模板类型 */
+export interface CustomTemplate {
+  templateId: string;
   name: string;
   description?: string;
-  status: 'draft' | 'published';
-  nodes: FlowchartNode[];
-  edges: FlowchartEdge[];
-  nodeCount?: number;
-  edgeCount?: number;
+  category: string;
+  industry?: string;
+  variables: string[];
+  version: string;
+  status: 'active' | 'disabled' | 'archived';
   createdAt: string;
   updatedAt: string;
 }
 
-/** 创建流程图请求 */
-export interface CreateFlowchartRequest {
+/** 模板版本历史 */
+export interface TemplateVersion {
+  version: string;
+  content: string;
+  updatedAt: string;
+}
+
+/** 获取自定义模板列表 */
+export function getCustomTemplates(params?: { category?: string; status?: string }) {
+  return request.get<unknown, CustomTemplate[]>('/v1/custom-templates', { params });
+}
+
+/** 获取自定义模板详情 */
+export function getCustomTemplate(templateId: string) {
+  return request.get<unknown, CustomTemplate & { content: string; versionHistory: TemplateVersion[] }>(
+    `/v1/custom-templates/${templateId}`
+  );
+}
+
+/** 上传自定义模板 */
+export function uploadCustomTemplate(data: {
   name: string;
   description?: string;
+  category: string;
+  industry?: string;
+  content: string;
+}) {
+  return request.post<unknown, CustomTemplate>('/v1/custom-templates/upload', data);
 }
 
-/** 更新流程图请求 */
-export interface UpdateFlowchartRequest {
-  name?: string;
+/** 更新自定义模板 */
+export function updateCustomTemplate(templateId: string, data: Partial<CustomTemplate>) {
+  return request.put<unknown, CustomTemplate>(`/v1/custom-templates/${templateId}`, data);
+}
+
+/** 更新模板内容（自动创建新版本） */
+export function updateTemplateContent(templateId: string, content: string) {
+  return request.post<unknown, CustomTemplate>(`/v1/custom-templates/${templateId}/update-content`, {
+    content,
+  });
+}
+
+/** 删除自定义模板 */
+export function deleteCustomTemplate(templateId: string) {
+  return request.delete<unknown, { message: string }>(`/v1/custom-templates/${templateId}`);
+}
+
+/** 获取模板版本历史 */
+export function getTemplateVersions(templateId: string) {
+  return request.get<unknown, TemplateVersion[]>(`/v1/custom-templates/${templateId}/versions`);
+}
+
+/** 回滚到指定版本 */
+export function rollbackTemplate(templateId: string, version: string) {
+  return request.post<unknown, CustomTemplate>(`/v1/custom-templates/${templateId}/rollback`, {
+    version,
+  });
+}
+
+/* ==================== 团队协作API (V1.3) ==================== */
+
+/** 团队成员角色 */
+export type TeamRole = 'owner' | 'admin' | 'member' | 'viewer';
+
+/** 团队信息 */
+export interface Team {
+  teamId: string;
+  name: string;
   description?: string;
-  data?: FlowchartData;
-  status?: 'draft' | 'published';
+  ownerId: string;
+  settings: {
+    allowMemberInvite: boolean;
+    defaultRole: TeamRole;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
-/** 获取流程图列表 */
-export function getFlowchartList() {
-  return request.get<unknown, FlowchartInfo[]>('/v1/flowcharts');
+/** 团队成员 */
+export interface TeamMember {
+  id: string;
+  teamId: string;
+  userId: string;
+  role: TeamRole;
+  permissions: Record<string, boolean>;
+  joinedAt: string;
+  userName?: string;
+  userEmail?: string;
 }
 
-/** 获取流程图详情 */
-export function getFlowchartDetail(id: string) {
-  return request.get<unknown, FlowchartInfo>(`/v1/flowcharts/${id}`);
+/** 权限配置 */
+export interface RolePermissions {
+  canManageTeam: boolean;
+  canInviteMember: boolean;
+  canRemoveMember: boolean;
+  canManageProject: boolean;
+  canEditDocument: boolean;
+  canViewDocument: boolean;
+  canDeleteProject: boolean;
 }
 
-/** 创建流程图 */
-export function createFlowchart(data: CreateFlowchartRequest) {
-  return request.post<unknown, FlowchartInfo>('/v1/flowcharts', data);
+/** 获取我的团队列表 */
+export function getMyTeams() {
+  return request.get<unknown, Team[]>('/v1/teams/my');
 }
 
-/** 更新流程图 */
-export function updateFlowchart(id: string, data: UpdateFlowchartRequest) {
-  return request.put<unknown, FlowchartInfo>(`/v1/flowcharts/${id}`, data);
+/** 获取团队详情 */
+export function getTeamDetail(teamId: string) {
+  return request.get<unknown, Team & { members: TeamMember[] }>(`/v1/teams/${teamId}`);
 }
 
-/** 删除流程图 */
-export function deleteFlowchart(id: string) {
-  return request.delete<unknown, void>(`/v1/flowcharts/${id}`);
+/** 创建团队 */
+export function createTeam(data: { name: string; description?: string }) {
+  return request.post<unknown, Team>('/v1/teams', data);
 }
 
-/** 发布流程图 */
-export function publishFlowchart(id: string) {
-  return request.post<unknown, FlowchartInfo>(`/v1/flowcharts/${id}/publish`);
+/** 更新团队 */
+export function updateTeam(teamId: string, data: Partial<Team>) {
+  return request.put<unknown, Team>(`/v1/teams/${teamId}`, data);
 }
 
-
-/* ==================== 认证阶段API (V1.4) ==================== */
-
-/** 认证阶段选项 */
-export interface CertStageOption {
-  stage: string;
-  label: string;
-  description: string;
-  year: string;
+/** 删除团队 */
+export function deleteTeam(teamId: string) {
+  return request.delete<unknown, { message: string }>(`/v1/teams/${teamId}`);
 }
 
-/** 文件范围 */
-export interface DocumentScope {
-  level: string;
-  levelCode: string;
-  action: string;
-  documentTypes: string[];
-  optional?: boolean;
-  defaultSelected?: boolean;
+/** 邀请成员 */
+export function inviteTeamMember(teamId: string, data: { email: string; role?: TeamRole }) {
+  return request.post<unknown, TeamMember>(`/v1/teams/${teamId}/members`, data);
 }
 
-/** 文件范围响应 */
-export interface DocumentScopeResponse {
-  stage: string;
-  stageLabel: string;
-  description: string;
-  scopes: DocumentScope[];
-  hasOptional: boolean;
-  optionalScopes: DocumentScope[];
+/** 更新成员角色 */
+export function updateMemberRole(teamId: string, userId: string, role: TeamRole) {
+  return request.put<unknown, TeamMember>(`/v1/teams/${teamId}/members/${userId}/role`, {
+    role,
+  });
 }
 
-/** 获取认证阶段选项 */
-export function getCertStageOptions() {
-  return request.get<unknown, CertStageOption[]>('/cert-stage/options');
+/** 移除成员 */
+export function removeTeamMember(teamId: string, userId: string) {
+  return request.delete<unknown, { message: string }>(`/v1/teams/${teamId}/members/${userId}`);
 }
 
-/** 获取文件范围 */
-export function getDocumentScope(stage: string) {
-  return request.get<unknown, DocumentScopeResponse>(`/cert-stage/${stage}/document-scope`);
+/** 获取我的权限 */
+export function getMyPermissions(teamId: string) {
+  return request.get<unknown, RolePermissions>(`/v1/teams/${teamId}/my-permissions`);
 }
 
-/** 建议认证阶段请求 */
-export interface CertStageSuggestRequest {
-  hasExistingCert?: boolean;
-  certIssueYear?: number;
-  certStandards?: string[];
-  companyName?: string;
+/** 将项目分配给团队 */
+export function assignProjectToTeam(projectId: string, teamId: string) {
+  return request.post<unknown, { message: string }>(`/v1/teams/${teamId}/projects`, {
+    project_id: projectId,
+  });
 }
 
-/** 建议认证阶段响应 */
-export interface CertStageSuggestResponse {
-  suggestedStage: string;
-  stageLabel: string;
-  reason: string;
-  certYearInfo?: string;
+/** 从团队移除项目 */
+export function removeProjectFromTeam(teamId: string, projectId: string) {
+  return request.delete<unknown, { message: string }>(`/v1/teams/${teamId}/projects/${projectId}`);
 }
 
-/** 建议认证阶段 */
-export function suggestCertStage(data: CertStageSuggestRequest) {
-  return request.post<unknown, CertStageSuggestResponse>('/cert-stage/suggest', data);
+/* ==================== 文档导出API (V1.5) ==================== */
+
+/** 导出选项 */
+export interface ExportOptions {
+  includeWatermark?: boolean;
+  includeLogo?: boolean;
+  documentFormat?: 'docx' | 'pdf';
+  forceExport?: boolean;  // 即使有未确认文档也导出
+}
+
+/** 导出状态 */
+export interface ExportStatus {
+  taskId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  totalDocuments: number;
+  processedDocuments: number;
+  downloadUrl?: string;
+  error?: string;
+  createdAt: string;
+}
+
+/** 导出单个文档 */
+export function exportSingleDocument(documentId: string, format: 'docx' | 'pdf' = 'docx') {
+  // 直接下载
+  window.open(`/api/v1/generator/export/single/${documentId}?format=${format}`, '_blank');
+  return Promise.resolve({ success: true });
+}
+
+/** 导出项目全部文档为ZIP */
+export async function exportProjectDocuments(projectId: string, options?: ExportOptions): Promise<ExportStatus> {
+  const response = await request.post<unknown, ExportStatus>('/v1/generator/export/zip', {
+    project_id: projectId,
+    include_watermark: options?.includeWatermark ?? false,
+    include_logo: options?.includeLogo ?? false,
+    force_export: options?.forceExport ?? false,
+  });
+  return response;
+}
+
+/** 查询导出任务状态 */
+export function getExportTaskStatus(taskId: string) {
+  return request.get<unknown, ExportStatus>(`/v1/generator/task/${taskId}`);
+}
+
+/** 下载导出的文件 */
+export function downloadExportedFile(taskId: string) {
+  window.open(`/api/v1/generator/export/download/${taskId}`, '_blank');
+}
+
+/* ==================== 文档生成API (V1.5) ==================== */
+
+/** 生成选项 */
+export interface GenerateOptions {
+  levels?: number[];  // 1-4，指定要生成的层级
+  standards?: string[];  // ISO9001, ISO14001, ISO45001
+  templateIds?: string[];  // 指定模板ID
+  overwrite?: boolean;  // 是否覆盖已有文档
+}
+
+/** 生成状态 */
+export interface GenerateStatus {
+  taskId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  totalDocuments: number;
+  generatedDocuments: DocumentInfo[];
+  errors: Array<{ documentName: string; error: string }>;
+  createdAt: string;
+}
+
+/** 获取可用模板列表 */
+export function getAvailableTemplates(level?: number) {
+  return request.get<unknown, Array<{
+    templateId: string;
+    name: string;
+    level: number;
+    category: string;
+    standard?: string;
+    description?: string;
+  }>>('/v1/generator/templates/available', { params: { level } });
+}
+
+/** 生成单个文档 */
+export function generateSingleDocument(projectId: string, templateId: string) {
+  return request.post<unknown, DocumentInfo>('/v1/generator/generate', {
+    project_id: projectId,
+    template_id: templateId,
+  });
+}
+
+/** 批量生成文档 */
+export function generateBatchDocuments(projectId: string, templateIds: string[]) {
+  return request.post<unknown, GenerateStatus>('/v1/generator/generate/batch', {
+    project_id: projectId,
+    template_ids: templateIds,
+  });
+}
+
+/** 按层级生成文档 */
+export function generateByLevel(projectId: string, levels: number[], standards?: string[]) {
+  return request.post<unknown, GenerateStatus>('/v1/generator/generate/level', {
+    project_id: projectId,
+    levels,
+    standards,
+  });
+}
+
+/** 生成全套体系文件 */
+export function generateAllDocuments(projectId: string, options?: GenerateOptions) {
+  return request.post<unknown, GenerateStatus>('/v1/generator/generate/all', {
+    project_id: projectId,
+    levels: options?.levels ?? [1, 2, 3, 4],
+    standards: options?.standards ?? ['ISO9001', 'ISO14001', 'ISO45001'],
+    overwrite: options?.overwrite ?? false,
+  });
+}
+
+/** 查询生成任务状态 */
+export function getGenerateTaskStatus(taskId: string) {
+  return request.get<unknown, GenerateStatus>(`/v1/generator/task/${taskId}`);
+}
+
+/** 获取支持的文档层级 */
+export function getSupportedLevels() {
+  return request.get<unknown, Array<{
+    level: number;
+    name: string;
+    description: string;
+    documentCount: number;
+  }>>('/v1/generator/levels');
 }
 
 export default request;

@@ -6,7 +6,9 @@ import {
   FolderOpenOutlined,
   CloudUploadOutlined,
   FileTextOutlined,
-  BranchesOutlined,
+  FileMarkdownOutlined,
+  TeamOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 
 const { Sider, Content, Header } = Layout;
@@ -34,9 +36,19 @@ const menuItems = [
     label: '文件上传',
   },
   {
-    key: '/flowcharts',
-    icon: <BranchesOutlined />,
-    label: '流程图设计',
+    key: '/knowledge',
+    icon: <BookOutlined />,
+    label: '知识库',
+  },
+  {
+    key: '/templates',
+    icon: <FileMarkdownOutlined />,
+    label: '我的模板',
+  },
+  {
+    key: '/team',
+    icon: <TeamOutlined />,
+    label: '团队协作',
   },
 ];
 
@@ -62,8 +74,8 @@ const PcLayout: React.FC<PcLayoutProps> = ({ children }) => {
     if (location.pathname.startsWith('/project/') && location.pathname !== '/project/create') {
       return '/project/create';
     }
-    if (location.pathname.startsWith('/flowcharts')) {
-      return '/flowcharts';
+    if (location.pathname.startsWith('/knowledge/')) {
+      return '/knowledge';
     }
     return location.pathname;
   };
