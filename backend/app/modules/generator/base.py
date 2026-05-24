@@ -120,6 +120,7 @@ class CompanyInfo:
         return {
             "{{公司名称}}": self.company_name,
             "{{公司代号}}": self.company_code,
+            "{company_code}": self.company_code,  # 简化格式，用于四级文件编号
             "{{行业}}": self.industry,
             "{{员工人数}}": str(self.employee_count),
             "{{办公面积}}": str(self.office_area_sqm),
@@ -312,9 +313,38 @@ class BaseGenerator:
         )
     
     def get_level4_file_code(self, seq: int, suffix: str = "") -> str:
-        """生成四级文件编号"""
-        return self.get_file_code(
-            f"{self.company_info.company_code}-QESMS-D",
-            seq,
-            suffix
-        )
+        """
+        生成四级文件编号
+        
+        四级文件编号规则：企业缩写 + 文件编号（按顺序）
+        例如：BDC-001, BDC-002, BDC-003...
+        """
+        company_code = self.company_info.company_code
+        if suffix:
+            return f"{company_code}-{seq:03d}{suffix}"
+        return f"{company_code}-{seq:03d}"
+    
+    def get_level4_record_ref(self, seq: int, name: str) -> str:
+        """
+        生成四级文件引用字符串
+        
+        Args:
+            seq: 文件序号
+            name: 文件名称
+            
+        Returns:
+            格式化的引用字符串，如 "- BDC-001 组织内外部环境分析表"
+        """
+        return f"- {self.get_level4_file_code(seq)} {name}"
+    
+    def get_level4_records_refs(self, records: list) -> str:
+        """
+        批量生成四级文件引用
+        
+        Args:
+            records: [(seq, name), ...] 列表
+            
+        Returns:
+            格式化的引用字符串列表
+        """
+        return "\n".join([self.get_level4_record_ref(seq, name) for seq, name in records])

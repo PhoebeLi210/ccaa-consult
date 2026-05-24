@@ -4,8 +4,8 @@
 三级文件生成器 - 作业指导书和制度
 
 三级文件分为两类：
-1. 管理制度（BDC-QESMS-C-001 ~ C-025）
-2. 设备操作规程（BDC-QESMS-C-002 ~ C-019）
+1. 管理制度（{company_code}-QESMS-C-001 ~ C-015）
+2. 设备操作规程（{company_code}-QESMS-C-016 ~ C-025）
 
 每个文件独立生成，便于维护和扩展。
 """
@@ -46,10 +46,13 @@ class RegulationGenerator(BaseLevel3Generator):
     
     def _render_regulation(self, content: str) -> str:
         """渲染制度文件"""
+        # 三级文件编号：企业缩写-QESMS-C-编号（如 BDC-QESMS-C-001）
+        file_code = self.get_level3_file_code(self.file_code)
+        
         template = f"""
 # {{公司名称}} {self.file_name}
 
-**文件编号**：{{公司代号}}-QESMS-C-{self.file_code:03d}
+**文件编号**：{file_code}
 
 **版本**：A/0
 
@@ -149,13 +152,13 @@ class InspectionEquipmentManagementGenerator(RegulationGenerator):
 
 7.1 使用部门负责设备的日常维护保养。
 
-7.2 综合管理部编制《设备维护保养计划》（BDC-QESMS-D-022），定期组织设备保养。
+7.2 综合管理部编制《设备维护保养计划》（{company_code}-022），定期组织设备保养。
 
-7.3 设备故障时应及时报修，填写《设备维保记录》（BDC-QESMS-D-021）。
+7.3 设备故障时应及时报修，填写《设备维保记录》（{company_code}-021）。
 
 ## 第八条 设备检定
 
-8.1 综合管理部编制《计量器具周期检定计划》（BDC-QESMS-D-024）。
+8.1 综合管理部编制《计量器具周期检定计划》（{company_code}-024）。
 
 8.2 强制检定设备必须按期送检，取得检定证书。
 
@@ -165,7 +168,7 @@ class InspectionEquipmentManagementGenerator(RegulationGenerator):
 
 9.1 设备损坏或技术落后无法使用时，应申请报废。
 
-9.2 报废设备应填写《设备报废申请单》（BDC-QESMS-D-020）。
+9.2 报废设备应填写《设备报废申请单》（{company_code}-020）。
 
 9.3 报废设备应从台账中注销。
 
@@ -238,7 +241,7 @@ class FireSafetyManagementGenerator(RegulationGenerator):
 - 疏散通道畅通情况
 - 隐患整改情况
 
-6.3 检查结果记录于《安全运行检查记录》（BDC-QESMS-D-040）。
+6.3 检查结果记录于《安全运行检查记录》（{company_code}-040）。
 
 ## 第七条 消防演练
 
@@ -255,7 +258,7 @@ class FireSafetyManagementGenerator(RegulationGenerator):
 
 8.1 发生火灾时，发现人员应立即报警并扑救初期火灾。
 
-8.2 火灾应急预案详见《火灾应急预案及演练》（BDC-QESMS-D-041）。
+8.2 火灾应急预案详见《火灾应急预案及演练》（{company_code}-041）。
 
 ## 第九条 考核与奖惩
 
@@ -1462,10 +1465,13 @@ class BaseOperationGenerator(BaseLevel3Generator):
     
     def _render_operation(self, content: str) -> str:
         """渲染操作规程"""
+        # 三级文件编号：企业缩写-QESMS-C-编号（如 BDC-QESMS-C-016）
+        file_code = self.get_level3_file_code(self.file_code)
+        
         template = f"""
 # {{公司名称}} {self.file_name}
 
-**文件编号**：{{公司代号}}-QESMS-C-{self.file_code:03d}
+**文件编号**：{file_code}
 
 **版本**：A/0
 

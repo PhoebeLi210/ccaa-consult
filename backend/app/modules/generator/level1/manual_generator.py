@@ -24,10 +24,13 @@ class ManualGenerator(BaseGenerator):
         """生成管理手册"""
         content = self._generate_content()
         
+        # 一级文件编号：企业缩写-QESMS-A-001
+        company_code = self.company_info.company_code
+        
         return GeneratedDocument(
             file_level=FileLevel.LEVEL_1,
             document_type=DocumentType.MANUAL,
-            file_code=f"{self.company_info.company_code}-QESMS-A-001",
+            file_code=f"{company_code}-QESMS-A-001",
             file_name=f"{self.company_info.company_name}管理手册.docx",
             title=f"{self.company_info.company_name}管理手册",
             content=content,
@@ -57,18 +60,21 @@ class ManualGenerator(BaseGenerator):
                 "10.3 持续改进",
             ],
             required_records=[
-                "BDC-QESMS-D-001 组织内外部环境分析表",
-                "BDC-QESMS-D-002 组织内外部环境相关信息监视和评审表",
-                "BDC-QESMS-D-003 相关方需求和期望识别表",
+                f"{company_code}-001 组织内外部环境分析表",
+                f"{company_code}-002 组织内外部环境相关信息监视和评审表",
+                f"{company_code}-003 相关方需求和期望识别表",
             ],
         )
     
     def _generate_content(self) -> str:
         """生成管理手册内容"""
-        template = """
+        # 一级文件编号：企业缩写-QESMS-A-001
+        file_code = f"{self.company_info.company_code}-QESMS-A-001"
+        
+        template = f"""
 # {{公司名称}}管理手册
 
-**文件编号**：{{公司代号}}-QESMS-A-001
+**文件编号**：{file_code}
 
 **版  本**：{{文件版本}}
 

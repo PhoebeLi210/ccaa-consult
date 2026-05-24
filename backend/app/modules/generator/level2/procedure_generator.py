@@ -101,10 +101,13 @@ class BaseProcedureGenerator(BaseGenerator):
     
     def _render_procedure(self) -> str:
         """渲染程序文件通用结构"""
+        # 二级文件编号：企业缩写-QESMS-B-编号（如 {company_code}-QESMS-B-001）
+        file_code = self.get_procedure_file_code(self.procedure_code)
+        
         template = f"""
 # {{公司名称}} {self.procedure_name}
 
-**文件编号**：{{company_code}}-QESMS-B-{self.procedure_code:03d}
+**文件编号**：{file_code}
 
 **版本**：A/0
 
@@ -151,7 +154,7 @@ class BaseProcedureGenerator(BaseGenerator):
         return GeneratedDocument(
             file_level=FileLevel.LEVEL_2,
             document_type=DocumentType.PROCEDURE,
-            file_code=f"{{company_code}}-QESMS-B-{self.procedure_code:03d}",
+            file_code=self.get_procedure_file_code(self.procedure_code),
             file_name=f"{self.procedure_name}.docx",
             title=self.procedure_name,
             content=content,
@@ -246,14 +249,14 @@ b） 外部环境信息：
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-002 相关方需求和期望控制程序
-- BDC-QESMS-B-003 风险与机遇识别评价控制程序
-- BDC-QESMS-B-024 管理评审控制程序"""
+        return """- {company_code}-QESMS-B-002 相关方需求和期望控制程序
+- {company_code}-QESMS-B-003 风险与机遇识别评价控制程序
+- {company_code}-QESMS-B-024 管理评审控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-001 组织内外部环境分析表
-- BDC-QESMS-D-002 组织内外部环境相关信息的监视和评审"""
+        return """- {company_code}-001 组织内外部环境分析表
+- {company_code}-002 组织内外部环境相关信息的监视和评审"""
 
 
 class StakeholderNeedsGenerator(BaseProcedureGenerator):
@@ -322,12 +325,12 @@ b） 外部相关方：
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-001 组织环境分析控制程序
-- BDC-QESMS-B-010 信息交流和沟通控制程序"""
+        return """- {company_code}-QESMS-B-001 组织环境分析控制程序
+- {company_code}-QESMS-B-010 信息交流和沟通控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-003 相关方需求和期望识别表"""
+        return """- {company_code}-003 相关方需求和期望识别表"""
 
 
 class RiskOpportunityGenerator(BaseProcedureGenerator):
@@ -394,13 +397,13 @@ class RiskOpportunityGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-001 组织环境分析控制程序
-- BDC-QESMS-B-002 相关方需求和期望控制程序
-- BDC-QESMS-B-005 目标指标和管理方案控制程序"""
+        return """- {company_code}-QESMS-B-001 组织环境分析控制程序
+- {company_code}-QESMS-B-002 相关方需求和期望控制程序
+- {company_code}-QESMS-B-005 目标指标和管理方案控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-004 风险与机遇评价与应对措施表"""
+        return """- {company_code}-004 风险与机遇评价与应对措施表"""
 
 
 class EnvFactorHazardGenerator(BaseProcedureGenerator):
@@ -461,18 +464,18 @@ class EnvFactorHazardGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-003 风险与机遇识别评价控制程序
-- BDC-QESMS-B-005 目标指标和管理方案控制程序
-- BDC-QESMS-B-013 环境、职业健康安全管理体系运行控制程序"""
+        return """- {company_code}-QESMS-B-003 风险与机遇识别评价控制程序
+- {company_code}-QESMS-B-005 目标指标和管理方案控制程序
+- {company_code}-QESMS-B-013 环境、职业健康安全管理体系运行控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-005 环境因素识别与评价表（办公区域）
-- BDC-QESMS-D-006 环境因素识别与评价表
-- BDC-QESMS-D-007 重要环境因素清单
-- BDC-QESMS-D-008 办公区域危险源识别与评价表
-- BDC-QESMS-D-009 危险源识别与评价表
-- BDC-QESMS-D-010 不可接受风险清单"""
+        return """- {company_code}-005 环境因素识别与评价表（办公区域）
+- {company_code}-006 环境因素识别与评价表
+- {company_code}-007 重要环境因素清单
+- {company_code}-008 办公区域危险源识别与评价表
+- {company_code}-009 危险源识别与评价表
+- {company_code}-010 不可接受风险清单"""
 
 
 class ObjectiveProgramGenerator(BaseProcedureGenerator):
@@ -539,16 +542,16 @@ class ObjectiveProgramGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-003 风险与机遇识别评价控制程序
-- BDC-QESMS-B-004 环境因素识别、危险源辨识和风险评价控制程序
-- BDC-QESMS-B-024 管理评审控制程序"""
+        return """- {company_code}-QESMS-B-003 风险与机遇识别评价控制程序
+- {company_code}-QESMS-B-004 环境因素识别、危险源辨识和风险评价控制程序
+- {company_code}-QESMS-B-024 管理评审控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-012 目标分解表
-- BDC-QESMS-D-013 目标统计表
-- BDC-QESMS-D-014 环境体系目标管理方案表
-- BDC-QESMS-D-016 安全目标管理方案"""
+        return """- {company_code}-012 目标分解表
+- {company_code}-013 目标统计表
+- {company_code}-014 环境体系目标管理方案表
+- {company_code}-016 安全目标管理方案"""
 
 
 # ============================================================
@@ -622,14 +625,14 @@ class InfrastructureGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-007 监视和测量设备控制程序
-- BDC-QESMS-B-013 环境、职业健康安全管理体系运行控制程序"""
+        return """- {company_code}-QESMS-B-007 监视和测量设备控制程序
+- {company_code}-QESMS-B-013 环境、职业健康安全管理体系运行控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-017 设备台账
-- BDC-QESMS-D-018 设备维护保养计划
-- BDC-QESMS-D-019 设备维护保养记录"""
+        return """- {company_code}-017 设备台账
+- {company_code}-018 设备维护保养计划
+- {company_code}-019 设备维护保养记录"""
 
 
 class MonitoringDeviceGenerator(BaseProcedureGenerator):
@@ -697,14 +700,14 @@ class MonitoringDeviceGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-006 基础设施和工作环境控制程序
-- BDC-QESMS-B-019 服务监视和测量控制程序"""
+        return """- {company_code}-QESMS-B-006 基础设施和工作环境控制程序
+- {company_code}-QESMS-B-019 服务监视和测量控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-020 监视和测量设备台账
-- BDC-QESMS-D-021 监视和测量设备校准计划
-- BDC-QESMS-D-022 监视和测量设备校准记录"""
+        return """- {company_code}-020 监视和测量设备台账
+- {company_code}-021 监视和测量设备校准计划
+- {company_code}-022 监视和测量设备校准记录"""
 
 
 class KnowledgeGenerator(BaseProcedureGenerator):
@@ -772,13 +775,13 @@ class KnowledgeGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-009 人力资源控制程序
-- BDC-QESMS-B-012 文件控制程序"""
+        return """- {company_code}-QESMS-B-009 人力资源控制程序
+- {company_code}-QESMS-B-012 文件控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-023 组织知识清单
-- BDC-QESMS-D-024 知识分享记录"""
+        return """- {company_code}-023 组织知识清单
+- {company_code}-024 知识分享记录"""
 
 
 class HumanResourceGenerator(BaseProcedureGenerator):
@@ -851,15 +854,15 @@ class HumanResourceGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-008 组织知识控制程序
-- BDC-QESMS-B-010 信息交流和沟通控制程序"""
+        return """- {company_code}-QESMS-B-008 组织知识控制程序
+- {company_code}-QESMS-B-010 信息交流和沟通控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-025 岗位能力要求表
-- BDC-QESMS-D-026 年度培训计划表
-- BDC-QESMS-D-027 培训记录表
-- BDC-QESMS-D-028 培训效果评价表"""
+        return """- {company_code}-025 岗位能力要求表
+- {company_code}-026 年度培训计划表
+- {company_code}-027 培训记录表
+- {company_code}-028 培训效果评价表"""
 
 
 class CommunicationGenerator(BaseProcedureGenerator):
@@ -928,13 +931,13 @@ class CommunicationGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-002 相关方需求和期望控制程序
-- BDC-QESMS-B-009 人力资源控制程序"""
+        return """- {company_code}-QESMS-B-002 相关方需求和期望控制程序
+- {company_code}-QESMS-B-009 人力资源控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-029 信息交流记录
-- BDC-QESMS-D-030 会议记录"""
+        return """- {company_code}-029 信息交流记录
+- {company_code}-030 会议记录"""
 
 
 class RecordControlGenerator(BaseProcedureGenerator):
@@ -1002,12 +1005,12 @@ class RecordControlGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-012 文件控制程序"""
+        return """- {company_code}-QESMS-B-012 文件控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-031 记录清单
-- BDC-QESMS-D-032 记录销毁记录"""
+        return """- {company_code}-031 记录清单
+- {company_code}-032 记录销毁记录"""
 
 
 class DocumentControlGenerator(BaseProcedureGenerator):
@@ -1087,13 +1090,13 @@ class DocumentControlGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-011 记录控制程序"""
+        return """- {company_code}-QESMS-B-011 记录控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-033 文件清单
-- BDC-QESMS-D-034 文件发放记录
-- BDC-QESMS-D-035 文件修订记录"""
+        return """- {company_code}-033 文件清单
+- {company_code}-034 文件发放记录
+- {company_code}-035 文件修订记录"""
 
 
 class OperationControlGenerator(BaseProcedureGenerator):
@@ -1165,13 +1168,13 @@ class OperationControlGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-004 环境因素识别、危险源辨识和风险评价控制程序
-- BDC-QESMS-B-014 应急准备和响应控制程序"""
+        return """- {company_code}-QESMS-B-004 环境因素识别、危险源辨识和风险评价控制程序
+- {company_code}-QESMS-B-014 应急准备和响应控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-036 运行控制检查记录
-- BDC-QESMS-D-037 作业许可记录"""
+        return """- {company_code}-036 运行控制检查记录
+- {company_code}-037 作业许可记录"""
 
 
 class EmergencyGenerator(BaseProcedureGenerator):
@@ -1254,14 +1257,14 @@ class EmergencyGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-013 环境、职业健康安全管理体系运行控制程序
-- BDC-QESMS-B-026 事故报告调查处理控制程序"""
+        return """- {company_code}-QESMS-B-013 环境、职业健康安全管理体系运行控制程序
+- {company_code}-QESMS-B-026 事故报告调查处理控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-038 应急预案
-- BDC-QESMS-D-039 应急演练记录
-- BDC-QESMS-D-040 应急物资清单"""
+        return """- {company_code}-038 应急预案
+- {company_code}-039 应急演练记录
+- {company_code}-040 应急物资清单"""
 
 
 class CustomerProcessGenerator(BaseProcedureGenerator):
@@ -1335,14 +1338,14 @@ class CustomerProcessGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-017 外部提供过程、产品和服务的控制程序
-- BDC-QESMS-B-022 客户满意度监测控制程序"""
+        return """- {company_code}-QESMS-B-017 外部提供过程、产品和服务的控制程序
+- {company_code}-QESMS-B-022 客户满意度监测控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-041 合同评审记录
-- BDC-QESMS-D-042 合同台账
-- BDC-QESMS-D-043 客户沟通记录"""
+        return """- {company_code}-041 合同评审记录
+- {company_code}-042 合同台账
+- {company_code}-043 客户沟通记录"""
 
 
 class DesignDevGenerator(BaseProcedureGenerator):
@@ -1420,16 +1423,16 @@ class DesignDevGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-015 与客户有关的过程控制程序
-- BDC-QESMS-B-017 外部提供过程、产品和服务的控制程序"""
+        return """- {company_code}-QESMS-B-015 与客户有关的过程控制程序
+- {company_code}-QESMS-B-017 外部提供过程、产品和服务的控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-044 设计开发计划
-- BDC-QESMS-D-045 设计输入清单
-- BDC-QESMS-D-046 设计评审记录
-- BDC-QESMS-D-047 设计验证记录
-- BDC-QESMS-D-048 设计确认记录"""
+        return """- {company_code}-044 设计开发计划
+- {company_code}-045 设计输入清单
+- {company_code}-046 设计评审记录
+- {company_code}-047 设计验证记录
+- {company_code}-048 设计确认记录"""
 
 
 class ExternalProviderGenerator(BaseProcedureGenerator):
@@ -1503,15 +1506,15 @@ class ExternalProviderGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-015 与客户有关的过程控制程序
-- BDC-QESMS-B-018 服务提供控制程序"""
+        return """- {company_code}-QESMS-B-015 与客户有关的过程控制程序
+- {company_code}-QESMS-B-018 服务提供控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-049 合格供应商名录
-- BDC-QESMS-D-050 供应商评价记录
-- BDC-QESMS-D-051 采购合同
-- BDC-QESMS-D-052 进货检验记录"""
+        return """- {company_code}-049 合格供应商名录
+- {company_code}-050 供应商评价记录
+- {company_code}-051 采购合同
+- {company_code}-052 进货检验记录"""
 
 
 class ServiceProvisionGenerator(BaseProcedureGenerator):
@@ -1585,14 +1588,14 @@ class ServiceProvisionGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-017 外部提供过程、产品和服务的控制程序
-- BDC-QESMS-B-019 服务监视和测量控制程序"""
+        return """- {company_code}-QESMS-B-017 外部提供过程、产品和服务的控制程序
+- {company_code}-QESMS-B-019 服务监视和测量控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-053 生产计划
-- BDC-QESMS-D-054 生产记录
-- BDC-QESMS-D-055 产品标识卡"""
+        return """- {company_code}-053 生产计划
+- {company_code}-054 生产记录
+- {company_code}-055 产品标识卡"""
 
 
 class ServiceMonitoringGenerator(BaseProcedureGenerator):
@@ -1663,16 +1666,16 @@ class ServiceMonitoringGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-007 监视和测量设备控制程序
-- BDC-QESMS-B-018 服务提供控制程序
-- BDC-QESMS-B-025 不合格（不符合）控制程序"""
+        return """- {company_code}-QESMS-B-007 监视和测量设备控制程序
+- {company_code}-QESMS-B-018 服务提供控制程序
+- {company_code}-QESMS-B-025 不合格（不符合）控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-056 进货检验记录
-- BDC-QESMS-D-057 过程检验记录
-- BDC-QESMS-D-058 最终检验记录
-- BDC-QESMS-D-059 检验报告"""
+        return """- {company_code}-056 进货检验记录
+- {company_code}-057 过程检验记录
+- {company_code}-058 最终检验记录
+- {company_code}-059 检验报告"""
 
 
 class SystemMonitoringGenerator(BaseProcedureGenerator):
@@ -1745,14 +1748,14 @@ class SystemMonitoringGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-005 目标指标和管理方案控制程序
-- BDC-QESMS-B-022 客户满意度监测控制程序
-- BDC-QESMS-B-024 管理评审控制程序"""
+        return """- {company_code}-QESMS-B-005 目标指标和管理方案控制程序
+- {company_code}-QESMS-B-022 客户满意度监测控制程序
+- {company_code}-QESMS-B-024 管理评审控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-060 绩效监测记录
-- BDC-QESMS-D-061 内部审核年度计划"""
+        return """- {company_code}-060 绩效监测记录
+- {company_code}-061 内部审核年度计划"""
 
 
 class ComplianceGenerator(BaseProcedureGenerator):
@@ -1817,13 +1820,13 @@ class ComplianceGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-001 组织环境分析控制程序
-- BDC-QESMS-B-024 管理评审控制程序"""
+        return """- {company_code}-QESMS-B-001 组织环境分析控制程序
+- {company_code}-QESMS-B-024 管理评审控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-062 法律法规清单
-- BDC-QESMS-D-063 合规性评价记录"""
+        return """- {company_code}-062 法律法规清单
+- {company_code}-063 合规性评价记录"""
 
 
 class CustomerSatisfactionGenerator(BaseProcedureGenerator):
@@ -1893,14 +1896,14 @@ class CustomerSatisfactionGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-015 与客户有关的过程控制程序
-- BDC-QESMS-B-025 不合格（不符合）控制程序
-- BDC-QESMS-B-027 改进措施控制程序"""
+        return """- {company_code}-QESMS-B-015 与客户有关的过程控制程序
+- {company_code}-QESMS-B-025 不合格（不符合）控制程序
+- {company_code}-QESMS-B-027 改进措施控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-064 客户满意度调查表
-- BDC-QESMS-D-065 客户投诉处理记录"""
+        return """- {company_code}-064 客户满意度调查表
+- {company_code}-065 客户投诉处理记录"""
 
 
 class InternalAuditGenerator(BaseProcedureGenerator):
@@ -1981,15 +1984,15 @@ class InternalAuditGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-024 管理评审控制程序
-- BDC-QESMS-B-027 改进措施控制程序"""
+        return """- {company_code}-QESMS-B-024 管理评审控制程序
+- {company_code}-QESMS-B-027 改进措施控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-061 内部审核年度计划
-- BDC-QESMS-D-066 内审报告
-- BDC-QESMS-D-067 内审检查表
-- BDC-QESMS-D-068 不符合报告"""
+        return """- {company_code}-061 内部审核年度计划
+- {company_code}-066 内审报告
+- {company_code}-067 内审检查表
+- {company_code}-068 不符合报告"""
 
 
 class ManagementReviewGenerator(BaseProcedureGenerator):
@@ -2070,14 +2073,14 @@ class ManagementReviewGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-005 目标指标和管理方案控制程序
-- BDC-QESMS-B-023 内部审核控制程序"""
+        return """- {company_code}-QESMS-B-005 目标指标和管理方案控制程序
+- {company_code}-QESMS-B-023 内部审核控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-069 管理评审计划
-- BDC-QESMS-D-070 管理评审输入材料
-- BDC-QESMS-D-071 管理评审报告"""
+        return """- {company_code}-069 管理评审计划
+- {company_code}-070 管理评审输入材料
+- {company_code}-071 管理评审报告"""
 
 
 class NonconformityGenerator(BaseProcedureGenerator):
@@ -2149,14 +2152,14 @@ class NonconformityGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-019 服务监视和测量控制程序
-- BDC-QESMS-B-027 改进措施控制程序"""
+        return """- {company_code}-QESMS-B-019 服务监视和测量控制程序
+- {company_code}-QESMS-B-027 改进措施控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-072 不合格品报告
-- BDC-QESMS-D-073 不合格品处置记录
-- BDC-QESMS-D-074 纠正措施记录"""
+        return """- {company_code}-072 不合格品报告
+- {company_code}-073 不合格品处置记录
+- {company_code}-074 纠正措施记录"""
 
 
 class AccidentReportGenerator(BaseProcedureGenerator):
@@ -2230,14 +2233,14 @@ class AccidentReportGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-014 应急准备和响应控制程序
-- BDC-QESMS-B-027 改进措施控制程序"""
+        return """- {company_code}-QESMS-B-014 应急准备和响应控制程序
+- {company_code}-QESMS-B-027 改进措施控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-075 事故报告
-- BDC-QESMS-D-076 事故调查报告
-- BDC-QESMS-D-077 事故统计表"""
+        return """- {company_code}-075 事故报告
+- {company_code}-076 事故调查报告
+- {company_code}-077 事故统计表"""
 
 
 class ImprovementGenerator(BaseProcedureGenerator):
@@ -2310,15 +2313,15 @@ class ImprovementGenerator(BaseProcedureGenerator):
     
     @property
     def related_files(self) -> str:
-        return """- BDC-QESMS-B-023 内部审核控制程序
-- BDC-QESMS-B-024 管理评审控制程序
-- BDC-QESMS-B-025 不合格（不符合）控制程序"""
+        return """- {company_code}-QESMS-B-023 内部审核控制程序
+- {company_code}-QESMS-B-024 管理评审控制程序
+- {company_code}-QESMS-B-025 不合格（不符合）控制程序"""
     
     @property
     def records(self) -> str:
-        return """- BDC-QESMS-D-078 纠正措施记录
-- BDC-QESMS-D-079 预防措施记录
-- BDC-QESMS-D-080 改进记录"""
+        return """- {company_code}-078 纠正措施记录
+- {company_code}-079 预防措施记录
+- {company_code}-080 改进记录"""
 
 
 # ============================================================
