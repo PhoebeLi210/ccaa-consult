@@ -53,7 +53,8 @@ from .template_manager import (
 )
 from .document_hierarchy import (
     DocumentHierarchyGenerator, DocumentRequirement, get_required_documents,
-)from .orchestrator import (
+)
+from .orchestrator import (
     DocumentOrchestrator,
     generate_full_package,
     generate_document_tree,

@@ -71,7 +71,7 @@ class ManualGenerator(BaseGenerator):
         # 一级文件编号：企业缩写-QESMS-A-001
         file_code = f"{self.company_info.company_code}-QESMS-A-001"
         
-        template = f"""
+        template = """
 # {{公司名称}}管理手册
 
 **文件编号**：{file_code}
@@ -490,7 +490,7 @@ j） 支持其他相关管理人员在其职责范围内证实其领导作用。
 | 批准 | 总经理 |
 | 生效日期 | {{生效日期}} |
 """
-        return self.render(template)
+        return self.render(template.format(file_code=file_code))
 
 
 def generate_manual(company_info: CompanyInfo) -> GeneratedDocument:

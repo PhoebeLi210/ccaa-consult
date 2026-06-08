@@ -292,16 +292,13 @@ async def get_industry_context(code: str):
     docs = chr(10).join(['- ' + doc for doc in data.get("common_documents", [])])
     stds = ', '.join(data["applicable_standards"])
     
-    context = f"行业：{data['name']}
-描述：{data['description']}
-
-适用标准：{stds}
-
-关键要求：
-{reqs}
-
-常用文档：
-{docs}"
+    context = (
+        f"行业：{data['name']}\n"
+        f"描述：{data['description']}\n\n"
+        f"适用标准：{stds}\n\n"
+        f"关键要求：\n{reqs}\n\n"
+        f"常用文档：\n{docs}"
+    )
     
     relevant_clauses = []
     for clause in data["typical_clauses"]:
@@ -417,23 +414,18 @@ async def generate_document_context(request: DocumentContextRequest):
     name = request.company_info.get('name', '未指定')
     scope = request.company_info.get('business_scope', '未指定')
     
-    prompt_context = f"【文档生成上下文】
-
-行业：{industry_data['name']}
-标准：{request.standard}
-文档类型：{request.document_type}
-
-企业信息：
-- 企业名称：{name}
-- 经营范围：{scope}
-
-行业特定要求：
-{reqs}
-
-适用条款：
-{clauses}
-
-请根据以上信息生成符合标准要求的专业文档内容。"
+    prompt_context = (
+        f"【文档生成上下文】\n\n"
+        f"行业：{industry_data['name']}\n"
+        f"标准：{request.standard}\n"
+        f"文档类型：{request.document_type}\n\n"
+        f"企业信息：\n"
+        f"- 企业名称：{name}\n"
+        f"- 经营范围：{scope}\n\n"
+        f"行业特定要求：\n{reqs}\n\n"
+        f"适用条款：\n{clauses}\n\n"
+        f"请根据以上信息生成符合标准要求的专业文档内容。"
+    )
     
     relevant_clauses = []
     for clause in industry_data["typical_clauses"][:5]:

@@ -57,12 +57,46 @@ class CompanyCreateRequest(BaseModel):
     """创建企业请求"""
     company_name: str
     industry: Optional[str] = None
-    **kwargs: Any
+    company_code: Optional[str] = None
+    sub_industry: Optional[str] = None
+    employee_count: Optional[int] = None
+    office_area_sqm: Optional[float] = None
+    certification_type: Optional[str] = None
+    address: Optional[str] = None
+    legal_representative: Optional[str] = None
+    contact_person: Optional[str] = None
+    contact_phone: Optional[str] = None
+    management_representative: Optional[str] = None
+    target_standards: Optional[List[str]] = None
+    main_processes: Optional[List[str]] = None
+    special_processes: Optional[List[str]] = None
+    quality_goals: Optional[str] = None
+    environment_goals: Optional[str] = None
+    safety_goals: Optional[str] = None
+    model_config = {"extra": "allow"}
 
 
 class CompanyUpdateRequest(BaseModel):
     """更新企业请求"""
-    **kwargs: Any
+    company_name: Optional[str] = None
+    industry: Optional[str] = None
+    company_code: Optional[str] = None
+    sub_industry: Optional[str] = None
+    employee_count: Optional[int] = None
+    office_area_sqm: Optional[float] = None
+    certification_type: Optional[str] = None
+    address: Optional[str] = None
+    legal_representative: Optional[str] = None
+    contact_person: Optional[str] = None
+    contact_phone: Optional[str] = None
+    management_representative: Optional[str] = None
+    target_standards: Optional[List[str]] = None
+    main_processes: Optional[List[str]] = None
+    special_processes: Optional[List[str]] = None
+    quality_goals: Optional[str] = None
+    environment_goals: Optional[str] = None
+    safety_goals: Optional[str] = None
+    model_config = {"extra": "allow"}
 
 
 @router.post("/", summary="创建企业")

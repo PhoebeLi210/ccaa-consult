@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 智质通·咨询版 - 个人自定义模板API (V1.3)
-支持用户上传、管理、使用个人模�?"""
+支持用户上传、管理、使用个人模板"""
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from pydantic import BaseModel, Field
@@ -73,7 +73,7 @@ class TemplateVersionInfo(BaseModel):
 
 # ============ API路由 ============
 
-@router.post("/upload", response_model=TemplateResponse, summary="上传自定义模�?)
+@router.post("/upload", response_model=TemplateResponse, summary="上传自定义模板")
 async def upload_custom_template(
     name: str = Form(..., description="模板名称"),
     description: Optional[str] = Form(None, description="模板描述"),
@@ -85,43 +85,45 @@ async def upload_custom_template(
     db: Session = Depends(get_db),
 ):
     """
-    上传个人自定义模�?    
+    上传个人自定义模板
     支持上传YAML格式的模板文件，系统会自动：
-    1. 验证YAML格式正确�?    2. 提取模板变量
+    1. 验证YAML格式正确性
+    2. 提取模板变量
     3. 创建模板版本记录
     """
     # 验证文件类型
     if not file.filename.endswith('.yaml'):
         raise HTTPException(status_code=400, detail="只支持YAML格式文件")
-    
+
     # 读取并验证YAML内容
     content = await file.read()
     try:
         template_data = yaml.safe_load(content)
     except yaml.YAMLError as e:
         raise HTTPException(status_code=400, detail=f"YAML格式错误: {str(e)}")
-    
+
     # 提取变量
     variables = _extract_variables(template_data)
-    
+
     # 生成模板ID
     template_id = str(uuid.uuid4())
-    
+
     # 保存文件
     upload_dir = os.path.join(
-        settings.UPLOAD_DIR, 
-        'custom_templates', 
+        settings.UPLOAD_DIR,
+        'custom_templates',
         str(current_user["id"])
     )
     os.makedirs(upload_dir, exist_ok=True)
-    
+
     file_name = f"{template_id}.yaml"
     file_path = os.path.join(upload_dir, file_name)
-    
+
     with open(file_path, "wb") as f:
         f.write(content)
-    
-    # 创建数据库记�?    template = CustomTemplate(
+
+    # 创建数据库记录
+    template = CustomTemplate(
         template_id=template_id,
         user_id=current_user["id"],
         name=name,
@@ -135,11 +137,11 @@ async def upload_custom_template(
         is_active=True,
         use_count=0,
     )
-    
+
     db.add(template)
     db.commit()
     db.refresh(template)
-    
+
     return _template_to_response(template)
 
 
@@ -158,8 +160,9 @@ async def get_my_templates(
     query = db.query(CustomTemplate).filter(
         CustomTemplate.user_id == current_user["id"]
     )
-    
-    # 应用筛选条�?    if category:
+
+    # 应用筛选条件
+    if category:
         query = query.filter(CustomTemplate.category == category)
     if standard:
         query = query.filter(CustomTemplate.standard == standard)
@@ -167,15 +170,15 @@ async def get_my_templates(
         query = query.filter(CustomTemplate.document_level == document_level)
     if is_active is not None:
         query = query.filter(CustomTemplate.is_active == is_active)
-    
+
     # 统计总数
     total = query.count()
-    
+
     # 分页查询
     templates = query.order_by(desc(CustomTemplate.created_at)).offset(
         (page - 1) * page_size
     ).limit(page_size).all()
-    
+
     return TemplateListResponse(
         total=total,
         templates=[_template_to_response(t) for t in templates],
@@ -188,15 +191,15 @@ async def get_template_detail(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """获取单个模板的详细信�?""
+    """获取单个模板的详细信息"""
     template = db.query(CustomTemplate).filter(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
     ).first()
-    
+
     if not template:
-        raise HTTPException(status_code=404, detail="模板不存�?)
-    
+        raise HTTPException(status_code=404, detail="模板不存在")
+
     return _template_to_response(template)
 
 
@@ -211,10 +214,10 @@ async def get_template_content(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
     ).first()
-    
+
     if not template:
-        raise HTTPException(status_code=404, detail="模板不存�?)
-    
+        raise HTTPException(status_code=404, detail="模板不存在")
+
     # 读取文件内容
     try:
         with open(template.file_path, "r", encoding="utf-8") as f:
@@ -236,10 +239,10 @@ async def update_template(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
     ).first()
-    
+
     if not template:
-        raise HTTPException(status_code=404, detail="模板不存�?)
-    
+        raise HTTPException(status_code=404, detail="模板不存在")
+
     # 更新字段
     if request.name is not None:
         template.name = request.name
@@ -249,11 +252,11 @@ async def update_template(
         template.category = request.category
     if request.is_active is not None:
         template.is_active = request.is_active
-    
+
     template.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(template)
-    
+
     return _template_to_response(template)
 
 
@@ -267,31 +270,31 @@ async def update_template_content(
 ):
     """
     更新模板文件内容，自动创建新版本
-    
-    版本号自动递增�?.0 -> 1.1 -> 1.2 ...
+
+    版本号自动递增：1.0 -> 1.1 -> 1.2 ...
     """
     template = db.query(CustomTemplate).filter(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
     ).first()
-    
+
     if not template:
-        raise HTTPException(status_code=404, detail="模板不存�?)
-    
+        raise HTTPException(status_code=404, detail="模板不存在")
+
     # 验证文件类型
     if not file.filename.endswith('.yaml'):
         raise HTTPException(status_code=400, detail="只支持YAML格式文件")
-    
+
     # 读取并验证YAML内容
     content = await file.read()
     try:
         template_data = yaml.safe_load(content)
     except yaml.YAMLError as e:
         raise HTTPException(status_code=400, detail=f"YAML格式错误: {str(e)}")
-    
+
     # 提取变量
     variables = _extract_variables(template_data)
-    
+
     # 版本号递增
     current_version = template.version
     try:
@@ -299,33 +302,36 @@ async def update_template_content(
         new_version = f"{major}.{minor + 1}"
     except:
         new_version = "1.1"
-    
-    # 备份旧版�?    backup_dir = os.path.join(
+
+    # 备份旧版本
+    backup_dir = os.path.join(
         settings.UPLOAD_DIR,
         'custom_templates',
         str(current_user["id"]),
         'versions'
     )
     os.makedirs(backup_dir, exist_ok=True)
-    
+
     backup_name = f"{template_id}_v{current_version}.yaml"
     backup_path = os.path.join(backup_dir, backup_name)
-    
+
     if os.path.exists(template.file_path):
         import shutil
         shutil.copy2(template.file_path, backup_path)
-    
-    # 保存新版�?    with open(template.file_path, "wb") as f:
+
+    # 保存新版本
+    with open(template.file_path, "wb") as f:
         f.write(content)
-    
-    # 更新数据�?    template.version = new_version
+
+    # 更新数据库
+    template.version = new_version
     template.variables = variables
     template.change_log = change_log
     template.updated_at = datetime.utcnow()
-    
+
     db.commit()
     db.refresh(template)
-    
+
     return _template_to_response(template)
 
 
@@ -335,23 +341,24 @@ async def get_template_versions(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """获取模板的所有版本历�?""
+    """获取模板的所有版本历史"""
     template = db.query(CustomTemplate).filter(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
     ).first()
-    
+
     if not template:
-        raise HTTPException(status_code=404, detail="模板不存�?)
-    
-    # 获取版本历史（从备份目录�?    versions = []
+        raise HTTPException(status_code=404, detail="模板不存在")
+
+    # 获取版本历史（从备份目录）
+    versions = []
     backup_dir = os.path.join(
         settings.UPLOAD_DIR,
         'custom_templates',
         str(current_user["id"]),
         'versions'
     )
-    
+
     if os.path.exists(backup_dir):
         for filename in os.listdir(backup_dir):
             if filename.startswith(f"{template_id}_v"):
@@ -363,36 +370,36 @@ async def get_template_versions(
                     created_at=created_at.isoformat(),
                     change_log=None,
                 ))
-    
+
     # 添加当前版本
     versions.append(TemplateVersionInfo(
         version=template.version,
         created_at=template.updated_at.isoformat() if template.updated_at else template.created_at.isoformat(),
         change_log=template.change_log,
     ))
-    
+
     # 按版本号排序
     versions.sort(key=lambda x: x.version, reverse=True)
-    
+
     return versions
 
 
-@router.post("/{template_id}/rollback", response_model=TemplateResponse, summary="回滚到指定版�?)
+@router.post("/{template_id}/rollback", response_model=TemplateResponse, summary="回滚到指定版本")
 async def rollback_template(
     template_id: str,
-    version: str = Form(..., description="目标版本�?),
+    version: str = Form(..., description="目标版本号"),
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """回滚模板到指定版�?""
+    """回滚模板到指定版本"""
     template = db.query(CustomTemplate).filter(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
     ).first()
-    
+
     if not template:
-        raise HTTPException(status_code=404, detail="模板不存�?)
-    
+        raise HTTPException(status_code=404, detail="模板不存在")
+
     # 查找版本文件
     backup_dir = os.path.join(
         settings.UPLOAD_DIR,
@@ -401,31 +408,32 @@ async def rollback_template(
         'versions'
     )
     backup_file = os.path.join(backup_dir, f"{template_id}_v{version}.yaml")
-    
+
     if not os.path.exists(backup_file):
-        raise HTTPException(status_code=404, detail="指定版本不存�?)
-    
+        raise HTTPException(status_code=404, detail="指定版本不存在")
+
     # 备份当前版本
     import shutil
     current_backup = os.path.join(backup_dir, f"{template_id}_v{template.version}.yaml")
     shutil.copy2(template.file_path, current_backup)
-    
+
     # 恢复指定版本
     shutil.copy2(backup_file, template.file_path)
-    
-    # 更新版本号（使用新版本号�?    try:
+
+    # 更新版本号（使用新版本号）
+    try:
         major, minor = map(int, template.version.split('.'))
         new_version = f"{major}.{minor + 1}"
     except:
         new_version = "1.1"
-    
+
     template.version = new_version
-    template.change_log = f"回滚到版�?{version}"
+    template.change_log = f"回滚到版本{version}"
     template.updated_at = datetime.utcnow()
-    
+
     db.commit()
     db.refresh(template)
-    
+
     return _template_to_response(template)
 
 
@@ -435,20 +443,20 @@ async def delete_template(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """删除自定义模�?""
+    """删除自定义模板"""
     template = db.query(CustomTemplate).filter(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
     ).first()
-    
+
     if not template:
-        raise HTTPException(status_code=404, detail="模板不存�?)
-    
+        raise HTTPException(status_code=404, detail="模板不存在")
+
     # 删除文件
     try:
         if os.path.exists(template.file_path):
             os.remove(template.file_path)
-        
+
         # 删除版本备份
         backup_dir = os.path.join(
             settings.UPLOAD_DIR,
@@ -462,11 +470,12 @@ async def delete_template(
                     os.remove(os.path.join(backup_dir, filename))
     except Exception as e:
         print(f"删除文件失败: {e}")
-    
-    # 删除数据库记�?    db.delete(template)
+
+    # 删除数据库记录
+    db.delete(template)
     db.commit()
-    
-    return {"message": "模板已删�?, "template_id": template_id}
+
+    return {"message": "模板已删除", "template_id": template_id}
 
 
 @router.post("/{template_id}/use", summary="记录模板使用")
@@ -475,19 +484,19 @@ async def record_template_use(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """记录模板被使用一次（增加使用计数�?""
+    """记录模板被使用一次（增加使用计数）"""
     template = db.query(CustomTemplate).filter(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
     ).first()
-    
+
     if not template:
-        raise HTTPException(status_code=404, detail="模板不存�?)
-    
+        raise HTTPException(status_code=404, detail="模板不存在")
+
     template.use_count += 1
     db.commit()
-    
-    return {"message": "使用记录已更�?, "use_count": template.use_count}
+
+    return {"message": "使用记录已更新", "use_count": template.use_count}
 
 
 @router.get("/categories/list", summary="获取模板分类列表")
@@ -500,7 +509,7 @@ async def get_template_categories(
         CustomTemplate.user_id == current_user["id"],
         CustomTemplate.is_active == True,
     ).distinct().all()
-    
+
     return [c[0] for c in categories if c[0]]
 
 
@@ -509,10 +518,11 @@ async def get_template_categories(
 def _extract_variables(template_data: Dict[str, Any]) -> List[str]:
     """从模板数据中提取变量"""
     variables = []
-    
+
     def find_variables(obj):
         if isinstance(obj, str):
-            # 查找 {{variable}} 格式的变�?            import re
+            # 查找 {{variable}} 格式的变量
+            import re
             matches = re.findall(r'\{\{(\w+)\}\}', obj)
             variables.extend(matches)
         elif isinstance(obj, dict):
@@ -521,13 +531,13 @@ def _extract_variables(template_data: Dict[str, Any]) -> List[str]:
         elif isinstance(obj, list):
             for item in obj:
                 find_variables(item)
-    
+
     find_variables(template_data)
     return list(set(variables))  # 去重
 
 
 def _template_to_response(template: CustomTemplate) -> TemplateResponse:
-    """将数据库模型转换为响应模�?""
+    """将数据库模型转换为响应模型"""
     return TemplateResponse(
         template_id=template.template_id,
         name=template.name,

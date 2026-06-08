@@ -247,27 +247,24 @@ class WritingStyle:
     
     def to_knowledge_item(self) -> KnowledgeItem:
         """转换为知识项"""
-        content = f"""
-## 写作风格: {self.style_name}
-
-### 用户ID
-{self.user_id}
-
-### 风格特征
-{chr(10).join(f'- {c}' for c in self.characteristics) if self.characteristics else '无'}
-
-### 常用词汇
-{', '.join(list(self.vocabulary.keys())[:20]) if self.vocabulary else '无'}
-
-### 句式模式
-{chr(10).join(f'- {p}' for p in self.sentence_patterns[:10]) if self.sentence_patterns else '无'}
-
-### 格式偏好
-{json.dumps(self.formatting_preferences, ensure_ascii=False, indent=2)}
-
-### 示例文本
-{chr(10).join(f'---\n{s}\n' for s in self.sample_texts[:3]) if self.sample_texts else '无'}
-"""
+        chars = self.characteristics
+        chars_text = chr(10).join('- ' + c for c in chars) if chars else '无'
+        vocab_text = ', '.join(list(self.vocabulary.keys())[:20]) if self.vocabulary else '无'
+        patterns = self.sentence_patterns
+        patterns_text = chr(10).join('- ' + p for p in patterns[:10]) if patterns else '无'
+        fmt_text = json.dumps(self.formatting_preferences, ensure_ascii=False, indent=2)
+        samples = self.sample_texts
+        samples_text = chr(10).join('---\n' + s + '\n' for s in samples[:3]) if samples else '无'
+        
+        content = (
+            f"## 写作风格: {self.style_name}\n\n"
+            f"### 用户ID\n{self.user_id}\n\n"
+            f"### 风格特征\n{chars_text}\n\n"
+            f"### 常用词汇\n{vocab_text}\n\n"
+            f"### 句式模式\n{patterns_text}\n\n"
+            f"### 格式偏好\n{fmt_text}\n\n"
+            f"### 示例文本\n{samples_text}"
+        )
         
         return KnowledgeItem(
             level=KnowledgeLevel.L4_USER,

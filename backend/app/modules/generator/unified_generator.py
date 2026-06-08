@@ -4,6 +4,8 @@
 
 整合所有层级的文档生成器，提供统一的生成接口
 支持按行业过滤模板
+支持行业规则引擎联动
+支持设备操作规程动态生成
 """
 
 from typing import Dict, List, Optional, Any
@@ -29,6 +31,12 @@ from app.utils.template_utils import (
 from app.core.constants import TEMPLATE_DIR
 from app.modules.generator.docx_exporter import DocxExporter, DocumentPackager
 from app.core.config import settings
+
+# 导入设备操作规程生成器
+from app.modules.generator.level3.dynamic_equipment_generator import (
+    generate_equipment_operations,
+    get_equipment_categories,
+)
 
 
 class UnifiedDocumentGenerator:
@@ -203,8 +211,106 @@ class UnifiedDocumentGenerator:
                 if doc:
                     self.generated_documents.append(doc)
         
+        # ========== 行业规则引擎：动态生成设备操作规程 ==========
+        # 根据行业配置决定是否生成设备操作规程
+        equipment_list = company_info.get("equipment_list", [])
+        industry_code = company_info.get("industry_code") or company_info.get("industry", "")
+        
+        # 检查行业配置中是否启用设备操作规程
+        should_generate_equipment_ops = self._should_generate_equipment_operations(
+            industry_code, equipment_list
+        )
+        
+        if should_generate_equipment_ops and equipment_list:
+            try:
+                # 将字典转换为CompanyInfo对象
+                company_info_obj = self._dict_to_company_info(company_info)
+                equipment_docs = generate_equipment_operations(
+                    company_info_obj,
+                    equipment_list,
+                    include_summary=True
+                )
+                self.generated_documents.extend(equipment_docs)
+                print(f"动态生成 {len(equipment_docs)} 个设备操作规程")
+            except Exception as e:
+                print(f"设备操作规程生成失败: {e}")
+        
         print(f"共生成 {len(self.generated_documents)} 个文档")
         return self.generated_documents
+    
+    def _should_generate_equipment_operations(
+        self,
+        industry_code: str,
+        equipment_list: List[Dict]
+    ) -> bool:
+        """
+        判断是否应生成设备操作规程
+        
+        规则：
+        1. 如果提供了设备清单，且行业不是纯服务业（如咨询、软件开发），则生成
+        2. 生产型行业（制造业、建筑业等）必须生成
+        3. 办公型行业（物业服务、软件开发等）如果有特殊设备也生成
+        
+        Args:
+            industry_code: 行业代码
+            equipment_list: 设备清单
+            
+        Returns:
+            是否生成设备操作规程
+        """
+        if not equipment_list:
+            return False
+        
+        # 生产型行业列表
+        production_industries = [
+            "manufacturing", "construction", "mining", "transportation",
+            "制造业", "建筑业", "采矿业", "运输业"
+        ]
+        
+        # 检查是否为生产型行业
+        is_production = any(pid in industry_code.lower() for pid in production_industries)
+        
+        # 生产型行业只要有设备就生成
+        if is_production:
+            return True
+        
+        # 非生产型行业：如果有特殊设备（非纯办公设备）也生成
+        office_only = ["电脑", "打印机", "复印机", "投影仪", "碎纸机", "饮水机"]
+        has_special_equipment = any(
+            eq.get("name", "") not in office_only 
+            for eq in equipment_list
+        )
+        
+        return has_special_equipment
+    
+    def _dict_to_company_info(self, company_info: Dict[str, Any]) -> CompanyInfo:
+        """将字典转换为CompanyInfo对象"""
+        return CompanyInfo(
+            company_name=company_info.get("company_name", ""),
+            company_code=company_info.get("company_code", company_info.get("company_abbr", "")),
+            industry=company_info.get("industry", ""),
+            sub_industry=company_info.get("sub_industry", ""),
+            employee_count=company_info.get("employee_count", 0),
+            office_area_sqm=company_info.get("office_area_sqm", 0),
+            certification_type=company_info.get("certification_type", "初次认证"),
+            existing_standards=company_info.get("existing_standards", []),
+            target_standards=company_info.get("target_standards", ["ISO9001", "ISO14001", "ISO45001"]),
+            departments=company_info.get("departments", []),
+            main_equipment=[eq.get("name", "") for eq in company_info.get("equipment_list", [])],
+            main_processes=company_info.get("main_processes", []),
+            special_processes=company_info.get("special_processes", []),
+            quality_goals=company_info.get("quality_goals", ""),
+            environment_goals=company_info.get("environment_goals", ""),
+            safety_goals=company_info.get("safety_goals", ""),
+            address=company_info.get("address", ""),
+            legal_representative=company_info.get("legal_representative", ""),
+            contact_person=company_info.get("contact_person", ""),
+            contact_phone=company_info.get("contact_phone", ""),
+            management_representative=company_info.get("management_representative", ""),
+            file_version=company_info.get("file_version", "A/0"),
+            effective_date=company_info.get("effective_date", ""),
+            release_date=company_info.get("release_date", ""),
+        )
     
     def generate_by_level(
         self,
