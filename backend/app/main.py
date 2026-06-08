@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, custom_templates, team, flowcharts
+from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, custom_templates, team, flowcharts, industry
 
 
 @asynccontextmanager
@@ -58,6 +58,7 @@ app.include_router(conversation.router, prefix="/api/v1")
 app.include_router(custom_templates.router, prefix="/api/v1")
 app.include_router(team.router, prefix="/api/v1")
 app.include_router(flowcharts.router, prefix="/api/v1")
+app.include_router(industry.router, prefix="/api/v1")
 
 
 @app.get("/")

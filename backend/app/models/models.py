@@ -513,3 +513,155 @@ class ProjectConfig(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+
+
+# ==================== V2.1 行业配置模型 ====================
+
+class IndustryConfig(Base):
+    """行业配置表 - V2.1
+    
+    存储各行业的适配规则配置，支持动态扩展。
+    """
+    __tablename__ = "industry_configs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    industry_code = Column(String(50), unique=True, nullable=False, index=True)
+    industry_name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+
+    # 行业特征标志
+    has_design_development = Column(Boolean, default=False)
+    has_equipment_operations = Column(Boolean, default=False)
+    has_multi_projects = Column(Boolean, default=False)
+    has_outsourcing = Column(Boolean, default=False)
+    internal_audit_by_dept = Column(Boolean, default=False)
+
+    # 应急预案类型列表
+    emergency_plans = Column(JSON, nullable=True)
+
+    # 所需资质许可
+    required_licenses = Column(JSON, nullable=True)
+
+    # 认证范围对应大类编号列表
+    certification_scope_classes = Column(JSON, nullable=True)
+
+    # 状态
+    is_active = Column(Boolean, default=True)
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关联
+    special_files = relationship("IndustrySpecialFile", back_populates="industry", cascade="all, delete-orphan")
+    rule_templates = relationship("IndustryRuleTemplate", back_populates="industry", cascade="all, delete-orphan")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "industry_code": self.industry_code,
+            "industry_name": self.industry_name,
+            "description": self.description,
+            "has_design_development": self.has_design_development,
+            "has_equipment_operations": self.has_equipment_operations,
+            "has_multi_projects": self.has_multi_projects,
+            "has_outsourcing": self.has_outsourcing,
+            "internal_audit_by_dept": self.internal_audit_by_dept,
+            "emergency_plans": self.emergency_plans or [],
+            "required_licenses": self.required_licenses or [],
+            "certification_scope_classes": self.certification_scope_classes or [],
+            "is_active": self.is_active,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class IndustrySpecialFile(Base):
+    """行业特有文件表 - V2.1
+    
+    存储各行业需要额外生成的特有文件。
+    """
+    __tablename__ = "industry_special_files"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    industry_id = Column(Integer, ForeignKey("industry_configs.id"), nullable=False, index=True)
+
+    # 文件信息
+    file_level = Column(String(10), nullable=False)  # A/B/C/D
+    file_code = Column(String(20), nullable=False)   # B-028, C-010
+    file_name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+
+    # 文件分类
+    category = Column(String(50), nullable=True)  # emergency_plan, equipment_op, design_dev, etc.
+
+    # 对应ISO条款
+    iso_clause = Column(String(20), nullable=True)
+
+    # 排序
+    sort_order = Column(Integer, default=0)
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # 关联
+    industry = relationship("IndustryConfig", back_populates="special_files")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "industry_id": self.industry_id,
+            "file_level": self.file_level,
+            "file_code": self.file_code,
+            "file_name": self.file_name,
+            "description": self.description,
+            "category": self.category,
+            "iso_clause": self.iso_clause,
+            "sort_order": self.sort_order,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class IndustryRuleTemplate(Base):
+    """行业规则模板表 - V2.1
+    
+    存储行业特有的规则模板，如设备操作规程模板、应急预案模板等。
+    """
+    __tablename__ = "industry_rule_templates"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    industry_id = Column(Integer, ForeignKey("industry_configs.id"), nullable=False, index=True)
+
+    # 模板信息
+    rule_type = Column(String(50), nullable=False)  # equipment_op, emergency_plan, design_dev
+    rule_name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+
+    # 模板内容（YAML格式）
+    template_content = Column(Text, nullable=True)
+
+    # 变量定义
+    variables = Column(JSON, nullable=True)
+
+    # 状态
+    is_active = Column(Boolean, default=True)
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关联
+    industry = relationship("IndustryConfig", back_populates="rule_templates")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "industry_id": self.industry_id,
+            "rule_type": self.rule_type,
+            "rule_name": self.rule_name,
+            "description": self.description,
+            "variables": self.variables or [],
+            "is_active": self.is_active,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

@@ -20,7 +20,16 @@
 
 ## 版本历史
 
-### V1.5.0 (当前版本) - 深度优化版
+### V2.1.0 (当前版本) - 行业规则数据库化 + 双主营业务支持
+
+**行业配置系统（V2.1 新增）**：
+- ✅ 11个行业数据库化配置（系统集成/软件开发/建筑工程/钢结构/档案数字化/智能制造/食品生产/机电设备/智能科技/物业管理/劳务派遣）
+- ✅ 行业特有文件动态管理（IndustryConfig + IndustrySpecialFile 模型）
+- ✅ 行业规则模板系统（IndustryRuleTemplate 模型）
+- ✅ 行业配置RESTful API（查询/初始化/特征检测）
+- ✅ 双主营业务文件合并API（支持物业+劳务派遣等组合）
+- ✅ 应急预案动态查询（按行业返回预案类型列表）
+- ✅ 资质许可自动提示（按行业返回所需许可证）
 
 **后端核心功能完善**：
 - ✅ 补全27个二级程序文件生成器（完整覆盖ISO标准要求）
@@ -183,11 +192,13 @@ ccaa-consult/
 │   │   │   ├── company.py            # 企业信息
 │   │   │   ├── custom_templates.py   # 个人模板（V1.3）
 │   │   │   ├── team.py               # 团队协作（V1.3）
-│   │   │   └── flowcharts.py         # 流程图管理
+│   │   │   ├── flowcharts.py         # 流程图管理
+│   │   │   └── industry.py           # 行业配置（V2.1）
 │   │   │
 │   │   ├── core/                     # 核心配置
 │   │   │   ├── config.py             # 全局配置
 │   │   │   ├── database.py           # 数据库连接
+│   │   │   ├── init_industries.py    # 行业初始化（V2.1）
 │   │   │   ├── fact_extractor.py     # 事实提取器（V1.5）
 │   │   │   ├── fact_lock.py          # 事实锁定（V1.5）
 │   │   │   ├── anti_fabrication.py   # 防编造检测（V1.5）
@@ -305,6 +316,9 @@ cp .env.example .env
 # 初始化数据库
 python -c "from app.core.database import init_db; init_db()"
 
+# 初始化行业数据（V2.1）
+python -c "from app.core.init_industries import init_industries; init_industries()"
+
 # 启动服务
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -338,6 +352,18 @@ npm run dev
 | POST | /api/v1/auth/register | 用户注册 |
 | POST | /api/v1/auth/login | 用户登录 |
 | POST | /api/v1/auth/logout | 用户登出 |
+
+### 行业配置（V2.1 新增）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/industry/list | 行业列表（含文件数量） |
+| GET | /api/v1/industry/{code} | 行业详情（含特有文件） |
+| POST | /api/v1/industry/files | 多行业文件清单（双主营业务） |
+| GET | /api/v1/industry/{code}/check-features | 行业特征检测 |
+| POST | /api/v1/industry/init | 初始化11个行业数据 |
+| GET | /api/v1/industry/{code}/emergency-plans | 应急预案列表 |
+| GET | /api/v1/industry/{code}/required-licenses | 所需资质许可 |
 
 ### 项目管理
 
@@ -410,7 +436,22 @@ npm run dev
 - [x] 前端文档生成向导
 - [x] 前端知识库页面
 
-### V2.0 (规划中)
+### V2.1 ✅ (已完成)
+- [x] 11个行业数据库化配置
+- [x] 行业特有文件动态管理
+- [x] 双主营业务支持
+- [x] 应急预案动态查询
+- [x] 资质许可自动提示
+- [x] 行业配置RESTful API
+
+### V2.2 (规划中)
+- [ ] 设备操作规程动态生成
+- [ ] 应急预案动态生成
+- [ ] 认证范围39大类数据接口
+- [ ] 文件清单生成API（按行业过滤）
+- [ ] 前端行业选择器组件
+
+### V3.0 (规划中)
 - [ ] AI智能审核
 - [ ] 审核报告生成
 - [ ] 客户管理CRM
