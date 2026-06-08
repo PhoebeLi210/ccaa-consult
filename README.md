@@ -394,6 +394,14 @@ npm run dev
 | GET | /api/v1/generator/export/single/{id} | 导出单个文档 |
 | GET | /api/v1/generator/task/{id} | 查询任务状态 |
 
+### 设备操作规程（V2.2 新增）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | /api/v1/generator/equipment-operations | 生成设备操作规程 |
+| GET | /api/v1/generator/equipment-categories | 获取设备分类列表 |
+| POST | /api/v1/generator/equipment-operations/preview | 预览单个设备操作规程 |
+
 ### 多轮对话（V1.1）
 
 | 方法 | 路径 | 说明 |
@@ -444,8 +452,12 @@ npm run dev
 - [x] 资质许可自动提示
 - [x] 行业配置RESTful API
 
-### V2.2 (规划中)
-- [ ] 设备操作规程动态生成
+### V2.2 (进行中)
+- [x] 设备操作规程动态生成（DynamicEquipmentOperationGenerator）
+- [x] 设备操作规程API（生成/分类/预览）
+- [x] 行业规则引擎与生成器联动
+- [x] 全部语法错误修复（8个文件）
+- [x] 编码损坏文件修复（custom_templates.py, team.py）
 - [ ] 应急预案动态生成
 - [ ] 认证范围39大类数据接口
 - [ ] 文件清单生成API（按行业过滤）
