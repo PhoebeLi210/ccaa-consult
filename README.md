@@ -402,6 +402,29 @@ npm run dev
 | GET | /api/v1/generator/equipment-categories | 获取设备分类列表 |
 | POST | /api/v1/generator/equipment-operations/preview | 预览单个设备操作规程 |
 
+### 应急预案（V2.2 新增）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | /api/v1/generator/emergency-plans | 生成应急预案 |
+| GET | /api/v1/generator/emergency-plan-categories | 获取预案分类列表 |
+
+### 文件清单（V2.2 新增）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | /api/v1/generator/file-list | 生成文件清单（按行业过滤） |
+
+### 认证范围（V2.2 新增）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/certification-scope/categories | 获取39大类列表 |
+| GET | /api/v1/certification-scope/category/{code} | 获取大类详情（含中类小类） |
+| GET | /api/v1/certification-scope/search | 搜索认证范围 |
+| GET | /api/v1/certification-scope/tree | 获取完整分类树 |
+| GET | /api/v1/certification-scope/match-industry | 行业匹配认证范围 |
+
 ### 多轮对话（V1.1）
 
 | 方法 | 路径 | 说明 |
@@ -452,16 +475,17 @@ npm run dev
 - [x] 资质许可自动提示
 - [x] 行业配置RESTful API
 
-### V2.2 (进行中)
+### V2.2 ✅ (已完成)
 - [x] 设备操作规程动态生成（DynamicEquipmentOperationGenerator）
 - [x] 设备操作规程API（生成/分类/预览）
 - [x] 行业规则引擎与生成器联动
 - [x] 全部语法错误修复（8个文件）
 - [x] 编码损坏文件修复（custom_templates.py, team.py）
-- [ ] 应急预案动态生成
-- [ ] 认证范围39大类数据接口
-- [ ] 文件清单生成API（按行业过滤）
-- [ ] 前端行业选择器组件
+- [x] 应急预案动态生成（DynamicEmergencyPlanGenerator，11种预案类型）
+- [x] 应急预案API（生成/分类查询）
+- [x] 认证范围39大类数据接口（5个API：列表/详情/搜索/树形/行业匹配）
+- [x] 文件清单生成API（按行业过滤，含通用+行业特有+设备+预案）
+- [x] 前端行业选择器组件（IndustrySelector，卡片网格+搜索+响应式）
 
 ### V3.0 (规划中)
 - [ ] AI智能审核
