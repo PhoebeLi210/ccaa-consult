@@ -7,6 +7,7 @@ import ProjectCreatePage from './pages/project/create';
 import ProjectDetailPage from './pages/project/detail';
 import ProjectDocumentsPage from './pages/project/documents';
 import DocumentExportPage from './pages/project/DocumentExport';
+import FileListPage from './pages/project/FileListPage';
 import UploadPage from './pages/upload';
 import MaterialsPage from './pages/materials';
 import MaterialsUploadPage from './pages/materials/upload';
@@ -41,6 +42,9 @@ const App: React.FC = () => {
         
         {/* 文档导出 (V2.2) */}
         <Route path="/project/:id/export" element={<DocumentExportPage />} />
+        
+        {/* 文件清单 (V2.2) */}
+        <Route path="/project/:id/file-list" element={<FileListPage />} />
         
         {/* 文件上传 */}
         <Route path="/upload" element={<UploadPage />} />

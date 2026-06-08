@@ -6,26 +6,41 @@
 FastAPI应用入口
 """
 
-from fastapi import FastAPI
+import time
+import uuid
+
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
 from app.core.database import init_db
+from app.core.logging_config import setup_logging, get_logger
+from app.core.backup import create_backup, list_backups, get_backup_info, setup_auto_backup
 from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, custom_templates, team, flowcharts, industry, certification_scope
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期"""
-    # 启动时初始化数据库
-    print("智质通·咨询版 启动中...")
-    print("初始化数据库...")
+    # 启动时初始化日志和数据库
+    setup_logging()
+    logger = get_logger("main")
+    logger.info("智质通·咨询版 启动中...")
+    logger.info("初始化数据库...")
     init_db()
-    print("数据库初始化完成")
+    logger.info("数据库初始化完成")
+    
+    # 启动时创建一次备份
+    logger.info("创建启动备份...")
+    create_backup()
+    
+    # 启动自动备份任务
+    setup_auto_backup()
+    
     yield
     # 关闭时
-    print("智质通·咨询版 关闭中...")
+    logger.info("智质通·咨询版 关闭中...")
 
 
 app = FastAPI(
@@ -43,6 +58,48 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 请求日志中间件
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """记录所有HTTP请求"""
+    start_time = time.time()
+    trace_id = str(uuid.uuid4())[:8]
+    
+    # 记录请求
+    access_logger = get_logger("access")
+    access_logger.info(
+        f"{request.method} {request.url.path}",
+        extra={
+            "trace_id": trace_id,
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host if request.client else None,
+        }
+    )
+    
+    # 处理请求
+    response = await call_next(request)
+    
+    # 计算耗时
+    duration_ms = round((time.time() - start_time) * 1000, 2)
+    
+    # 记录响应
+    access_logger.info(
+        f"{request.method} {request.url.path} {response.status_code} {duration_ms}ms",
+        extra={
+            "trace_id": trace_id,
+            "method": request.method,
+            "path": request.url.path,
+            "status_code": response.status_code,
+            "duration_ms": duration_ms,
+        }
+    )
+    
+    # 添加trace_id到响应头
+    response.headers["X-Trace-ID"] = trace_id
+    
+    return response
 
 # 注册路由
 app.include_router(templates.router, prefix="/api/v1")
@@ -101,6 +158,47 @@ async def root():
 async def health():
     """健康检查"""
     return {"status": "healthy"}
+
+
+# ============ 备份管理API ============
+
+@app.post("/api/v1/admin/backup", summary="手动触发数据库备份")
+async def trigger_backup():
+    """手动触发数据库备份"""
+    backup_path = create_backup()
+    if backup_path:
+        return {
+            "success": True,
+            "message": "备份成功",
+            "backup": get_backup_info(backup_path),
+        }
+    return {"success": False, "message": "备份失败"}
+
+
+@app.get("/api/v1/admin/backups", summary="获取备份列表")
+async def get_backups():
+    """获取所有备份文件列表"""
+    backups = list_backups()
+    return {
+        "total": len(backups),
+        "backups": [get_backup_info(b) for b in backups],
+    }
+
+
+@app.get("/api/v1/admin/backup/status", summary="获取备份状态")
+async def backup_status():
+    """获取备份状态统计"""
+    backups = list_backups()
+    db_path = Path("./data/zhizhitong.db")
+    
+    return {
+        "total_backups": len(backups),
+        "max_backups": 30,
+        "latest_backup": get_backup_info(backups[0]) if backups else None,
+        "database_size_mb": round(db_path.stat().st_size / 1024 / 1024, 2) if db_path.exists() else 0,
+        "auto_backup_enabled": True,
+        "backup_interval_hours": 24,
+    }
 
 
 if __name__ == "__main__":
