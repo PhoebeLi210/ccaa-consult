@@ -5,6 +5,7 @@ import { Card, Button as AntButton, Table, Descriptions, Tag as AntTag, Space, m
 import { EditOutlined, FileTextOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useProject } from '@/hooks/useProject';
+import GenerateWizard from '@/components/GenerateWizard';
 
 /** 字段中文名映射 */
 const fieldLabels: Record<string, string> = {
@@ -42,6 +43,7 @@ const ProjectDetailPage: React.FC = () => {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [wizardVisible, setWizardVisible] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -67,7 +69,19 @@ const ProjectDetailPage: React.FC = () => {
     }
   }, [editingField, editValue, id, editProject]);
 
-  /** 生成文档 */
+  /** 打开生成向导 */
+  const handleOpenWizard = useCallback(() => {
+    setWizardVisible(true);
+  }, []);
+
+  /** 生成向导完成回调 */
+  const handleWizardComplete = useCallback(() => {
+    setWizardVisible(false);
+    Toast.show({ content: '文档生成任务已提交', icon: 'success' });
+    navigate(`/project/${id}/documents`);
+  }, [id, navigate]);
+
+  /** 旧版直接生成（保留作为备选） */
   const handleGenerate = useCallback(async () => {
     if (!id) return;
     Dialog.confirm({
@@ -279,8 +293,7 @@ const ProjectDetailPage: React.FC = () => {
           <AntButton
             type="primary"
             icon={<FileTextOutlined />}
-            loading={generating}
-            onClick={handleGenerate}
+            onClick={handleOpenWizard}
           >
             生成文档
           </AntButton>
@@ -359,6 +372,14 @@ const ProjectDetailPage: React.FC = () => {
           </Descriptions>
         )}
       </Card>
+
+      {/* 文档生成向导 */}
+      <GenerateWizard
+        visible={wizardVisible}
+        onClose={() => setWizardVisible(false)}
+        onGenerateComplete={handleWizardComplete}
+        projectId={id}
+      />
     </div>
   );
 };

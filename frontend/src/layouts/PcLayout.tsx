@@ -9,6 +9,9 @@ import {
   FileMarkdownOutlined,
   TeamOutlined,
   BookOutlined,
+  MessageOutlined,
+  SafetyCertificateOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 
 const { Sider, Content, Header } = Layout;
@@ -31,9 +34,24 @@ const menuItems = [
     label: '创建项目',
   },
   {
+    key: '/conversation',
+    icon: <MessageOutlined />,
+    label: '多轮对话',
+  },
+  {
+    key: '/materials',
+    icon: <FolderOpenOutlined />,
+    label: '材料管理',
+  },
+  {
     key: '/upload',
     icon: <CloudUploadOutlined />,
     label: '文件上传',
+  },
+  {
+    key: '/analyzer',
+    icon: <SafetyCertificateOutlined />,
+    label: '评估报告',
   },
   {
     key: '/knowledge',

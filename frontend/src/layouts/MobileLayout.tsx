@@ -6,6 +6,8 @@ import {
   FileOutline,
   ContentOutline,
   CloudUploadOutline,
+  MessageOutline,
+  FolderOutline,
 } from 'antd-mobile-icons';
 
 /** 移动端布局组件属性 */
@@ -17,8 +19,9 @@ interface MobileLayoutProps {
 const tabs = [
   { key: '/', title: '首页', icon: <AppOutline /> },
   { key: '/project/create', title: '创建', icon: <ContentOutline /> },
+  { key: '/conversation', title: '对话', icon: <MessageOutline /> },
+  { key: '/materials', title: '材料', icon: <FolderOutline /> },
   { key: '/upload', title: '上传', icon: <CloudUploadOutline /> },
-  { key: '/project/documents', title: '文档', icon: <FileOutline /> },
 ];
 
 /**

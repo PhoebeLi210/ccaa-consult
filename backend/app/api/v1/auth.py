@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 智质通·咨询版 - 用户认证API
-使用JWT进行用户认证
+使用JWT进行用户认证，数据持久化到数据库
 """
 
 from fastapi import APIRouter, HTTPException, Depends, status
@@ -11,8 +11,6 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from datetime import datetime, timedelta
 import uuid
-import secrets
-import hashlib
 
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -20,6 +18,7 @@ from jose import JWTError, jwt
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.models.models import User, UserStatus
 
 router = APIRouter(prefix="/auth", tags=["用户认证"])
 
@@ -29,10 +28,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # OAuth2
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-# JWT配置
-SECRET_KEY = secrets.token_urlsafe(32)  # 生产环境应从配置读取
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_HOURS = 24
+# JWT配置（从settings读取，确保重启后不变）
+SECRET_KEY = settings.JWT_SECRET_KEY
+ALGORITHM = settings.JWT_ALGORITHM
+ACCESS_TOKEN_EXPIRE_HOURS = settings.JWT_ACCESS_TOKEN_EXPIRE_HOURS
 
 
 # ============ 数据模型 ============
@@ -82,12 +81,6 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 
-# ============ 模拟用户存储（生产环境应使用数据库） ============
-
-# 简单的用户存储（内存）
-users_db = {}
-
-
 # ============ 密码工具 ============
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -128,13 +121,43 @@ def decode_token(token: str) -> Optional[TokenData]:
         return None
 
 
+# ============ 数据库用户操作 ============
+
+def get_user_by_username(db: Session, username: str) -> Optional[User]:
+    """通过用户名获取用户"""
+    return db.query(User).filter(User.username == username).first()
+
+
+def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
+    """通过用户ID获取用户"""
+    return db.query(User).filter(User.user_id == user_id).first()
+
+
+def create_user_db(db: Session, user_data: dict) -> User:
+    """在数据库中创建用户"""
+    db_user = User(
+        user_id=user_data["id"],
+        username=user_data["username"],
+        email=user_data.get("email"),
+        hashed_password=user_data["hashed_password"],
+        full_name=user_data.get("full_name"),
+        company=user_data.get("company"),
+        is_active=True,
+        status=UserStatus.ACTIVE.value,
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
 # ============ 用户依赖 ============
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
-) -> dict:
-    """获取当前用户"""
+) -> User:
+    """获取当前用户（从数据库）"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="无法验证凭据",
@@ -145,7 +168,7 @@ async def get_current_user(
     if token_data is None:
         raise credentials_exception
     
-    user = users_db.get(token_data.user_id)
+    user = get_user_by_id(db, token_data.user_id)
     if user is None:
         raise credentials_exception
     
@@ -153,18 +176,31 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: dict = Depends(get_current_user)
-) -> dict:
+    current_user: User = Depends(get_current_user)
+) -> User:
     """获取当前活跃用户"""
-    if not current_user.get("is_active", False):
+    if not current_user.is_active:
         raise HTTPException(status_code=400, detail="用户已被禁用")
     return current_user
+
+
+def user_to_response(user: User) -> UserResponse:
+    """将User模型转换为UserResponse"""
+    return UserResponse(
+        id=user.user_id,
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name,
+        company=user.company,
+        is_active=user.is_active,
+        created_at=user.created_at,
+    )
 
 
 # ============ API路由 ============
 
 @router.post("/register", response_model=UserResponse, summary="用户注册")
-async def register(user: UserCreate):
+async def register(user: UserCreate, db: Session = Depends(get_db)):
     """
     注册新用户
     
@@ -175,12 +211,12 @@ async def register(user: UserCreate):
     - company: 公司（可选）
     """
     # 检查用户名是否已存在
-    for u in users_db.values():
-        if u["username"] == user.username:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="用户名已被注册"
-            )
+    existing_user = get_user_by_username(db, user.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="用户名已被注册"
+        )
     
     # 创建用户
     user_id = str(uuid.uuid4())
@@ -193,25 +229,15 @@ async def register(user: UserCreate):
         "full_name": user.full_name,
         "company": user.company,
         "hashed_password": hashed_password,
-        "is_active": True,
-        "created_at": datetime.utcnow(),
     }
     
-    users_db[user_id] = user_data
+    db_user = create_user_db(db, user_data)
     
-    return UserResponse(
-        id=user_id,
-        username=user.username,
-        email=user.email,
-        full_name=user.full_name,
-        company=user.company,
-        is_active=True,
-        created_at=user_data["created_at"],
-    )
+    return user_to_response(db_user)
 
 
 @router.post("/login", response_model=Token, summary="用户登录")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """
     用户登录
     
@@ -220,12 +246,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     - password: 密码
     """
     # 查找用户
-    user = None
-    for u in users_db.values():
-        if u["username"] == form_data.username:
-            user = u
-            break
-    
+    user = get_user_by_username(db, form_data.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -234,36 +255,32 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     
     # 验证密码
-    if not verify_password(form_data.password, user["hashed_password"]):
+    if not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户名或密码错误",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    # 更新最后登录时间
+    user.last_login = datetime.utcnow()
+    db.commit()
+    
     # 创建令牌
     access_token = create_access_token(
-        data={"sub": user["id"], "username": user["username"]}
+        data={"sub": user.user_id, "username": user.username}
     )
     
     return Token(
         access_token=access_token,
         token_type="bearer",
         expires_in=ACCESS_TOKEN_EXPIRE_HOURS * 3600,
-        user=UserResponse(
-            id=user["id"],
-            username=user["username"],
-            email=user.get("email"),
-            full_name=user.get("full_name"),
-            company=user.get("company"),
-            is_active=user["is_active"],
-            created_at=user["created_at"],
-        )
+        user=user_to_response(user),
     )
 
 
 @router.post("/login/json", response_model=Token, summary="JSON格式登录")
-async def login_json(credentials: UserLogin):
+async def login_json(credentials: UserLogin, db: Session = Depends(get_db)):
     """
     JSON格式登录（用于前端API调用）
     
@@ -271,12 +288,7 @@ async def login_json(credentials: UserLogin):
     - password: 密码
     """
     # 查找用户
-    user = None
-    for u in users_db.values():
-        if u["username"] == credentials.username:
-            user = u
-            break
-    
+    user = get_user_by_username(db, credentials.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -284,45 +296,33 @@ async def login_json(credentials: UserLogin):
         )
     
     # 验证密码
-    if not verify_password(credentials.password, user["hashed_password"]):
+    if not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户名或密码错误"
         )
     
+    # 更新最后登录时间
+    user.last_login = datetime.utcnow()
+    db.commit()
+    
     # 创建令牌
     access_token = create_access_token(
-        data={"sub": user["id"], "username": user["username"]}
+        data={"sub": user.user_id, "username": user.username}
     )
     
     return Token(
         access_token=access_token,
         token_type="bearer",
         expires_in=ACCESS_TOKEN_EXPIRE_HOURS * 3600,
-        user=UserResponse(
-            id=user["id"],
-            username=user["username"],
-            email=user.get("email"),
-            full_name=user.get("full_name"),
-            company=user.get("company"),
-            is_active=user["is_active"],
-            created_at=user["created_at"],
-        )
+        user=user_to_response(user),
     )
 
 
 @router.get("/me", response_model=UserResponse, summary="获取当前用户信息")
-async def get_me(current_user: dict = Depends(get_current_active_user)):
+async def get_me(current_user: User = Depends(get_current_active_user)):
     """获取当前登录用户的信息"""
-    return UserResponse(
-        id=current_user["id"],
-        username=current_user["username"],
-        email=current_user.get("email"),
-        full_name=current_user.get("full_name"),
-        company=current_user.get("company"),
-        is_active=current_user["is_active"],
-        created_at=current_user["created_at"],
-    )
+    return user_to_response(current_user)
 
 
 @router.put("/me", response_model=UserResponse, summary="更新用户信息")
@@ -330,60 +330,54 @@ async def update_me(
     full_name: Optional[str] = None,
     company: Optional[str] = None,
     email: Optional[str] = None,
-    current_user: dict = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
 ):
     """更新当前用户信息"""
-    user_id = current_user["id"]
-    
     if full_name is not None:
-        users_db[user_id]["full_name"] = full_name
+        current_user.full_name = full_name
     if company is not None:
-        users_db[user_id]["company"] = company
+        current_user.company = company
     if email is not None:
-        users_db[user_id]["email"] = email
+        current_user.email = email
     
-    updated_user = users_db[user_id]
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(current_user)
     
-    return UserResponse(
-        id=updated_user["id"],
-        username=updated_user["username"],
-        email=updated_user.get("email"),
-        full_name=updated_user.get("full_name"),
-        company=updated_user.get("company"),
-        is_active=updated_user["is_active"],
-        created_at=updated_user["created_at"],
-    )
+    return user_to_response(current_user)
 
 
 @router.post("/logout", summary="用户登出")
-async def logout(current_user: dict = Depends(get_current_active_user)):
+async def logout(current_user: User = Depends(get_current_active_user)):
     """
     用户登出
     
     注意：JWT是无状态的，服务端不维护会话。
     客户端需要删除本地存储的token。
     """
-    return {"message": "登出成功", "username": current_user["username"]}
+    return {"message": "登出成功", "username": current_user.username}
 
 
 @router.post("/change-password", summary="修改密码")
 async def change_password(
     old_password: str,
     new_password: str,
-    current_user: dict = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
 ):
     """修改密码"""
-    user_id = current_user["id"]
-    
     # 验证旧密码
-    if not verify_password(old_password, current_user["hashed_password"]):
+    if not verify_password(old_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="旧密码错误"
         )
     
     # 更新密码
-    users_db[user_id]["hashed_password"] = get_password_hash(new_password)
+    current_user.hashed_password = get_password_hash(new_password)
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
     
     return {"message": "密码修改成功"}
 
@@ -394,24 +388,13 @@ async def change_password(
 async def list_users(
     skip: int = 0,
     limit: int = 20,
-    current_user: dict = Depends(get_current_active_user)
+    db: Session = Depends(get_db)
 ):
-    """获取用户列表（需要管理员权限）"""
-    # 简单实现：所有用户都可以查看
-    users = list(users_db.values())[skip:skip+limit]
+    """获取用户列表"""
+    total = db.query(User).count()
+    users = db.query(User).offset(skip).limit(limit).all()
     
     return {
-        "total": len(users_db),
-        "users": [
-            UserResponse(
-                id=u["id"],
-                username=u["username"],
-                email=u.get("email"),
-                full_name=u.get("full_name"),
-                company=u.get("company"),
-                is_active=u["is_active"],
-                created_at=u["created_at"],
-            )
-            for u in users
-        ]
+        "total": total,
+        "users": [user_to_response(u) for u in users]
     }

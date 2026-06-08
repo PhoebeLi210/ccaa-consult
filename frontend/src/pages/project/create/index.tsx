@@ -1,11 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavBar, Button, Toast, Dialog, Form, Input } from 'antd-mobile';
-import { Card, Button as AntButton, Steps, message, Modal, Form as AntForm, Input as AntInput } from 'antd';
+import { Card, Button as AntButton, Steps, message, Modal, Form as AntForm, Input as AntInput, Tabs } from 'antd';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useProject } from '@/hooks/useProject';
 import NaturalLanguageInput from '@/components/NaturalLanguageInput';
+import IndustrySelector from '@/components/IndustrySelector';
 import type { ParseResult } from '@/api';
+import type { IndustryConfig } from '@/api';
 
 /** 创建项目页面 */
 const ProjectCreatePage: React.FC = () => {
@@ -17,6 +19,8 @@ const ProjectCreatePage: React.FC = () => {
   const [parsing, setParsing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [inputMode, setInputMode] = useState<'ai' | 'manual'>('ai');
+  const [selectedIndustry, setSelectedIndustry] = useState<{ code: string; industry: IndustryConfig } | null>(null);
 
   /** AI解析回调（实时解析） */
   const handleParse = useCallback(
@@ -90,14 +94,48 @@ const ProjectCreatePage: React.FC = () => {
     });
   }, [parseResult]);
 
-  /** 创建项目 */
+  /** 行业选择回调 */
+  const handleIndustrySelect = useCallback((code: string, industry: IndustryConfig) => {
+    setSelectedIndustry({ code, industry });
+    if (parseResult) {
+      setParseResult({
+        ...parseResult,
+        industry: industry.industry_name,
+      });
+    }
+  }, [parseResult]);
+
+  /** 手动创建项目 */
+  const handleManualCreate = useCallback(async (values: Record<string, string>) => {
+    setSubmitting(true);
+    try {
+      const project = await createNewProject({
+        companyName: values.companyName,
+        industry: values.industry || selectedIndustry?.industry?.industry_name || '',
+        employeeCount: values.employeeCount,
+        registeredCapital: values.registeredCapital,
+        address: values.address,
+        contactPerson: values.contactPerson,
+        contactPhone: values.contactPhone,
+        name: values.companyName || '新项目',
+      });
+      Toast.show({ content: '项目创建成功', icon: 'success' });
+      navigate(`/project/${project.id}`);
+    } catch {
+      Toast.show({ content: '创建失败，请重试', icon: 'fail' });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [createNewProject, navigate, selectedIndustry]);
+
+  /** AI模式创建项目 */
   const handleCreate = useCallback(async () => {
     if (!parseResult) return;
     setSubmitting(true);
     try {
       const project = await createNewProject({
         companyName: parseResult.companyName,
-        industry: parseResult.industry,
+        industry: parseResult.industry || selectedIndustry?.industry?.industry_name || '',
         employeeCount: parseResult.employeeCount,
         registeredCapital: parseResult.registeredCapital,
         address: parseResult.address,
@@ -112,7 +150,7 @@ const ProjectCreatePage: React.FC = () => {
     } finally {
       setSubmitting(false);
     }
-  }, [parseResult, createNewProject, navigate]);
+  }, [parseResult, createNewProject, navigate, selectedIndustry]);
 
   /** 字段中文名映射 */
   const fieldLabels: Record<string, string> = {
@@ -250,25 +288,97 @@ const ProjectCreatePage: React.FC = () => {
         ]}
       />
 
-      {/* 第一步：自然语言输入 */}
+      {/* 第一步：选择输入方式 */}
       {currentStep === 0 && (
-        <Card title="请描述您客户的企业情况">
-          <NaturalLanguageInput
-            onSubmit={handleSubmit}
-            onParse={handleParse}
-            loading={parsing}
-            parseResult={parseResult}
+        <Card>
+          <Tabs
+            activeKey={inputMode}
+            onChange={(key) => setInputMode(key as 'ai' | 'manual')}
+            items={[
+              {
+                key: 'ai',
+                label: 'AI智能解析',
+                children: (
+                  <div>
+                    <p style={{ color: '#666', marginBottom: 16 }}>
+                      用自然语言描述企业情况，AI自动提取关键信息
+                    </p>
+                    <NaturalLanguageInput
+                      onSubmit={handleSubmit}
+                      onParse={handleParse}
+                      loading={parsing}
+                      parseResult={parseResult}
+                    />
+                    <div style={{ marginTop: 16, textAlign: 'right' }}>
+                      <AntButton
+                        type="primary"
+                        size="large"
+                        disabled={!parseResult}
+                        onClick={() => setCurrentStep(1)}
+                      >
+                        下一步
+                      </AntButton>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: 'manual',
+                label: '手动填写',
+                children: (
+                  <div>
+                    <p style={{ color: '#666', marginBottom: 16 }}>
+                      手动填写企业信息，适合已知详细信息的情况
+                    </p>
+                    <IndustrySelector
+                      value={selectedIndustry?.code}
+                      onChange={handleIndustrySelect}
+                      style={{ marginBottom: 24 }}
+                    />
+                    <AntForm layout="vertical">
+                      {Object.entries(fieldLabels).map(([key, label]) => (
+                        <AntForm.Item key={key} label={label}>
+                          <AntInput
+                            placeholder={`请输入${label}`}
+                            onChange={(e) => {
+                              if (parseResult) {
+                                setParseResult({
+                                  ...parseResult,
+                                  [key]: e.target.value,
+                                });
+                              } else {
+                                setParseResult({
+                                  companyName: '',
+                                  industry: '',
+                                  employeeCount: '',
+                                  registeredCapital: '',
+                                  address: '',
+                                  contactPerson: '',
+                                  contactPhone: '',
+                                  businessScope: '',
+                                  missingFields: [],
+                                  [key]: e.target.value,
+                                } as ParseResult);
+                              }
+                            }}
+                          />
+                        </AntForm.Item>
+                      ))}
+                    </AntForm>
+                    <div style={{ textAlign: 'right' }}>
+                      <AntButton
+                        type="primary"
+                        size="large"
+                        onClick={() => setCurrentStep(1)}
+                      >
+                        下一步
+                      </AntButton>
+                    </div>
+                  </div>
+                ),
+              },
+            ]}
           />
-          <div style={{ marginTop: 16, textAlign: 'right' }}>
-            <AntButton
-              type="primary"
-              size="large"
-              disabled={!parseResult}
-              onClick={() => setCurrentStep(1)}
-            >
-              下一步
-            </AntButton>
-          </div>
         </Card>
       )}
 
@@ -289,6 +399,13 @@ const ProjectCreatePage: React.FC = () => {
               以下信息缺失，请点击补充：{parseResult.missingFields.map((f) => fieldLabels[f]).join('、')}
             </div>
           )}
+
+          {/* 行业选择器（第二步也可修改行业） */}
+          <IndustrySelector
+            value={selectedIndustry?.code}
+            onChange={handleIndustrySelect}
+            style={{ marginBottom: 24 }}
+          />
 
           <AntForm layout="vertical">
             {Object.entries(fieldLabels).map(([key, label]) => {
