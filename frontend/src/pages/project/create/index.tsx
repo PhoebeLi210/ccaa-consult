@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavBar, Button, Toast, Dialog, Form, Input } from 'antd-mobile';
-import { Card, Button as AntButton, Steps, message, Modal, Form as AntForm, Input as AntInput, Tabs } from 'antd';
+import { Card, Button as AntButton, Steps, message, Modal, Form as AntForm, Input as AntInput, Tabs, Tag } from 'antd';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useProject } from '@/hooks/useProject';
 import NaturalLanguageInput from '@/components/NaturalLanguageInput';
 import IndustrySelector from '@/components/IndustrySelector';
+import { checkIndustryFeatures } from '@/api';
 import type { ParseResult } from '@/api';
 import type { IndustryConfig } from '@/api';
 
@@ -21,6 +22,8 @@ const ProjectCreatePage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [inputMode, setInputMode] = useState<'ai' | 'manual'>('ai');
   const [selectedIndustry, setSelectedIndustry] = useState<{ code: string; industry: IndustryConfig } | null>(null);
+  const [industryFeatures, setIndustryFeatures] = useState<any>(null);
+  const [checkingFeatures, setCheckingFeatures] = useState(false);
 
   /** AI解析回调（实时解析） */
   const handleParse = useCallback(
@@ -95,13 +98,22 @@ const ProjectCreatePage: React.FC = () => {
   }, [parseResult]);
 
   /** 行业选择回调 */
-  const handleIndustrySelect = useCallback((code: string, industry: IndustryConfig) => {
+  const handleIndustrySelect = useCallback(async (code: string, industry: IndustryConfig) => {
     setSelectedIndustry({ code, industry });
     if (parseResult) {
       setParseResult({
         ...parseResult,
         industry: industry.industry_name,
       });
+    }
+    setCheckingFeatures(true);
+    try {
+      const features = await checkIndustryFeatures(code);
+      setIndustryFeatures(features);
+    } catch {
+      setIndustryFeatures(null);
+    } finally {
+      setCheckingFeatures(false);
     }
   }, [parseResult]);
 
@@ -253,6 +265,44 @@ const ProjectCreatePage: React.FC = () => {
                   </div>
                 );
               })}
+
+              {/* 行业特征展示 */}
+              {industryFeatures && (
+                <Card title="行业特征" style={{ marginTop: 16 }} loading={checkingFeatures}>
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontWeight: 500, marginBottom: 8 }}>行业特征标签</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {industryFeatures.has_design_development && <Tag color="blue">设计开发</Tag>}
+                      {industryFeatures.has_equipment_operations && <Tag color="green">设备操作</Tag>}
+                      {industryFeatures.has_multi_projects && <Tag color="orange">多项目</Tag>}
+                      {industryFeatures.has_outsourcing && <Tag color="purple">外包</Tag>}
+                      {!industryFeatures.has_design_development && !industryFeatures.has_equipment_operations && !industryFeatures.has_multi_projects && !industryFeatures.has_outsourcing && (
+                        <span style={{ color: '#999' }}>无特殊特征</span>
+                      )}
+                    </div>
+                  </div>
+                  {industryFeatures.emergency_plans && industryFeatures.emergency_plans.length > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontWeight: 500, marginBottom: 8 }}>应急预案</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {industryFeatures.emergency_plans.map((plan: string) => (
+                          <Tag key={plan} color="red">{plan}</Tag>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {industryFeatures.required_licenses && industryFeatures.required_licenses.length > 0 && (
+                    <div>
+                      <div style={{ fontWeight: 500, marginBottom: 8 }}>所需资质许可</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {industryFeatures.required_licenses.map((license: string) => (
+                          <Tag key={license} color="cyan">{license}</Tag>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              )}
 
               {/* 操作按钮 */}
               <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
@@ -406,6 +456,44 @@ const ProjectCreatePage: React.FC = () => {
             onChange={handleIndustrySelect}
             style={{ marginBottom: 24 }}
           />
+
+          {/* 行业特征展示 */}
+          {industryFeatures && (
+            <Card title="行业特征" style={{ marginBottom: 24 }} loading={checkingFeatures}>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontWeight: 500, marginBottom: 8 }}>行业特征标签</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {industryFeatures.has_design_development && <Tag color="blue">设计开发</Tag>}
+                  {industryFeatures.has_equipment_operations && <Tag color="green">设备操作</Tag>}
+                  {industryFeatures.has_multi_projects && <Tag color="orange">多项目</Tag>}
+                  {industryFeatures.has_outsourcing && <Tag color="purple">外包</Tag>}
+                  {!industryFeatures.has_design_development && !industryFeatures.has_equipment_operations && !industryFeatures.has_multi_projects && !industryFeatures.has_outsourcing && (
+                    <span style={{ color: '#999' }}>无特殊特征</span>
+                  )}
+                </div>
+              </div>
+              {industryFeatures.emergency_plans && industryFeatures.emergency_plans.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontWeight: 500, marginBottom: 8 }}>应急预案</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {industryFeatures.emergency_plans.map((plan: string) => (
+                      <Tag key={plan} color="red">{plan}</Tag>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {industryFeatures.required_licenses && industryFeatures.required_licenses.length > 0 && (
+                <div>
+                  <div style={{ fontWeight: 500, marginBottom: 8 }}>所需资质许可</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {industryFeatures.required_licenses.map((license: string) => (
+                      <Tag key={license} color="cyan">{license}</Tag>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Card>
+          )}
 
           <AntForm layout="vertical">
             {Object.entries(fieldLabels).map(([key, label]) => {

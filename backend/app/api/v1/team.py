@@ -556,6 +556,42 @@ async def assign_project_to_team(
     return {"message": "项目已分配到团队", "project_id": project_id}
 
 
+@router.delete("/{team_id}/projects/{project_id}/remove", summary="从团队移除项目")
+async def remove_project_from_team(
+    team_id: str,
+    project_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    从团队中移除项目
+
+    只有团队所有者或管理员可以移除项目
+    """
+    # 检查团队是否存在
+    team = db.query(Team).filter(Team.team_id == team_id).first()
+    if not team:
+        raise HTTPException(status_code=404, detail="团队不存在")
+
+    # 检查权限（只有团队所有者可以移除）
+    if team.owner_id != current_user["id"]:
+        raise HTTPException(status_code=403, detail="只有团队所有者可以移除项目")
+
+    # 检查项目是否属于该团队
+    project = db.query(Project).filter(
+        Project.project_id == project_id,
+        Project.team_id == team_id,
+    ).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="该项目不在此团队中")
+
+    # 移除项目（将team_id设为null）
+    project.team_id = None
+    db.commit()
+
+    return {"message": "项目已从团队移除", "project_id": project_id}
+
+
 # ============ 辅助函数 ============
 
 def _is_team_member(team_id: str, user_id: str, db: Session) -> bool:

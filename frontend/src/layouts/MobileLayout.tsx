@@ -8,6 +8,7 @@ import {
   CloudUploadOutline,
   MessageOutline,
   FolderOutline,
+  PartitionOutline,
 } from 'antd-mobile-icons';
 
 /** 移动端布局组件属性 */
@@ -22,6 +23,7 @@ const tabs = [
   { key: '/conversation', title: '对话', icon: <MessageOutline /> },
   { key: '/materials', title: '材料', icon: <FolderOutline /> },
   { key: '/upload', title: '上传', icon: <CloudUploadOutline /> },
+  { key: '/flowcharts', title: '流程图', icon: <PartitionOutline /> },
 ];
 
 /**

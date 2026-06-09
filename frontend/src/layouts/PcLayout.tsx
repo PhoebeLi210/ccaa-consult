@@ -12,6 +12,7 @@ import {
   MessageOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
+  PartitionOutlined,
 } from '@ant-design/icons';
 
 const { Sider, Content, Header } = Layout;
@@ -67,6 +68,11 @@ const menuItems = [
     key: '/team',
     icon: <TeamOutlined />,
     label: '团队协作',
+  },
+  {
+    key: '/flowcharts',
+    icon: <PartitionOutlined />,
+    label: '流程图',
   },
 ];
 

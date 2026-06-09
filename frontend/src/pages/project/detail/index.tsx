@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { NavBar, Button, Toast, Dialog, List, Tag } from 'antd-mobile';
-import { Card, Button as AntButton, Table, Descriptions, Tag as AntTag, Space, message, Modal, Form, Input } from 'antd';
-import { EditOutlined, FileTextOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Card, Button as AntButton, Table, Descriptions, Tag as AntTag, Space, message, Modal, Form, Input, Progress, Divider } from 'antd';
+import { EditOutlined, FileTextOutlined, ArrowLeftOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useProject } from '@/hooks/useProject';
+import { analyzeCoverage } from '@/api';
+import type { CoverageAnalysisResponse } from '@/api';
 import GenerateWizard from '@/components/GenerateWizard';
 
 /** 字段中文名映射 */
@@ -44,6 +46,8 @@ const ProjectDetailPage: React.FC = () => {
   const [editValue, setEditValue] = useState('');
   const [generating, setGenerating] = useState(false);
   const [wizardVisible, setWizardVisible] = useState(false);
+  const [coverageLoading, setCoverageLoading] = useState(false);
+  const [coverageResult, setCoverageResult] = useState<CoverageAnalysisResponse | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -100,6 +104,21 @@ const ProjectDetailPage: React.FC = () => {
       },
     });
   }, [id, generateProjectDocuments, navigate]);
+
+  /** 条款覆盖分析 */
+  const handleAnalyzeCoverage = useCallback(async () => {
+    if (!id) return;
+    setCoverageLoading(true);
+    try {
+      const result = await analyzeCoverage(id);
+      setCoverageResult(result);
+      Toast.show({ content: '分析完成', icon: 'success' });
+    } catch {
+      Toast.show({ content: '分析失败', icon: 'fail' });
+    } finally {
+      setCoverageLoading(false);
+    }
+  }, [id]);
 
   /** 获取缺失字段列表 */
   const getMissingFields = (): string[] => {
@@ -261,6 +280,58 @@ const ProjectDetailPage: React.FC = () => {
               >
                 生成文档
               </Button>
+
+              {/* 条款覆盖分析按钮 */}
+              <Button
+                block
+                color="primary"
+                fill="outline"
+                size="large"
+                icon={<SafetyCertificateOutlined />}
+                loading={coverageLoading}
+                onClick={handleAnalyzeCoverage}
+                style={{ marginTop: 12 }}
+              >
+                条款覆盖分析
+              </Button>
+
+              {/* 覆盖分析结果展示 */}
+              {coverageResult && (
+                <Card title="条款覆盖分析结果" style={{ marginTop: 16 }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontWeight: 500, marginBottom: 8 }}>总体覆盖率</div>
+                    <Progress
+                      percent={Math.round(coverageResult.summary.coverageRate * 100)}
+                      status={coverageResult.summary.coverageRate >= 0.8 ? 'success' : coverageResult.summary.coverageRate >= 0.5 ? 'normal' : 'exception'}
+                    />
+                    <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>
+                      总条款 {coverageResult.summary.totalClauses}，已覆盖 {coverageResult.summary.covered}，部分覆盖 {coverageResult.summary.partial}，缺失 {coverageResult.summary.missing}
+                    </div>
+                  </div>
+                  {coverageResult.clauses && coverageResult.clauses.filter((c) => c.status === 'missing').length > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontWeight: 500, marginBottom: 8 }}>缺失条款</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {coverageResult.clauses
+                          .filter((c) => c.status === 'missing')
+                          .map((c) => (
+                            <Tag key={c.clause} color="red">{c.clause} {c.title}</Tag>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                  {coverageResult.suggestions && coverageResult.suggestions.length > 0 && (
+                    <div>
+                      <div style={{ fontWeight: 500, marginBottom: 8 }}>建议补充</div>
+                      <div style={{ fontSize: 13, color: '#666' }}>
+                        {coverageResult.suggestions.map((s, i) => (
+                          <div key={i} style={{ marginBottom: 4 }}>{i + 1}. {s}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              )}
             </>
           ) : (
             <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
@@ -296,6 +367,13 @@ const ProjectDetailPage: React.FC = () => {
             onClick={handleOpenWizard}
           >
             生成文档
+          </AntButton>
+          <AntButton
+            icon={<SafetyCertificateOutlined />}
+            loading={coverageLoading}
+            onClick={handleAnalyzeCoverage}
+          >
+            条款覆盖分析
           </AntButton>
           <AntButton onClick={() => navigate(`/project/${id}/documents`)}>
             管理文档
@@ -372,6 +450,91 @@ const ProjectDetailPage: React.FC = () => {
           </Descriptions>
         )}
       </Card>
+
+      {/* 条款覆盖分析结果 */}
+      {coverageResult && (
+        <Card title="条款覆盖分析结果" style={{ marginTop: 24 }}>
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontWeight: 500, marginBottom: 12, fontSize: 16 }}>总体覆盖率</div>
+            <Progress
+              percent={Math.round(coverageResult.summary.coverageRate * 100)}
+              status={coverageResult.summary.coverageRate >= 0.8 ? 'success' : coverageResult.summary.coverageRate >= 0.5 ? 'normal' : 'exception'}
+              strokeWidth={20}
+            />
+            <div style={{ fontSize: 14, color: '#666', marginTop: 8 }}>
+              总条款 {coverageResult.summary.totalClauses}，已覆盖 {coverageResult.summary.covered}，部分覆盖 {coverageResult.summary.partial}，缺失 {coverageResult.summary.missing}
+            </div>
+          </div>
+
+          <Divider />
+
+          {coverageResult.standards && coverageResult.standards.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontWeight: 500, marginBottom: 12, fontSize: 16 }}>各标准覆盖情况</div>
+              <Space direction="vertical" style={{ width: '100%' }}>
+                {coverageResult.standards.map((standard) => {
+                  const standardClauses = coverageResult.clauses?.filter((c) => c.clause.startsWith(standard)) || [];
+                  const standardTotal = standardClauses.length;
+                  const standardCovered = standardClauses.filter((c) => c.status === 'covered').length;
+                  const standardRate = standardTotal > 0 ? Math.round((standardCovered / standardTotal) * 100) : 0;
+                  return (
+                    <div key={standard} style={{ width: '100%' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <span>{standard}</span>
+                        <span>{standardCovered}/{standardTotal}</span>
+                      </div>
+                      <Progress percent={standardRate} size="small" status={standardRate >= 80 ? 'success' : standardRate >= 50 ? 'normal' : 'exception'} />
+                    </div>
+                  );
+                })}
+              </Space>
+            </div>
+          )}
+
+          <Divider />
+
+          {coverageResult.clauses && coverageResult.clauses.filter((c) => c.status === 'missing').length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontWeight: 500, marginBottom: 12, fontSize: 16 }}>缺失条款列表</div>
+              <Table
+                dataSource={coverageResult.clauses.filter((c) => c.status === 'missing')}
+                rowKey="clause"
+                size="small"
+                pagination={false}
+                columns={[
+                  { title: '条款编号', dataIndex: 'clause', key: 'clause', width: 120 },
+                  { title: '条款标题', dataIndex: 'title', key: 'title' },
+                  {
+                    title: '相关文档',
+                    dataIndex: 'relatedDocuments',
+                    key: 'relatedDocuments',
+                    render: (docs: string[]) => (
+                      <Space size="small">
+                        {docs?.map((doc) => (
+                          <AntTag key={doc} size="small">{doc}</AntTag>
+                        )) || <span style={{ color: '#999' }}>无</span>}
+                      </Space>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+          )}
+
+          {coverageResult.suggestions && coverageResult.suggestions.length > 0 && (
+            <div>
+              <div style={{ fontWeight: 500, marginBottom: 12, fontSize: 16 }}>建议补充内容</div>
+              <div style={{ backgroundColor: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 6, padding: 16 }}>
+                {coverageResult.suggestions.map((s, i) => (
+                  <div key={i} style={{ marginBottom: 8, fontSize: 14 }}>
+                    {i + 1}. {s}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
 
       {/* 文档生成向导 */}
       <GenerateWizard

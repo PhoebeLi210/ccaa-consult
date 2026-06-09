@@ -8,9 +8,11 @@ FastAPI应用入口
 
 import time
 import uuid
+import traceback
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
@@ -158,6 +160,38 @@ async def root():
 async def health():
     """健康检查"""
     return {"status": "healthy"}
+
+
+# ============ 全局异常处理 ============
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """全局异常处理"""
+    logger = get_logger("main")
+    logger.error(f"未捕获的异常: {exc}\n{traceback.format_exc()}")
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "message": "服务器内部错误",
+            "detail": str(exc) if settings.DEBUG else "请联系管理员",
+            "trace_id": request.headers.get("X-Trace-ID", "unknown"),
+        }
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """HTTP异常处理"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "message": exc.detail,
+            "trace_id": request.headers.get("X-Trace-ID", "unknown"),
+        }
+    )
 
 
 # ============ 备份管理API ============
