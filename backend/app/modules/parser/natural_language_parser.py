@@ -418,13 +418,17 @@ class LLMParser(NaturalLanguageParser):
 
 如果某个字段无法提取，设为null。不要编造。只输出JSON，不要其他内容。"""
 
+    # 类级别缓存：相同文本的解析结果直接复用
+    _parse_cache: Dict[str, "CompanyInfo"] = {}
+    _PARSE_CACHE_MAX = 128
+
     def __init__(self, llm_client):
         super().__init__(llm_client)
         self.llm_client = llm_client
 
     async def parse_with_llm(self, free_text: str) -> CompanyInfo:
         """
-        使用大模型解析
+        使用大模型解析（结果按输入文本缓存）
 
         Args:
             free_text: 用户输入的自然语言描述
@@ -432,6 +436,10 @@ class LLMParser(NaturalLanguageParser):
         Returns:
             CompanyInfo: 提取的企业信息
         """
+        # 缓存命中
+        if free_text in self._parse_cache:
+            return self._parse_cache[free_text]
+
         # 先用规则解析
         info = self.parse(free_text)
 
@@ -452,6 +460,11 @@ class LLMParser(NaturalLanguageParser):
                         setattr(info, key, value)
             except Exception as e:
                 print(f"LLM解析失败，使用规则解析结果: {e}")
+
+        # 写入缓存
+        if len(self._parse_cache) >= self._PARSE_CACHE_MAX:
+            self._parse_cache.pop(next(iter(self._parse_cache)))
+        self._parse_cache[free_text] = info
 
         return info
 

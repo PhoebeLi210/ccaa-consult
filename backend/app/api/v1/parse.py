@@ -17,6 +17,18 @@ from app.modules.generator.llm_client import LLMService, LLMConfig, create_llm_s
 router = APIRouter(prefix="/parse", tags=["自然语言解析"])
 
 
+# LLM解析结果缓存（等同于 functools.lru_cache，适配 async 函数）
+_parse_cache: Dict[str, Dict[str, Any]] = {}
+_PARSE_CACHE_MAX = 128
+
+
+def _cache_parse_result(text: str, result: Dict[str, Any]) -> None:
+    """写入缓存，超出上限时淘汰最早条目"""
+    if len(_parse_cache) >= _PARSE_CACHE_MAX:
+        _parse_cache.pop(next(iter(_parse_cache)))
+    _parse_cache[text] = result
+
+
 # ============ 请求/响应模型 ============
 
 class ParseRequest(BaseModel):
@@ -256,7 +268,11 @@ def get_llm_service() -> LLMService:
 
 
 async def parse_with_llm(text: str) -> Dict[str, Any]:
-    """使用LLM解析企业信息"""
+    """使用LLM解析企业信息（结果按输入文本缓存）"""
+    # 缓存命中
+    if text in _parse_cache:
+        return _parse_cache[text]
+    
     llm_service = get_llm_service()
     
     try:
@@ -268,6 +284,9 @@ async def parse_with_llm(text: str) -> Dict[str, Any]:
         # 处理行业代码
         if result.get("industry"):
             result["industry_code"] = get_industry_code(result["industry"])
+        
+        # 写入缓存
+        _cache_parse_result(text, result)
         
         return result
     
