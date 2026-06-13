@@ -100,7 +100,7 @@ const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
   /** 获取字段值 */
   const getFieldValue = (fieldName: string): string => {
     if (!parseResult) return '';
-    return (parseResult as Record<string, unknown>)[fieldName] as string || '';
+    return (parseResult as unknown as Record<string, unknown>)[fieldName] as string || '';
   };
 
   /** 渲染解析结果卡片 */

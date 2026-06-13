@@ -607,7 +607,7 @@ const GenerateWizard: React.FC<GenerateWizardProps> = ({
         setTimeout(() => pollGenerateStatus(taskId), 1000);
       } else if (status.status === 'completed') {
         setIsGenerating(false);
-        onGenerateComplete?.(status.generatedDocuments);
+        onGenerateComplete?.(status.generated_documents);
       } else if (status.status === 'failed') {
         setIsGenerating(false);
       }
