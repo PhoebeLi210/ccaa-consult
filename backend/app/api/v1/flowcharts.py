@@ -8,7 +8,8 @@ from uuid import UUID, uuid4
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from pydantic import BaseModel, Field
 
 from app.models.flowchart_models import Flowchart, FlowchartTemplate, FlowchartNodeConfig
@@ -149,9 +150,9 @@ router = APIRouter(prefix="/flowcharts", tags=["流程图管理"])
     summary="创建流程图",
     description="创建一个新的流程图，可以指定节点和边线配置"
 )
-def create_flowchart(
+async def create_flowchart(
     request: FlowchartCreateRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     创建新流程图
@@ -163,10 +164,11 @@ def create_flowchart(
     - **edges**: 边线配置列表（可选）
     """
     # 检查项目名称是否已存在（同一项目内）
-    existing = db.query(Flowchart).filter(
+    result = await db.execute(select(Flowchart).where(
         Flowchart.project_id == request.project_id,
         Flowchart.name == request.name
-    ).first()
+    ))
+    existing = result.scalar_one_or_none()
 
     if existing:
         raise HTTPException(
@@ -187,8 +189,8 @@ def create_flowchart(
     )
 
     db.add(flowchart)
-    db.commit()
-    db.refresh(flowchart)
+    await db.commit()
+    await db.refresh(flowchart)
 
     return flowchart
 
@@ -199,16 +201,17 @@ def create_flowchart(
     summary="获取流程图详情",
     description="根据ID获取流程图的完整信息"
 )
-def get_flowchart(
+async def get_flowchart(
     flowchart_id: UUID,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     获取流程图详情
 
     - **flowchart_id**: 流程图ID（路径参数）
     """
-    flowchart = db.query(Flowchart).filter(Flowchart.id == flowchart_id).first()
+    result = await db.execute(select(Flowchart).where(Flowchart.id == flowchart_id))
+    flowchart = result.scalar_one_or_none()
 
     if not flowchart:
         raise HTTPException(
@@ -225,10 +228,10 @@ def get_flowchart(
     summary="更新流程图",
     description="更新流程图的基本信息、节点或边线配置"
 )
-def update_flowchart(
+async def update_flowchart(
     flowchart_id: UUID,
     request: FlowchartUpdateRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     更新流程图
@@ -240,7 +243,8 @@ def update_flowchart(
     - **edges**: 新边线配置（可选）
     - **status**: 新状态（可选）
     """
-    flowchart = db.query(Flowchart).filter(Flowchart.id == flowchart_id).first()
+    result = await db.execute(select(Flowchart).where(Flowchart.id == flowchart_id))
+    flowchart = result.scalar_one_or_none()
 
     if not flowchart:
         raise HTTPException(
@@ -250,11 +254,12 @@ def update_flowchart(
 
     # 检查名称冲突
     if request.name and request.name != flowchart.name:
-        existing = db.query(Flowchart).filter(
+        existing = await db.execute(select(Flowchart).where(
             Flowchart.project_id == flowchart.project_id,
             Flowchart.name == request.name,
             Flowchart.id != flowchart_id
-        ).first()
+        ))
+        existing = existing.scalar_one_or_none()
 
         if existing:
             raise HTTPException(
@@ -287,8 +292,8 @@ def update_flowchart(
     flowchart.version += 1
     flowchart.updated_at = datetime.utcnow()
 
-    db.commit()
-    db.refresh(flowchart)
+    await db.commit()
+    await db.refresh(flowchart)
 
     return flowchart
 
@@ -299,16 +304,17 @@ def update_flowchart(
     summary="删除流程图",
     description="删除指定的流程图"
 )
-def delete_flowchart(
+async def delete_flowchart(
     flowchart_id: UUID,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     删除流程图
 
     - **flowchart_id**: 流程图ID（路径参数）
     """
-    flowchart = db.query(Flowchart).filter(Flowchart.id == flowchart_id).first()
+    result = await db.execute(select(Flowchart).where(Flowchart.id == flowchart_id))
+    flowchart = result.scalar_one_or_none()
 
     if not flowchart:
         raise HTTPException(
@@ -316,7 +322,7 @@ def delete_flowchart(
             detail=f"流程图 '{flowchart_id}' 不存在"
         )
 
-    db.delete(flowchart)
+    await db.delete(flowchart)
     db.commit()
 
     return None
@@ -328,10 +334,10 @@ def delete_flowchart(
     summary="获取项目的流程图列表",
     description="获取指定项目下的所有流程图列表"
 )
-def get_project_flowcharts(
+async def get_project_flowcharts(
     project_id: UUID,
     status: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     获取项目的流程图列表
@@ -339,12 +345,13 @@ def get_project_flowcharts(
     - **project_id**: 项目ID（路径参数）
     - **status**: 按状态筛选（可选，查询参数）
     """
-    query = db.query(Flowchart).filter(Flowchart.project_id == project_id)
+    query = select(Flowchart).where(Flowchart.project_id == project_id)
 
     if status:
-        query = query.filter(Flowchart.status == status)
+        query = query.where(Flowchart.status == status)
 
-    flowcharts = query.order_by(Flowchart.updated_at.desc()).all()
+    result = await db.execute(query.order_by(Flowchart.updated_at.desc()))
+    flowcharts = result.scalars().all()
 
     return flowcharts
 
@@ -357,9 +364,9 @@ def get_project_flowcharts(
     summary="生成作业指导书",
     description="根据流程图内容自动生成作业指导书"
 )
-def generate_instruction(
+async def generate_instruction(
     flowchart_id: UUID,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     根据流程图生成作业指导书
@@ -368,7 +375,8 @@ def generate_instruction(
 
     系统会分析流程图的节点和连接关系，生成结构化的作业指导书内容
     """
-    flowchart = db.query(Flowchart).filter(Flowchart.id == flowchart_id).first()
+    result = await db.execute(select(Flowchart).where(Flowchart.id == flowchart_id))
+    flowchart = result.scalar_one_or_none()
 
     if not flowchart:
         raise HTTPException(
@@ -495,10 +503,10 @@ def generate_instruction(
     summary="获取流程图模板列表",
     description="获取所有可用的流程图模板"
 )
-def get_flowchart_templates(
+async def get_flowchart_templates(
     category: Optional[str] = None,
     include_system: bool = True,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     获取流程图模板列表
@@ -506,15 +514,16 @@ def get_flowchart_templates(
     - **category**: 按分类筛选（可选，查询参数）
     - **include_system**: 是否包含系统模板（可选，默认true）
     """
-    query = db.query(FlowchartTemplate)
+    query = select(FlowchartTemplate)
 
     if category:
-        query = query.filter(FlowchartTemplate.category == category)
+        query = query.where(FlowchartTemplate.category == category)
 
     if not include_system:
-        query = query.filter(FlowchartTemplate.is_system == False)
+        query = query.where(FlowchartTemplate.is_system == False)
 
-    templates = query.order_by(FlowchartTemplate.created_at.desc()).all()
+    result = await db.execute(query.order_by(FlowchartTemplate.created_at.desc()))
+    templates = result.scalars().all()
 
     return templates
 
@@ -526,10 +535,10 @@ def get_flowchart_templates(
     summary="应用模板创建流程图",
     description="使用指定模板创建新的流程图"
 )
-def apply_template(
+async def apply_template(
     template_id: UUID,
     request: ApplyTemplateRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     应用模板创建流程图
@@ -540,9 +549,10 @@ def apply_template(
     - **description**: 流程图描述（可选）
     """
     # 获取模板
-    template = db.query(FlowchartTemplate).filter(
+    result = await db.execute(select(FlowchartTemplate).where(
         FlowchartTemplate.id == template_id
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(
@@ -554,10 +564,11 @@ def apply_template(
     flowchart_name = request.name or template.name
 
     # 检查名称冲突
-    existing = db.query(Flowchart).filter(
+    result = await db.execute(select(Flowchart).where(
         Flowchart.project_id == request.project_id,
         Flowchart.name == flowchart_name
-    ).first()
+    ))
+    existing = result.scalar_one_or_none()
 
     if existing:
         raise HTTPException(
@@ -579,7 +590,7 @@ def apply_template(
     )
 
     db.add(flowchart)
-    db.commit()
-    db.refresh(flowchart)
+    await db.commit()
+    await db.refresh(flowchart)
 
     return flowchart

@@ -8,7 +8,8 @@
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 from pydantic import BaseModel
 
 from app.core.database import get_db
@@ -82,7 +83,7 @@ class IndustryFileListResponse(BaseModel):
 
 @router.get("/list", response_model=List[IndustryListResponse])
 async def list_industries(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     active_only: bool = Query(True, description="仅显示启用的行业")
 ):
     """获取行业列表
@@ -90,19 +91,23 @@ async def list_industries(
     Returns:
         行业列表，包含每个行业的特有文件数量
     """
-    query = db.query(IndustryConfig)
+    query = select(IndustryConfig)
     if active_only:
-        query = query.filter(IndustryConfig.is_active == True)
+        query = query.where(IndustryConfig.is_active == True)
     
-    industries = query.order_by(IndustryConfig.industry_code).all()
+    result = await db.execute(query.order_by(IndustryConfig.industry_code))
+    industries = result.scalars().all()
     
-    result = []
+    result_list = []
     for industry in industries:
-        file_count = db.query(IndustrySpecialFile).filter(
-            IndustrySpecialFile.industry_id == industry.id
-        ).count()
+        count_result = await db.execute(
+            select(func.count()).select_from(IndustrySpecialFile).where(
+                IndustrySpecialFile.industry_id == industry.id
+            )
+        )
+        file_count = count_result.scalar()
         
-        result.append({
+        result_list.append({
             "id": industry.id,
             "industry_code": industry.industry_code,
             "industry_name": industry.industry_name,
@@ -112,13 +117,13 @@ async def list_industries(
             "special_file_count": file_count,
         })
     
-    return result
+    return result_list
 
 
 @router.get("/{industry_code}", response_model=IndustryConfigResponse)
 async def get_industry(
     industry_code: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """获取行业详情
     
@@ -128,17 +133,21 @@ async def get_industry(
     Returns:
         行业详情，包含所有特有文件
     """
-    industry = db.query(IndustryConfig).filter(
+    result = await db.execute(select(IndustryConfig).where(
         IndustryConfig.industry_code == industry_code
-    ).first()
+    ))
+    industry = result.scalar_one_or_none()
     
     if not industry:
         raise HTTPException(status_code=404, detail=f"行业不存在: {industry_code}")
     
     # 获取特有文件
-    special_files = db.query(IndustrySpecialFile).filter(
-        IndustrySpecialFile.industry_id == industry.id
-    ).order_by(IndustrySpecialFile.sort_order).all()
+    result = await db.execute(
+        select(IndustrySpecialFile).where(
+            IndustrySpecialFile.industry_id == industry.id
+        ).order_by(IndustrySpecialFile.sort_order)
+    )
+    special_files = result.scalars().all()
     
     result = industry.to_dict()
     result["special_files"] = [f.to_dict() for f in special_files]
@@ -149,7 +158,7 @@ async def get_industry(
 @router.post("/files", response_model=List[IndustryFileListResponse])
 async def get_industry_files(
     request: IndustryFileListRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """获取多个行业的文件清单
     
@@ -164,24 +173,26 @@ async def get_industry_files(
     result = []
     
     for code in request.industry_codes:
-        industry = db.query(IndustryConfig).filter(
+        result = await db.execute(select(IndustryConfig).where(
             IndustryConfig.industry_code == code
-        ).first()
+        ))
+        industry = result.scalar_one_or_none()
         
         if not industry:
             continue
         
-        query = db.query(IndustrySpecialFile).filter(
+        query = select(IndustrySpecialFile).where(
             IndustrySpecialFile.industry_id == industry.id
         )
         
         # 按层级过滤
         if request.file_levels:
-            query = query.filter(
+            query = query.where(
                 IndustrySpecialFile.file_level.in_(request.file_levels)
             )
         
-        files = query.order_by(IndustrySpecialFile.sort_order).all()
+        result = await db.execute(query.order_by(IndustrySpecialFile.sort_order))
+        files = result.scalars().all()
         
         result.append({
             "industry_code": industry.industry_code,
@@ -195,7 +206,7 @@ async def get_industry_files(
 @router.get("/{industry_code}/check-features")
 async def check_industry_features(
     industry_code: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """检查行业特征
     
@@ -207,9 +218,10 @@ async def check_industry_features(
     Returns:
         行业特征对象
     """
-    industry = db.query(IndustryConfig).filter(
+    result = await db.execute(select(IndustryConfig).where(
         IndustryConfig.industry_code == industry_code
-    ).first()
+    ))
+    industry = result.scalar_one_or_none()
     
     if not industry:
         raise HTTPException(status_code=404, detail=f"行业不存在: {industry_code}")
@@ -230,7 +242,7 @@ async def check_industry_features(
 
 
 @router.post("/init")
-async def init_industry_data(db: Session = Depends(get_db)):
+async def init_industry_data(db: AsyncSession = Depends(get_db)):
     """初始化行业数据
     
     从 init_industries.py 加载11个行业配置到数据库。
@@ -242,7 +254,7 @@ async def init_industry_data(db: Session = Depends(get_db)):
     from app.core.init_industries import init_industries
     
     try:
-        count = init_industries(db)
+        count = await init_industries(db)
         return {
             "success": True,
             "created_count": count,
@@ -255,7 +267,7 @@ async def init_industry_data(db: Session = Depends(get_db)):
 @router.get("/{industry_code}/emergency-plans")
 async def get_emergency_plans(
     industry_code: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """获取行业应急预案列表
     
@@ -265,9 +277,10 @@ async def get_emergency_plans(
     Returns:
         应急预案类型列表
     """
-    industry = db.query(IndustryConfig).filter(
+    result = await db.execute(select(IndustryConfig).where(
         IndustryConfig.industry_code == industry_code
-    ).first()
+    ))
+    industry = result.scalar_one_or_none()
     
     if not industry:
         raise HTTPException(status_code=404, detail=f"行业不存在: {industry_code}")
@@ -282,7 +295,7 @@ async def get_emergency_plans(
 @router.get("/{industry_code}/required-licenses")
 async def get_required_licenses(
     industry_code: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """获取行业所需资质许可
     
@@ -292,9 +305,10 @@ async def get_required_licenses(
     Returns:
         所需资质许可列表
     """
-    industry = db.query(IndustryConfig).filter(
+    result = await db.execute(select(IndustryConfig).where(
         IndustryConfig.industry_code == industry_code
-    ).first()
+    ))
+    industry = result.scalar_one_or_none()
     
     if not industry:
         raise HTTPException(status_code=404, detail=f"行业不存在: {industry_code}")

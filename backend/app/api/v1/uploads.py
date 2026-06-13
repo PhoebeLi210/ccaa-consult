@@ -14,8 +14,10 @@ from typing import Optional, List
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Query
 from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
+
+from sqlalchemy import select, func
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -35,7 +37,7 @@ async def upload_file(
     project_id: str,
     file: UploadFile = File(...),
     parse_excel: bool = Query(True, description="是否自动解析Excel文件"),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     上传文件到项目
@@ -45,7 +47,8 @@ async def upload_file(
     如果是Excel文件且parse_excel=True，会自动解析提取企业信息
     """
     # 验证项目存在
-    project = db.query(Project).filter(Project.project_id == project_id).first()
+    result = await db.execute(select(Project).where(Project.project_id == project_id))
+    project = result.scalar_one_or_none()
     if not project:
         raise HTTPException(status_code=404, detail="项目不存在")
     
@@ -111,8 +114,8 @@ async def upload_file(
             upload.parse_error = str(e)
     
     db.add(upload)
-    db.commit()
-    db.refresh(upload)
+    await db.commit()
+    await db.refresh(upload)
     
     response = upload.to_dict()
     response["parsed_info"] = parse_result
@@ -124,29 +127,32 @@ async def upload_file(
 async def list_uploads(
     project_id: str,
     file_type: Optional[str] = Query(None, description="按类型过滤"),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """获取项目的上传文件列表"""
-    project = db.query(Project).filter(Project.project_id == project_id).first()
+    result = await db.execute(select(Project).where(Project.project_id == project_id))
+    project = result.scalar_one_or_none()
     if not project:
         raise HTTPException(status_code=404, detail="项目不存在")
     
-    query = db.query(Upload).filter(Upload.project_id == project_id)
+    query = select(Upload).where(Upload.project_id == project_id)
     if file_type:
-        query = query.filter(Upload.file_type == file_type)
+        query = query.where(Upload.file_type == file_type)
     
-    uploads = query.order_by(Upload.created_at.desc()).all()
+    result = await db.execute(query.order_by(Upload.created_at.desc()))
+    uploads = result.scalars().all()
     
     return [u.to_dict() for u in uploads]
 
 
 @router.get("/{project_id}/{upload_id}", summary="获取上传文件详情")
-async def get_upload(project_id: str, upload_id: str, db: Session = Depends(get_db)):
+async def get_upload(project_id: str, upload_id: str, db: AsyncSession = Depends(get_db)):
     """获取上传文件详情（含解析结果）"""
-    upload = db.query(Upload).filter(
+    result = await db.execute(select(Upload).where(
         Upload.upload_id == upload_id,
         Upload.project_id == project_id
-    ).first()
+    ))
+    upload = result.scalar_one_or_none()
     
     if not upload:
         raise HTTPException(status_code=404, detail="文件记录不存在")
@@ -164,12 +170,13 @@ async def get_upload(project_id: str, upload_id: str, db: Session = Depends(get_
 
 
 @router.get("/{project_id}/{upload_id}/download", summary="下载上传的文件")
-async def download_file(project_id: str, upload_id: str, db: Session = Depends(get_db)):
+async def download_file(project_id: str, upload_id: str, db: AsyncSession = Depends(get_db)):
     """下载已上传的文件"""
-    upload = db.query(Upload).filter(
+    result = await db.execute(select(Upload).where(
         Upload.upload_id == upload_id,
         Upload.project_id == project_id
-    ).first()
+    ))
+    upload = result.scalar_one_or_none()
     
     if not upload:
         raise HTTPException(status_code=404, detail="文件记录不存在")
@@ -186,12 +193,13 @@ async def download_file(project_id: str, upload_id: str, db: Session = Depends(g
 
 
 @router.delete("/{project_id}/{upload_id}", summary="删除上传文件")
-async def delete_upload(project_id: str, upload_id: str, db: Session = Depends(get_db)):
+async def delete_upload(project_id: str, upload_id: str, db: AsyncSession = Depends(get_db)):
     """删除上传文件及其记录"""
-    upload = db.query(Upload).filter(
+    result = await db.execute(select(Upload).where(
         Upload.upload_id == upload_id,
         Upload.project_id == project_id
-    ).first()
+    ))
+    upload = result.scalar_one_or_none()
     
     if not upload:
         raise HTTPException(status_code=404, detail="文件记录不存在")
@@ -201,8 +209,8 @@ async def delete_upload(project_id: str, upload_id: str, db: Session = Depends(g
     if file_path.exists():
         file_path.unlink()
     
-    db.delete(upload)
-    db.commit()
+    await db.delete(upload)
+    await db.commit()
     
     return {"message": "文件已删除", "upload_id": upload_id}
 
@@ -216,7 +224,7 @@ async def get_template_fields():
     }
 
 
-def _update_project_from_parse(project: Project, parsed: dict, db: Session):
+def _update_project_from_parse(project: Project, parsed: dict, db: AsyncSession):
     """用Excel解析结果更新项目信息"""
     update_map = {
         "company_name": "company_name",

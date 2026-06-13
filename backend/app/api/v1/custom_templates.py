@@ -8,8 +8,8 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 from datetime import datetime
-from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, desc
 import uuid
 import os
 import yaml
@@ -82,7 +82,7 @@ async def upload_custom_template(
     standard: str = Form(..., description="适用标准"),
     file: UploadFile = File(..., description="模板YAML文件"),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     上传个人自定义模板
@@ -139,8 +139,8 @@ async def upload_custom_template(
     )
 
     db.add(template)
-    db.commit()
-    db.refresh(template)
+    await db.commit()
+    await db.refresh(template)
 
     return _template_to_response(template)
 
@@ -154,30 +154,44 @@ async def get_my_templates(
     page: int = 1,
     page_size: int = 20,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """获取当前用户的自定义模板列表"""
-    query = db.query(CustomTemplate).filter(
+    query = select(CustomTemplate).where(
         CustomTemplate.user_id == current_user["id"]
     )
 
     # 应用筛选条件
     if category:
-        query = query.filter(CustomTemplate.category == category)
+        query = query.where(CustomTemplate.category == category)
     if standard:
-        query = query.filter(CustomTemplate.standard == standard)
+        query = query.where(CustomTemplate.standard == standard)
     if document_level:
-        query = query.filter(CustomTemplate.document_level == document_level)
+        query = query.where(CustomTemplate.document_level == document_level)
     if is_active is not None:
-        query = query.filter(CustomTemplate.is_active == is_active)
+        query = query.where(CustomTemplate.is_active == is_active)
 
     # 统计总数
-    total = query.count()
+    count_query = select(func.count()).select_from(CustomTemplate).where(
+        CustomTemplate.user_id == current_user["id"]
+    )
+    if category:
+        count_query = count_query.where(CustomTemplate.category == category)
+    if standard:
+        count_query = count_query.where(CustomTemplate.standard == standard)
+    if document_level:
+        count_query = count_query.where(CustomTemplate.document_level == document_level)
+    if is_active is not None:
+        count_query = count_query.where(CustomTemplate.is_active == is_active)
+    total = (await db.execute(count_query)).scalar()
 
     # 分页查询
-    templates = query.order_by(desc(CustomTemplate.created_at)).offset(
-        (page - 1) * page_size
-    ).limit(page_size).all()
+    result = await db.execute(
+        query.order_by(desc(CustomTemplate.created_at)).offset(
+            (page - 1) * page_size
+        ).limit(page_size)
+    )
+    templates = result.scalars().all()
 
     return TemplateListResponse(
         total=total,
@@ -189,13 +203,14 @@ async def get_my_templates(
 async def get_template_detail(
     template_id: str,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """获取单个模板的详细信息"""
-    template = db.query(CustomTemplate).filter(
+    result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(status_code=404, detail="模板不存在")
@@ -207,13 +222,14 @@ async def get_template_detail(
 async def get_template_content(
     template_id: str,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """获取模板的YAML内容"""
-    template = db.query(CustomTemplate).filter(
+    result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(status_code=404, detail="模板不存在")
@@ -232,13 +248,14 @@ async def update_template(
     template_id: str,
     request: TemplateUpdateRequest,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """更新模板的基本信息（不更新文件内容）"""
-    template = db.query(CustomTemplate).filter(
+    result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(status_code=404, detail="模板不存在")
@@ -254,8 +271,8 @@ async def update_template(
         template.is_active = request.is_active
 
     template.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(template)
+    await db.commit()
+    await db.refresh(template)
 
     return _template_to_response(template)
 
@@ -266,17 +283,18 @@ async def update_template_content(
     change_log: Optional[str] = Form(None, description="变更说明"),
     file: UploadFile = File(..., description="新的模板YAML文件"),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     更新模板文件内容，自动创建新版本
 
     版本号自动递增：1.0 -> 1.1 -> 1.2 ...
     """
-    template = db.query(CustomTemplate).filter(
+    result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(status_code=404, detail="模板不存在")
@@ -329,8 +347,8 @@ async def update_template_content(
     template.change_log = change_log
     template.updated_at = datetime.utcnow()
 
-    db.commit()
-    db.refresh(template)
+    await db.commit()
+    await db.refresh(template)
 
     return _template_to_response(template)
 
@@ -339,13 +357,14 @@ async def update_template_content(
 async def get_template_versions(
     template_id: str,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """获取模板的所有版本历史"""
-    template = db.query(CustomTemplate).filter(
+    result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(status_code=404, detail="模板不存在")
@@ -389,13 +408,14 @@ async def rollback_template(
     template_id: str,
     version: str = Form(..., description="目标版本号"),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """回滚模板到指定版本"""
-    template = db.query(CustomTemplate).filter(
+    result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(status_code=404, detail="模板不存在")
@@ -431,8 +451,8 @@ async def rollback_template(
     template.change_log = f"回滚到版本{version}"
     template.updated_at = datetime.utcnow()
 
-    db.commit()
-    db.refresh(template)
+    await db.commit()
+    await db.refresh(template)
 
     return _template_to_response(template)
 
@@ -441,13 +461,14 @@ async def rollback_template(
 async def delete_template(
     template_id: str,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """删除自定义模板"""
-    template = db.query(CustomTemplate).filter(
+    result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(status_code=404, detail="模板不存在")
@@ -472,7 +493,7 @@ async def delete_template(
         print(f"删除文件失败: {e}")
 
     # 删除数据库记录
-    db.delete(template)
+    await db.delete(template)
     db.commit()
 
     return {"message": "模板已删除", "template_id": template_id}
@@ -482,13 +503,14 @@ async def delete_template(
 async def record_template_use(
     template_id: str,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """记录模板被使用一次（增加使用计数）"""
-    template = db.query(CustomTemplate).filter(
+    result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
         CustomTemplate.user_id == current_user["id"],
-    ).first()
+    ))
+    template = result.scalar_one_or_none()
 
     if not template:
         raise HTTPException(status_code=404, detail="模板不存在")
@@ -502,13 +524,16 @@ async def record_template_use(
 @router.get("/categories/list", summary="获取模板分类列表")
 async def get_template_categories(
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """获取用户所有模板的分类列表"""
-    categories = db.query(CustomTemplate.category).filter(
-        CustomTemplate.user_id == current_user["id"],
-        CustomTemplate.is_active == True,
-    ).distinct().all()
+    result = await db.execute(
+        select(CustomTemplate.category).where(
+            CustomTemplate.user_id == current_user["id"],
+            CustomTemplate.is_active == True,
+        ).distinct()
+    )
+    categories = result.scalars().all()
 
     return [c[0] for c in categories if c[0]]
 

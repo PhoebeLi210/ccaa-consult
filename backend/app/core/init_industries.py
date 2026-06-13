@@ -7,8 +7,10 @@
 运行方式：python -m app.core.init_industries
 """
 
-from sqlalchemy.orm import Session
-from app.core.database import get_db, init_db
+import asyncio
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import AsyncSessionLocal, init_db
 from app.models.models import IndustryConfig, IndustrySpecialFile
 
 
@@ -303,91 +305,95 @@ INDUSTRY_SPECIAL_FILES = {
 }
 
 
-def init_industries(db: Session = None):
+async def init_industries(db: AsyncSession = None):
     """初始化行业配置
     
     Args:
-        db: 数据库会话，None则自动创建
+        db: 异步数据库会话，None则自动创建
     """
     if db is None:
-        db = next(get_db())
-    
-    print("开始初始化行业配置...")
-    
-    # 清空现有数据（可选，用于重新初始化）
-    # db.query(IndustrySpecialFile).delete()
-    # db.query(IndustryConfig).delete()
-    # db.commit()
-    
-    created_count = 0
-    
-    for config_data in INDUSTRY_CONFIGS:
-        industry_code = config_data["industry_code"]
+        db = AsyncSessionLocal()
+        owns_session = True
+    else:
+        owns_session = False
+    try:
+        print("开始初始化行业配置...")
         
-        # 检查是否已存在
-        existing = db.query(IndustryConfig).filter(
-            IndustryConfig.industry_code == industry_code
-        ).first()
+        created_count = 0
         
-        if existing:
-            print(f"  行业已存在，跳过: {industry_code}")
-            continue
-        
-        # 创建行业配置
-        industry = IndustryConfig(**config_data)
-        db.add(industry)
-        db.flush()  # 获取ID
-        
-        # 创建行业特有文件
-        special_files = INDUSTRY_SPECIAL_FILES.get(industry_code, [])
-        for idx, file_data in enumerate(special_files):
-            special_file = IndustrySpecialFile(
-                industry_id=industry.id,
-                sort_order=idx,
-                **file_data
+        for config_data in INDUSTRY_CONFIGS:
+            industry_code = config_data["industry_code"]
+            
+            result = await db.execute(
+                select(IndustryConfig).where(IndustryConfig.industry_code == industry_code)
             )
-            db.add(special_file)
+            existing = result.scalar_one_or_none()
+            
+            if existing:
+                print(f"  行业已存在，跳过: {industry_code}")
+                continue
+            
+            industry = IndustryConfig(**config_data)
+            db.add(industry)
+            await db.flush()
+            
+            special_files = INDUSTRY_SPECIAL_FILES.get(industry_code, [])
+            for idx, file_data in enumerate(special_files):
+                special_file = IndustrySpecialFile(
+                    industry_id=industry.id,
+                    sort_order=idx,
+                    **file_data
+                )
+                db.add(special_file)
+            
+            created_count += 1
+            print(f"  创建行业: {industry_code} ({config_data['industry_name']}) - {len(special_files)}个特有文件")
         
-        created_count += 1
-        print(f"  创建行业: {industry_code} ({config_data['industry_name']}) - {len(special_files)}个特有文件")
-    
-    db.commit()
-    print(f"\n行业初始化完成！共创建 {created_count} 个行业配置。")
-    
-    return created_count
+        await db.commit()
+        print(f"\n行业初始化完成！共创建 {created_count} 个行业配置。")
+        return created_count
+    finally:
+        if owns_session:
+            await db.close()
 
 
-def get_industry_stats(db: Session = None):
+async def get_industry_stats(db: AsyncSession = None):
     """获取行业统计信息"""
     if db is None:
-        db = next(get_db())
-    
-    industries = db.query(IndustryConfig).all()
-    
-    stats = []
-    for industry in industries:
-        file_count = db.query(IndustrySpecialFile).filter(
-            IndustrySpecialFile.industry_id == industry.id
-        ).count()
+        db = AsyncSessionLocal()
+        owns_session = True
+    else:
+        owns_session = False
+    try:
+        result = await db.execute(select(IndustryConfig))
+        industries = result.scalars().all()
         
-        stats.append({
-            "industry_code": industry.industry_code,
-            "industry_name": industry.industry_name,
-            "special_file_count": file_count,
-            "has_design_development": industry.has_design_development,
-            "has_equipment_operations": industry.has_equipment_operations,
-        })
+        stats = []
+        for industry in industries:
+            count_result = await db.execute(
+                select(IndustrySpecialFile).where(IndustrySpecialFile.industry_id == industry.id)
+            )
+            file_count = len(count_result.scalars().all())
+            
+            stats.append({
+                "industry_code": industry.industry_code,
+                "industry_name": industry.industry_name,
+                "special_file_count": file_count,
+            })
+    finally:
+        if owns_session:
+            await db.close()
     
     return stats
 
 
 if __name__ == "__main__":
-    # 直接运行初始化
-    init_db()
-    count = init_industries()
-    
-    if count > 0:
-        print("\n行业统计:")
-        stats = get_industry_stats()
-        for stat in stats:
-            print(f"  {stat['industry_name']}: {stat['special_file_count']}个特有文件")
+    async def main():
+        await init_db()
+        count = await init_industries()
+        if count > 0:
+            print("\n行业统计:")
+            stats = await get_industry_stats()
+            for stat in stats:
+                print(f"  {stat['industry_name']}: {stat['special_file_count']}个特有文件")
+    asyncio.run(main())

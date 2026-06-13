@@ -7,7 +7,8 @@
 
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional, List
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 from pydantic import BaseModel, Field
 
 from app.core.database import get_db
@@ -68,7 +69,7 @@ class SafetyAssessmentResponse(BaseModel):
 async def analyze_clause_coverage(
     project_id: str,
     standards: Optional[List[str]] = None,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     分析项目文档对ISO标准条款的覆盖情况
@@ -81,14 +82,16 @@ async def analyze_clause_coverage(
         覆盖情况报告，包含每个条款的状态和补充建议
     """
     # 查找项目
-    project = db.query(Project).filter(Project.project_id == project_id).first()
+    result = await db.execute(select(Project).where(Project.project_id == project_id))
+    project = result.scalar_one_or_none()
     if not project:
         raise HTTPException(status_code=404, detail="项目不存在")
     
     # 获取项目文档
-    documents = db.query(Document).filter(
+    result = await db.execute(select(Document).where(
         Document.project_id == project_id
-    ).all()
+    ))
+    documents = result.scalars().all()
     
     if not documents:
         raise HTTPException(status_code=400, detail="项目暂无文档，请先生成文档")
@@ -126,18 +129,20 @@ async def analyze_clause_coverage(
 async def quick_coverage_check(
     project_id: str,
     standard: str = "ISO9001",
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     快速检查覆盖率（仅返回统计摘要）
     """
-    project = db.query(Project).filter(Project.project_id == project_id).first()
+    result = await db.execute(select(Project).where(Project.project_id == project_id))
+    project = result.scalar_one_or_none()
     if not project:
         raise HTTPException(status_code=404, detail="项目不存在")
     
-    documents = db.query(Document).filter(
+    result = await db.execute(select(Document).where(
         Document.project_id == project_id
-    ).all()
+    ))
+    documents = result.scalars().all()
     
     if not documents:
         raise HTTPException(status_code=400, detail="项目暂无文档")

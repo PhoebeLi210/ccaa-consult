@@ -12,7 +12,8 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 import uuid
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 
@@ -123,17 +124,19 @@ def decode_token(token: str) -> Optional[TokenData]:
 
 # ============ 数据库用户操作 ============
 
-def get_user_by_username(db: Session, username: str) -> Optional[User]:
+async def get_user_by_username(db: AsyncSession, username: str) -> Optional[User]:
     """通过用户名获取用户"""
-    return db.query(User).filter(User.username == username).first()
+    result = await db.execute(select(User).where(User.username == username))
+    return result.scalar_one_or_none()
 
 
-def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
+async def get_user_by_id(db: AsyncSession, user_id: str) -> Optional[User]:
     """通过用户ID获取用户"""
-    return db.query(User).filter(User.user_id == user_id).first()
+    result = await db.execute(select(User).where(User.user_id == user_id))
+    return result.scalar_one_or_none()
 
 
-def create_user_db(db: Session, user_data: dict) -> User:
+async def create_user_db(db: AsyncSession, user_data: dict) -> User:
     """在数据库中创建用户"""
     db_user = User(
         user_id=user_data["id"],
@@ -146,8 +149,8 @@ def create_user_db(db: Session, user_data: dict) -> User:
         status=UserStatus.ACTIVE.value,
     )
     db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    await db.commit()
+    await db.refresh(db_user)
     return db_user
 
 
@@ -155,7 +158,7 @@ def create_user_db(db: Session, user_data: dict) -> User:
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ) -> User:
     """获取当前用户（从数据库）"""
     credentials_exception = HTTPException(
@@ -168,7 +171,7 @@ async def get_current_user(
     if token_data is None:
         raise credentials_exception
     
-    user = get_user_by_id(db, token_data.user_id)
+    user = await get_user_by_id(db, token_data.user_id)
     if user is None:
         raise credentials_exception
     
@@ -200,7 +203,7 @@ def user_to_response(user: User) -> UserResponse:
 # ============ API路由 ============
 
 @router.post("/register", response_model=UserResponse, summary="用户注册")
-async def register(user: UserCreate, db: Session = Depends(get_db)):
+async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """
     注册新用户
     
@@ -211,7 +214,7 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     - company: 公司（可选）
     """
     # 检查用户名是否已存在
-    existing_user = get_user_by_username(db, user.username)
+    existing_user = await get_user_by_username(db, user.username)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -231,13 +234,13 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
         "hashed_password": hashed_password,
     }
     
-    db_user = create_user_db(db, user_data)
+    db_user = await create_user_db(db, user_data)
     
     return user_to_response(db_user)
 
 
 @router.post("/login", response_model=Token, summary="用户登录")
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     """
     用户登录
     
@@ -246,7 +249,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     - password: 密码
     """
     # 查找用户
-    user = get_user_by_username(db, form_data.username)
+    user = await get_user_by_username(db, form_data.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -264,7 +267,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     
     # 更新最后登录时间
     user.last_login = datetime.utcnow()
-    db.commit()
+    await db.commit()
     
     # 创建令牌
     access_token = create_access_token(
@@ -280,7 +283,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 
 
 @router.post("/login/json", response_model=Token, summary="JSON格式登录")
-async def login_json(credentials: UserLogin, db: Session = Depends(get_db)):
+async def login_json(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
     """
     JSON格式登录（用于前端API调用）
     
@@ -288,7 +291,7 @@ async def login_json(credentials: UserLogin, db: Session = Depends(get_db)):
     - password: 密码
     """
     # 查找用户
-    user = get_user_by_username(db, credentials.username)
+    user = await get_user_by_username(db, credentials.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -304,7 +307,7 @@ async def login_json(credentials: UserLogin, db: Session = Depends(get_db)):
     
     # 更新最后登录时间
     user.last_login = datetime.utcnow()
-    db.commit()
+    await db.commit()
     
     # 创建令牌
     access_token = create_access_token(
@@ -331,7 +334,7 @@ async def update_me(
     company: Optional[str] = None,
     email: Optional[str] = None,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """更新当前用户信息"""
     if full_name is not None:
@@ -342,8 +345,8 @@ async def update_me(
         current_user.email = email
     
     current_user.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(current_user)
+    await db.commit()
+    await db.refresh(current_user)
     
     return user_to_response(current_user)
 
@@ -364,7 +367,7 @@ async def change_password(
     old_password: str,
     new_password: str,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """修改密码"""
     # 验证旧密码
@@ -377,7 +380,7 @@ async def change_password(
     # 更新密码
     current_user.hashed_password = get_password_hash(new_password)
     current_user.updated_at = datetime.utcnow()
-    db.commit()
+    await db.commit()
     
     return {"message": "密码修改成功"}
 
@@ -388,11 +391,12 @@ async def change_password(
 async def list_users(
     skip: int = 0,
     limit: int = 20,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """获取用户列表"""
-    total = db.query(User).count()
-    users = db.query(User).offset(skip).limit(limit).all()
+    total = (await db.execute(select(func.count()).select_from(User))).scalar()
+    result = await db.execute(select(User).offset(skip).limit(limit))
+    users = result.scalars().all()
     
     return {
         "total": total,

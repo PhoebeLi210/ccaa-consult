@@ -9,7 +9,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 from datetime import datetime
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 import uuid
 import json
 
@@ -72,7 +73,7 @@ class ConversationStatusResponse(BaseModel):
 @router.post("/start", response_model=ConversationResponse, summary="开始多轮对话")
 async def start_conversation(
     request: ConversationStartRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     开始一个新的多轮对话会话
@@ -118,7 +119,7 @@ async def start_conversation(
     
     # 如果有项目ID，保存到项目原始输入
     if request.project_id:
-        _save_to_project_raw_input(request.project_id, request.initial_text, parsed_info, db)
+        await _save_to_project_raw_input(request.project_id, request.initial_text, parsed_info, db)
     
     return ConversationResponse(
         session_id=session_id,
@@ -134,7 +135,7 @@ async def start_conversation(
 @router.post("/continue", response_model=ConversationResponse, summary="继续对话")
 async def continue_conversation(
     request: ConversationContinueRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     继续多轮对话，回答追问问题
@@ -191,7 +192,7 @@ async def continue_conversation(
     
     # 如果完成且有关联项目，更新项目信息
     if status == "complete" and session.get("project_id"):
-        _update_project_with_complete_info(session["project_id"], session["parsed_info"], db)
+                await _update_project_with_complete_info(session["project_id"], session["parsed_info"], db)
     
     return ConversationResponse(
         session_id=session_id,
@@ -226,7 +227,7 @@ async def get_conversation_status(session_id: str):
 async def complete_conversation(
     session_id: str,
     project_id: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     手动完成对话，将收集的信息保存到项目
@@ -243,7 +244,7 @@ async def complete_conversation(
         raise HTTPException(status_code=400, detail="未指定项目ID")
     
     # 更新项目信息
-    _update_project_with_complete_info(target_project_id, session["parsed_info"], db)
+    await _update_project_with_complete_info(target_project_id, session["parsed_info"], db)
     
     # 标记会话完成
     session["status"] = "completed"
@@ -397,11 +398,11 @@ def _extract_info_from_answer(answer: str, expected_fields: List[str]) -> Dict[s
     return extracted
 
 
-def _save_to_project_raw_input(
+async def _save_to_project_raw_input(
     project_id: str,
     content: str,
     parsed_info: Dict[str, Any],
-    db: Session
+    db: AsyncSession
 ):
     """保存到项目原始输入表"""
     try:
@@ -412,20 +413,21 @@ def _save_to_project_raw_input(
             parsed_json=parsed_info,
         )
         db.add(raw_input)
-        db.commit()
+        await db.commit()
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         print(f"保存原始输入失败: {e}")
 
 
-def _update_project_with_complete_info(
+async def _update_project_with_complete_info(
     project_id: str,
     parsed_info: Dict[str, Any],
-    db: Session
+    db: AsyncSession
 ):
     """将完整信息更新到项目"""
     try:
-        project = db.query(Project).filter(Project.project_id == project_id).first()
+        result = await db.execute(select(Project).where(Project.project_id == project_id))
+        project = result.scalar_one_or_none()
         if not project:
             return
         
@@ -452,7 +454,7 @@ def _update_project_with_complete_info(
             if parsed_info.get("legal_representative"):
                 project.config["legal_representative"] = parsed_info["legal_representative"]
         
-        db.commit()
+        await db.commit()
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         print(f"更新项目信息失败: {e}")

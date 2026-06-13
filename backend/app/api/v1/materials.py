@@ -9,7 +9,8 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 from datetime import datetime
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 import uuid
 import json
 import os
@@ -141,7 +142,7 @@ async def upload_material(
     project_id: str = Form(..., description="项目ID"),
     material_type: str = Form(..., description="材料类型"),
     file: UploadFile = File(..., description="上传的文件"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     上传补充材料（组织架构图、设备清单等）
@@ -156,7 +157,8 @@ async def upload_material(
     - other: 其他材料
     """
     # 验证项目存在
-    project = db.query(Project).filter(Project.project_id == project_id).first()
+    result = await db.execute(select(Project).where(Project.project_id == project_id))
+    project = result.scalar_one_or_none()
     if not project:
         raise HTTPException(status_code=404, detail="项目不存在")
     
@@ -221,7 +223,7 @@ async def upload_material(
     material_info["status"] = "completed" if extracted_info else "failed"
     
     # 保存到项目原始输入
-    _save_material_to_project(project_id, material_type, file.filename, extracted_info, db)
+    await _save_material_to_project(project_id, material_type, file.filename, extracted_info, db)
     
     return MaterialUploadResponse(
         material_id=material_id,
@@ -449,12 +451,12 @@ async def _extract_license_info(file_path: str, content: bytes) -> Dict[str, Any
     return {"note": "证书已保存"}
 
 
-def _save_material_to_project(
+async def _save_material_to_project(
     project_id: str,
     material_type: str,
     file_name: str,
     extracted_info: Optional[Dict[str, Any]],
-    db: Session
+    db: AsyncSession
 ):
     """保存材料信息到项目原始输入"""
     try:
@@ -465,7 +467,7 @@ def _save_material_to_project(
             parsed_json=extracted_info or {},
         )
         db.add(raw_input)
-        db.commit()
+        await db.commit()
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         print(f"保存材料信息失败: {e}")

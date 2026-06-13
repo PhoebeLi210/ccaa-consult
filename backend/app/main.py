@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     logger = get_logger("main")
     logger.info("智质通·咨询版 启动中...")
     logger.info("初始化数据库...")
-    init_db()
+    await init_db()
     logger.info("数据库初始化完成")
     
     # 启动时创建一次备份

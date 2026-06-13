@@ -12,7 +12,8 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from pathlib import Path
-from sqlalchemy.orm import Session
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 import io
 import json
@@ -151,7 +152,7 @@ async def generate_single(request: GenerateRequest):
 @router.post("/generate/batch", response_model=GenerateResponse, summary="批量生成文档")
 async def generate_batch(
     request: GenerateBatchRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     批量生成文档
@@ -181,7 +182,7 @@ async def generate_batch(
                 saved_document_ids = _save_documents_to_db(db, documents, request.project_id)
                 print(f"已将 {len(saved_document_ids)} 个文档写入数据库，项目ID: {request.project_id}")
             except Exception as db_err:
-                db.rollback()
+                await db.rollback()
                 print(f"数据库写入失败（文档已生成但未持久化）: {str(db_err)}")
         
         return GenerateResponse(
@@ -203,7 +204,7 @@ async def generate_batch(
 @router.post("/generate/level", response_model=GenerateResponse, summary="按层级生成")
 async def generate_level(
     request: GenerateLevelRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     按层级生成所有文档（支持行业过滤）
@@ -233,7 +234,7 @@ async def generate_level(
                 saved_document_ids = _save_documents_to_db(db, documents, request.project_id)
                 print(f"已将 {len(saved_document_ids)} 个文档写入数据库，项目ID: {request.project_id}")
             except Exception as db_err:
-                db.rollback()
+                await db.rollback()
                 print(f"数据库写入失败（文档已生成但未持久化）: {str(db_err)}")
         
         return GenerateResponse(
@@ -255,7 +256,7 @@ async def generate_level(
 @router.post("/generate/all", response_model=GenerateResponse, summary="生成全套体系文件")
 async def generate_all_documents(
     request: GenerateAllRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     根据企业信息生成全套体系文件（支持行业过滤）
@@ -314,7 +315,7 @@ async def generate_all_documents(
                 saved_document_ids = _save_documents_to_db(db, documents, request.project_id)
                 print(f"已将 {len(saved_document_ids)} 个文档写入数据库，项目ID: {request.project_id}")
             except Exception as db_err:
-                db.rollback()
+                await db.rollback()
                 print(f"数据库写入失败（文档已生成但未持久化）: {str(db_err)}")
                 # 不中断流程，仍然返回生成结果
         
@@ -413,8 +414,8 @@ def _get_level_name(file_level) -> str:
     return name_map.get(file_level, "四级文件")
 
 
-def _save_documents_to_db(
-    db: Session, 
+async def _save_documents_to_db(
+    db: AsyncSession, 
     documents: List[GeneratedDocument], 
     project_id: str
 ) -> List[str]:
@@ -447,7 +448,7 @@ def _save_documents_to_db(
         db.add(db_doc)
         document_ids.append(doc_id)
     
-    db.commit()
+    await db.commit()
     return document_ids
 
 
@@ -514,7 +515,7 @@ async def download_single_docx(task_id: str, document_index: int = 0):
 @router.post("/export/zip", summary="生成并下载全套文档ZIP包")
 async def export_and_download_zip(
     request: ExportRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     导出全套体系文件并打包为ZIP下载
@@ -643,7 +644,7 @@ async def export_and_download_zip(
 @router.get("/export/single/{document_id}", summary="导出单个文档为.docx")
 async def export_single_document(
     document_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     从数据库读取单个文档并导出为 .docx 文件下载
@@ -838,7 +839,7 @@ COMMON_LEVEL_C_FILES = [
 
 
 @router.post("/file-list", response_model=FileListResponse, summary="生成文件清单")
-async def generate_file_list(request: FileListRequest, db: Session = Depends(get_db)):
+async def generate_file_list(request: FileListRequest, db: AsyncSession = Depends(get_db)):
     """
     根据行业配置生成完整的文件清单
     
@@ -1001,7 +1002,7 @@ class EquipmentCategoryResponse(BaseModel):
 @router.post("/equipment-operations", response_model=GenerateResponse, summary="生成设备操作规程")
 async def generate_equipment_operations_api(
     request: EquipmentOperationRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     根据设备清单动态生成设备操作规程
@@ -1155,7 +1156,7 @@ class EmergencyPlanCategoryResponse(BaseModel):
 @router.post("/emergency-plans", response_model=GenerateResponse, summary="生成应急预案")
 async def generate_emergency_plans_api(
     request: EmergencyPlanRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     根据预案类型列表动态生成应急预案
