@@ -38,11 +38,7 @@ class CertificationType(Enum):
     RE_CERTIFICATION = "再认证"
 
 
-class StandardType(Enum):
-    """标准类型"""
-    ISO9001 = "ISO9001"
-    ISO14001 = "ISO14001"
-    ISO45001 = "ISO45001"
+from app.core.constants import StandardType
 
 
 class NaturalLanguageParser:

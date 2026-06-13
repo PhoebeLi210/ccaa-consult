@@ -10,24 +10,9 @@ import json
 from typing import Optional, List, Dict, Any, Tuple
 from dataclasses import dataclass, field
 from pathlib import Path
-from enum import Enum
 import yaml
 
-
-class DocumentLevel(Enum):
-    """文档层级"""
-    LEVEL_1 = "一级文件"  # 管理手册
-    LEVEL_2 = "二级文件"  # 程序文件
-    LEVEL_3 = "三级文件"  # 作业指导书
-    LEVEL_4 = "四级文件"  # 记录表格
-
-
-class StandardType(Enum):
-    """标准类型"""
-    ISO9001 = "ISO9001"
-    ISO14001 = "ISO14001"
-    ISO45001 = "ISO45001"
-    INTEGRATED = "INTEGRATED"  # 三标一体
+from app.core.constants import DocumentLevel, StandardType
 
 
 @dataclass
