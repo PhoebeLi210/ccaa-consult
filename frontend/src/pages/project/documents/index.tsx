@@ -187,7 +187,7 @@ const ProjectDocumentsPage: React.FC = () => {
                     }
                     description={
                       <span style={{ fontSize: 12, color: '#999' }}>
-                        {doc.createdAt}
+                        {doc.created_at}
                       </span>
                     }
                     extra={<ConfirmBadge status={doc.status} />}
@@ -211,8 +211,8 @@ const ProjectDocumentsPage: React.FC = () => {
                   </div>
                   <div style={{ fontSize: 13, color: '#666', lineHeight: 1.8 }}>
                     <p>文档类型：{selectedDoc.type}</p>
-                    <p>创建时间：{selectedDoc.createdAt}</p>
-                    <p>更新时间：{selectedDoc.updatedAt}</p>
+                    <p>创建时间：{selectedDoc.created_at}</p>
+                    <p>更新时间：{selectedDoc.updated_at}</p>
                   </div>
                   {selectedDoc.url && (
                     <div style={{ marginTop: 12 }}>
@@ -297,8 +297,8 @@ const ProjectDocumentsPage: React.FC = () => {
     },
     {
       title: '创建时间',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      dataIndex: 'created_at',
+      key: 'created_at',
       width: 180,
     },
     {
@@ -414,11 +414,11 @@ const ProjectDocumentsPage: React.FC = () => {
             </p>
             <p>
               <strong>创建时间：</strong>
-              {selectedDoc.createdAt}
+              {selectedDoc.created_at}
             </p>
             <p>
               <strong>更新时间：</strong>
-              {selectedDoc.updatedAt}
+              {selectedDoc.updated_at}
             </p>
             {selectedDoc.url && (
               <p>

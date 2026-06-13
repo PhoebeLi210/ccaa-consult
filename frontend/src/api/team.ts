@@ -3,37 +3,37 @@ import { request } from './request';
 export type TeamRole = 'owner' | 'admin' | 'member' | 'viewer';
 
 export interface Team {
-  teamId: string;
+  team_id: string;
   name: string;
   description?: string;
-  ownerId: string;
+  owner_id: string;
   settings: {
-    allowMemberInvite: boolean;
-    defaultRole: TeamRole;
+    allow_member_invite: boolean;
+    default_role: TeamRole;
   };
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TeamMember {
   id: string;
-  teamId: string;
-  userId: string;
+  team_id: string;
+  user_id: string;
   role: TeamRole;
   permissions: Record<string, boolean>;
-  joinedAt: string;
-  userName?: string;
-  userEmail?: string;
+  joined_at: string;
+  user_name?: string;
+  user_email?: string;
 }
 
 export interface RolePermissions {
-  canManageTeam: boolean;
-  canInviteMember: boolean;
-  canRemoveMember: boolean;
-  canManageProject: boolean;
-  canEditDocument: boolean;
-  canViewDocument: boolean;
-  canDeleteProject: boolean;
+  can_manage_team: boolean;
+  can_invite_member: boolean;
+  can_remove_member: boolean;
+  can_manage_project: boolean;
+  can_edit_document: boolean;
+  can_view_document: boolean;
+  can_delete_project: boolean;
 }
 
 export function getMyTeams() {

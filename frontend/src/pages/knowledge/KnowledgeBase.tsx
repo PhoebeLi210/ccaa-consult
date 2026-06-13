@@ -250,7 +250,7 @@ const KnowledgeBase: React.FC = () => {
             <Tooltip title="浏览次数">
               <Space size={4}>
                 <HistoryOutlined style={{ color: '#999' }} />
-                <Text type="secondary">{item.viewCount}</Text>
+                <Text type="secondary">{item.view_count}</Text>
               </Space>
             </Tooltip>
             <Button
@@ -288,8 +288,8 @@ const KnowledgeBase: React.FC = () => {
                 <Tag icon={categoryConfig.icon} color={categoryConfig.color}>
                   {categoryConfig.label}
                 </Tag>
-                {item.industryName && (
-                  <Tag color="cyan">{item.industryName}</Tag>
+                {item.industry_name && (
+                  <Tag color="cyan">{item.industry_name}</Tag>
                 )}
                 {item.tags?.slice(0, 3).map((tag) => (
                   <Tag key={tag}>{tag}</Tag>

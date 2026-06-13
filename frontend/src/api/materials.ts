@@ -10,22 +10,22 @@ export interface MaterialTypeConfig {
 }
 
 export interface MaterialInfo {
-  materialId: string;
-  materialType: string;
-  fileName: string;
-  fileSize: number;
+  material_id: string;
+  material_type: string;
+  file_name: string;
+  file_size: number;
   status: string;
-  extractedInfo?: Record<string, any>;
-  uploadedAt: string;
+  extracted_info?: Record<string, any>;
+  uploaded_at: string;
 }
 
 export interface MaterialUploadResponse {
-  materialId: string;
-  materialType: string;
-  fileName: string;
-  fileSize: number;
+  material_id: string;
+  material_type: string;
+  file_name: string;
+  file_size: number;
   status: string;
-  extractedInfo?: Record<string, any>;
+  extracted_info?: Record<string, any>;
   message: string;
 }
 
@@ -78,7 +78,7 @@ export function uploadMaterial(
 }
 
 export function getProjectMaterials(projectId: string, materialType?: string) {
-  return request.get<unknown, { projectId: string; materials: MaterialInfo[]; totalCount: number }>(
+  return request.get<unknown, { project_id: string; materials: MaterialInfo[]; total_count: number }>(
     `/v1/materials/project/${projectId}`,
     { params: { material_type: materialType } }
   );
@@ -88,8 +88,8 @@ export function getMaterialDetail(materialId: string) {
   return request.get<unknown, MaterialInfo>(`/v1/materials/${materialId}`);
 }
 
-export function deleteMaterial(materialId: string) {
-  return request.delete<unknown, { message: string; materialId: string }>(`/v1/materials/${materialId}`);
+export function deleteMaterial(material_id: string) {
+  return request.delete<unknown, { message: string; material_id: string }>(`/v1/materials/${material_id}`);
 }
 
 export function reprocessMaterial(materialId: string) {

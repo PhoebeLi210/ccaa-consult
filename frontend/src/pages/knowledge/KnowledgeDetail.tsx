@@ -143,8 +143,8 @@ const KnowledgeDetail: React.FC = () => {
               {knowledge.standard && (
                 <Tag color="blue">{knowledge.standard}</Tag>
               )}
-              {knowledge.industryName && (
-                <Tag color="cyan">{knowledge.industryName}</Tag>
+              {knowledge.industry_name && (
+                <Tag color="cyan">{knowledge.industry_name}</Tag>
               )}
             </Space>
             <Title level={3} style={{ marginTop: 12, marginBottom: 8 }}>
@@ -153,10 +153,10 @@ const KnowledgeDetail: React.FC = () => {
             <Space split={<Divider type="vertical" />}>
               <Space size={4}>
                 <HistoryOutlined style={{ color: '#999' }} />
-                <Text type="secondary">浏览 {knowledge.viewCount} 次</Text>
+                <Text type="secondary">浏览 {knowledge.view_count} 次</Text>
               </Space>
               <Text type="secondary">
-                更新于 {new Date(knowledge.updatedAt).toLocaleDateString()}
+                更新于 {new Date(knowledge.updated_at).toLocaleDateString()}
               </Text>
             </Space>
           </div>

@@ -108,7 +108,7 @@ const TeamPage: React.FC = () => {
   const handleSave = async (values: any) => {
     try {
       if (editingTeam) {
-        await updateTeam(editingTeam.teamId, values);
+        await updateTeam(editingTeam.team_id, values);
         message.success('团队更新成功');
       } else {
         await createTeam(values);
@@ -138,8 +138,8 @@ const TeamPage: React.FC = () => {
     setDetailDrawerVisible(true);
     try {
       const [detailData, permissionsData] = await Promise.all([
-        getTeamDetail(team.teamId),
-        getMyPermissions(team.teamId),
+        getTeamDetail(team.team_id),
+        getMyPermissions(team.team_id),
       ]);
       setMembers(detailData.members);
       setMyPermissions(permissionsData as Record<string, boolean>);
@@ -152,12 +152,12 @@ const TeamPage: React.FC = () => {
   const handleInvite = async (values: { email: string; role: TeamRole }) => {
     if (!selectedTeam) return;
     try {
-      await inviteTeamMember(selectedTeam.teamId, values);
+      await inviteTeamMember(selectedTeam.team_id, values);
       message.success('邀请已发送');
       setInviteModalVisible(false);
       inviteForm.resetFields();
       // 刷新成员列表
-      const detailData = await getTeamDetail(selectedTeam.teamId);
+      const detailData = await getTeamDetail(selectedTeam.team_id);
       setMembers(detailData.members);
     } catch (error) {
       message.error('邀请失败');
@@ -165,13 +165,13 @@ const TeamPage: React.FC = () => {
   };
 
   // 更新成员角色
-  const handleUpdateRole = async (userId: string, role: TeamRole) => {
+  const handleUpdateRole = async (user_id: string, role: TeamRole) => {
     if (!selectedTeam) return;
     try {
-      await updateMemberRole(selectedTeam.teamId, userId, role);
+      await updateMemberRole(selectedTeam.team_id, user_id, role);
       message.success('角色更新成功');
       // 刷新成员列表
-      const detailData = await getTeamDetail(selectedTeam.teamId);
+      const detailData = await getTeamDetail(selectedTeam.team_id);
       setMembers(detailData.members);
     } catch (error) {
       message.error('更新失败');
@@ -179,12 +179,12 @@ const TeamPage: React.FC = () => {
   };
 
   // 移除成员
-  const handleRemoveMember = async (userId: string) => {
+  const handleRemoveMember = async (user_id: string) => {
     if (!selectedTeam) return;
     try {
-      await removeTeamMember(selectedTeam.teamId, userId);
+      await removeTeamMember(selectedTeam.team_id, user_id);
       message.success('成员已移除');
-      setMembers(members.filter((m) => m.userId !== userId));
+      setMembers(members.filter((m) => m.user_id !== user_id));
     } catch (error) {
       message.error('移除失败');
     }
@@ -241,7 +241,7 @@ const TeamPage: React.FC = () => {
                       description="删除后无法恢复，是否继续？"
                       onConfirm={(e) => {
                         e?.stopPropagation();
-                        handleDelete(team.teamId);
+                        handleDelete(team.team_id);
                       }}
                       okText="删除"
                       cancelText="取消"
@@ -272,7 +272,7 @@ const TeamPage: React.FC = () => {
                           {team.description || '无描述'}
                         </Text>
                         <Text type="secondary" style={{ fontSize: 12 }}>
-                          创建于 {new Date(team.createdAt).toLocaleDateString()}
+                          创建于 {new Date(team.created_at).toLocaleDateString()}
                         </Text>
                       </Space>
                     }
@@ -315,7 +315,7 @@ const TeamPage: React.FC = () => {
         open={detailDrawerVisible}
         onClose={() => setDetailDrawerVisible(false)}
         extra={
-          hasPermission('canInviteMember') && (
+          hasPermission('can_invite_member') && (
             <Button
               type="primary"
               icon={<UserAddOutlined />}
@@ -333,13 +333,13 @@ const TeamPage: React.FC = () => {
               renderItem={(member) => (
                 <List.Item
                   actions={[
-                    hasPermission('canManageTeam') && member.role !== 'owner' && (
+                    hasPermission('can_manage_team') && member.role !== 'owner' && (
                       <Select
                         key="role"
                         value={member.role}
                         style={{ width: 100 }}
-                        onChange={(value) => handleUpdateRole(member.userId, value)}
-                        disabled={!hasPermission('canManageTeam')}
+                        onChange={(value) => handleUpdateRole(member.user_id, value)}
+                        disabled={!hasPermission('can_manage_team')}
                       >
                         {Object.entries(ROLE_CONFIG).map(([role, config]) => (
                           <Option key={role} value={role}>
@@ -348,14 +348,14 @@ const TeamPage: React.FC = () => {
                         ))}
                       </Select>
                     ),
-                    hasPermission('canRemoveMember') &&
+                    hasPermission('can_remove_member') &&
                       member.role !== 'owner' &&
-                      member.userId !== selectedTeam?.ownerId && (
+                      member.user_id !== selectedTeam?.owner_id && (
                         <Popconfirm
                           key="remove"
                           title="确认移除"
                           description="确定要移除此成员吗？"
-                          onConfirm={() => handleRemoveMember(member.userId)}
+                          onConfirm={() => handleRemoveMember(member.user_id)}
                           okText="移除"
                           cancelText="取消"
                         >
@@ -370,11 +370,11 @@ const TeamPage: React.FC = () => {
                     avatar={<Avatar icon={<UserOutlined />} />}
                     title={
                       <Space>
-                        <Text>{member.userId}</Text>
+                        <Text>{member.user_id}</Text>
                         <Tag color={ROLE_CONFIG[member.role].color}>
                           {ROLE_CONFIG[member.role].label}
                         </Tag>
-                        {member.userId === selectedTeam?.ownerId && (
+                        {member.user_id === selectedTeam?.owner_id && (
                           <Tag color="gold">创建者</Tag>
                         )}
                       </Space>

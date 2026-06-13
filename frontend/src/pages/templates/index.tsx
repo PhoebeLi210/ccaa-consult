@@ -113,7 +113,7 @@ const TemplatesPage: React.FC = () => {
   const handleSave = async (values: any) => {
     try {
       if (editingTemplate) {
-        await updateCustomTemplate(editingTemplate.templateId, values);
+        await updateCustomTemplate(editingTemplate.template_id, values);
         message.success('模板更新成功');
       } else {
         // 新建模板需要内容
@@ -131,9 +131,9 @@ const TemplatesPage: React.FC = () => {
   };
 
   // 删除模板
-  const handleDelete = async (templateId: string) => {
+  const handleDelete = async (template_id: string) => {
     try {
-      await deleteCustomTemplate(templateId);
+      await deleteCustomTemplate(template_id);
       message.success('模板删除成功');
       loadTemplates();
     } catch (error) {
@@ -145,7 +145,7 @@ const TemplatesPage: React.FC = () => {
   const handleViewVersions = async (template: CustomTemplate) => {
     setSelectedTemplate(template);
     try {
-      const data = await getTemplateVersions(template.templateId);
+      const data = await getTemplateVersions(template.template_id);
       setVersions(data);
       setVersionDrawerVisible(true);
     } catch (error) {
@@ -157,7 +157,7 @@ const TemplatesPage: React.FC = () => {
   const handleRollback = async (version: string) => {
     if (!selectedTemplate) return;
     try {
-      await rollbackTemplate(selectedTemplate.templateId, version);
+      await rollbackTemplate(selectedTemplate.template_id, version);
       message.success(`已回滚到版本 ${version}`);
       setVersionDrawerVisible(false);
       loadTemplates();
@@ -169,7 +169,7 @@ const TemplatesPage: React.FC = () => {
   // 预览模板
   const handlePreview = async (template: CustomTemplate) => {
     try {
-      const data = await getCustomTemplate(template.templateId);
+      const data = await getCustomTemplate(template.template_id);
       setPreviewContent(data.content);
       setSelectedTemplate(template);
       setPreviewDrawerVisible(true);
@@ -229,8 +229,8 @@ const TemplatesPage: React.FC = () => {
     },
     {
       title: '更新时间',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
+      dataIndex: 'updated_at',
+      key: 'updated_at',
       width: 180,
       render: (date: string) => new Date(date).toLocaleString(),
     },
@@ -264,7 +264,7 @@ const TemplatesPage: React.FC = () => {
           <Popconfirm
             title="确认删除"
             description="删除后无法恢复，是否继续？"
-            onConfirm={() => handleDelete(record.templateId)}
+            onConfirm={() => handleDelete(record.template_id)}
             okText="删除"
             cancelText="取消"
           >
@@ -293,7 +293,7 @@ const TemplatesPage: React.FC = () => {
         <Table
           columns={columns}
           dataSource={templates}
-          rowKey="templateId"
+          rowKey="template_id"
           loading={loading}
           pagination={{ pageSize: 10 }}
         />
@@ -369,7 +369,7 @@ const TemplatesPage: React.FC = () => {
                   <Space>
                     <Tag color="blue">v{v.version}</Tag>
                     <Text type="secondary" style={{ fontSize: 12 }}>
-                      {new Date(v.updatedAt).toLocaleString()}
+                      {new Date(v.updated_at).toLocaleString()}
                     </Text>
                   </Space>
                   {index > 0 && (

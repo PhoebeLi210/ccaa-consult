@@ -10,30 +10,30 @@ export interface KnowledgeItem {
   id: string;
   title: string;
   category: KnowledgeCategory;
-  subCategory?: string;
+  sub_category?: string;
   standard?: string;  // 所属标准，如 ISO9001, ISO14001, ISO45001
   industry?: string;  // 所属行业代码
-  industryName?: string;
+  industry_name?: string;
   tags: string[];
   summary: string;
   content?: string;
-  viewCount: number;
-  createdAt: string;
-  updatedAt: string;
+  view_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
 /** 标准条款类型 */
 export interface StandardClause {
   id: string;
   standard: string;  // ISO9001, ISO14001, ISO45001
-  clauseNumber: string;  // 条款号，如 4.1, 5.2
+  clause_number: string;  // 条款号，如 4.1, 5.2
   title: string;
   content: string;
   requirements: string[];  // 要求列表
   records: RecordRequirement[];  // 记录要求
-  auditPoints: AuditPoint[];  // 审核要点
-  relatedClauses: string[];  // 相关条款
-  parentClause?: string;  // 父条款
+  audit_points: AuditPoint[];  // 审核要点
+  related_clauses: string[];  // 相关条款
+  parent_clause?: string;  // 父条款
   level: number;  // 层级
 }
 
@@ -42,7 +42,7 @@ export interface RecordRequirement {
   id: string;
   name: string;
   description: string;
-  retentionPeriod?: string;  // 保存期限
+  retention_period?: string;  // 保存期限
   template?: string;  // 模板文件名
   required: boolean;
 }
@@ -53,22 +53,22 @@ export interface AuditPoint {
   content: string;
   method: 'document' | 'interview' | 'observation';  // 审核方法
   evidence: string[];  // 所需证据
-  commonIssues: string[];  // 常见问题
+  common_issues: string[];  // 常见问题
 }
 
 /** 行业知识类型 */
 export interface IndustryKnowledge {
   id: string;
-  industryCode: string;
-  industryName: string;
+  industry_code: string;
+  industry_name: string;
   category: string;
   title: string;
   content: string;
-  applicableStandards: string[];
-  riskFactors: string[];
-  controlMeasures: string[];
-  createdAt: string;
-  updatedAt: string;
+  applicable_standards: string[];
+  risk_factors: string[];
+  control_measures: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 /** 知识搜索结果类型 */
@@ -76,7 +76,7 @@ export interface KnowledgeSearchResult {
   items: KnowledgeItem[];
   total: number;
   page: number;
-  pageSize: number;
+  page_size: number;
   highlights?: Record<string, string[]>;  // 高亮字段
 }
 
@@ -99,11 +99,11 @@ export function getKnowledgeCategoryTree() {
 /** 获取知识列表 */
 export function getKnowledgeList(params?: {
   category?: KnowledgeCategory;
-  subCategory?: string;
+  sub_category?: string;
   standard?: string;
   industry?: string;
   page?: number;
-  pageSize?: number;
+  page_size?: number;
 }) {
   return request.get<unknown, KnowledgeSearchResult>('/v1/knowledge/list', { params });
 }
@@ -120,7 +120,7 @@ export function searchKnowledge(params: {
   standard?: string;
   industry?: string;
   page?: number;
-  pageSize?: number;
+  page_size?: number;
 }) {
   return request.get<unknown, KnowledgeSearchResult>('/v1/knowledge/search', { params });
 }
@@ -128,7 +128,7 @@ export function searchKnowledge(params: {
 /** 获取标准条款列表 */
 export function getStandardClauses(params?: {
   standard?: string;
-  parentClause?: string;
+  parent_clause?: string;
 }) {
   return request.get<unknown, StandardClause[]>('/v1/knowledge/standard-clauses', { params });
 }
@@ -145,16 +145,16 @@ export function getStandardClauseTree(standard: string) {
 
 /** 获取行业知识列表 */
 export function getIndustryKnowledge(params?: {
-  industryCode?: string;
+  industry_code?: string;
   category?: string;
   page?: number;
-  pageSize?: number;
+  page_size?: number;
 }) {
   return request.get<unknown, {
     items: IndustryKnowledge[];
     total: number;
     page: number;
-    pageSize: number;
+    page_size: number;
   }>('/v1/knowledge/industry', { params });
 }
 
@@ -168,8 +168,8 @@ export function getSupportedStandardsList() {
   return request.get<unknown, Array<{
     code: string;
     name: string;
-    fullName: string;
-    totalClauses: number;
+    full_name: string;
+    total_clauses: number;
     description: string;
   }>>('/v1/knowledge/standards');
 }
@@ -186,7 +186,7 @@ export function getIndustryList() {
 
 /** 增加知识查看次数 */
 export function incrementViewCount(id: string) {
-  return request.post<unknown, { viewCount: number }>(`/v1/knowledge/${id}/view`);
+  return request.post<unknown, { view_count: number }>(`/v1/knowledge/${id}/view`);
 }
 
 /** 获取相关知识推荐 */
@@ -222,7 +222,7 @@ export function deleteUserKnowledge(id: string) {
 /** 获取用户知识列表 */
 export function getUserKnowledgeList(params?: {
   page?: number;
-  pageSize?: number;
+  page_size?: number;
 }) {
   return request.get<unknown, KnowledgeSearchResult>('/v1/knowledge/user/list', { params });
 }

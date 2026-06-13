@@ -63,7 +63,7 @@ const HomePage: React.FC = () => {
     ? projects.filter(
         (p) =>
           p.name.includes(keyword) ||
-          p.companyName.includes(keyword) ||
+          p.company_name.includes(keyword) ||
           p.industry.includes(keyword),
       )
     : projects;
@@ -118,14 +118,14 @@ const HomePage: React.FC = () => {
                     description={
                       <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
                         <span>{project.industry}</span>
-                        <span style={{ marginLeft: 8 }}>{project.employeeCount}人</span>
+                        <span style={{ marginLeft: 8 }}>{project.employee_count}人</span>
                       </div>
                     }
                     extra={<Tag color={status.color}>{status.text}</Tag>}
                   >
-                    <div style={{ fontWeight: 500 }}>{project.companyName || project.name}</div>
+                    <div style={{ fontWeight: 500 }}>{project.company_name || project.name}</div>
                     <div style={{ fontSize: 12, color: '#bbb', marginTop: 2 }}>
-                      {project.createdAt}
+                      {project.created_at}
                     </div>
                   </List.Item>
                 </SwipeAction>
@@ -141,8 +141,8 @@ const HomePage: React.FC = () => {
   const columns = [
     {
       title: '项目名称',
-      dataIndex: 'companyName',
-      key: 'companyName',
+      dataIndex: 'company_name',
+      key: 'company_name',
       render: (text: string, record: ProjectInfo) => (
         <a onClick={() => handleView(record.id)}>{text || record.name}</a>
       ),
@@ -155,8 +155,8 @@ const HomePage: React.FC = () => {
     },
     {
       title: '员工数',
-      dataIndex: 'employeeCount',
-      key: 'employeeCount',
+      dataIndex: 'employee_count',
+      key: 'employee_count',
       width: 100,
     },
     {
@@ -171,8 +171,8 @@ const HomePage: React.FC = () => {
     },
     {
       title: '创建时间',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      dataIndex: 'created_at',
+      key: 'created_at',
       width: 180,
     },
     {

@@ -35,22 +35,22 @@ const ProjectCreatePage: React.FC = () => {
       } catch {
         // 解析失败时使用模拟数据
         setParseResult({
-          companyName: '',
+          company_name: '',
           industry: '',
-          employeeCount: '',
-          registeredCapital: '',
+          employee_count: '',
+          registered_capital: '',
           address: '',
-          contactPerson: '',
-          contactPhone: '',
-          businessScope: '',
-          missingFields: [
-            'companyName',
+          contact_person: '',
+          contact_phone: '',
+          business_scope: '',
+          missing_fields: [
+            'company_name',
             'industry',
-            'employeeCount',
-            'registeredCapital',
+            'employee_count',
+            'registered_capital',
             'address',
-            'contactPerson',
-            'contactPhone',
+            'contact_person',
+            'contact_phone',
           ],
         });
       } finally {
@@ -88,7 +88,7 @@ const ProjectCreatePage: React.FC = () => {
           setParseResult({
             ...parseResult,
             [fieldName]: value,
-            missingFields: (parseResult.missingFields || []).filter(
+            missing_fields: (parseResult.missing_fields || []).filter(
               (f) => f !== fieldName,
             ),
           });
@@ -122,14 +122,14 @@ const ProjectCreatePage: React.FC = () => {
     setSubmitting(true);
     try {
       const project = await createNewProject({
-        companyName: values.companyName,
+        company_name: values.company_name,
         industry: values.industry || selectedIndustry?.industry?.industry_name || '',
-        employeeCount: values.employeeCount,
-        registeredCapital: values.registeredCapital,
+        employee_count: values.employee_count,
+        registered_capital: values.registered_capital,
         address: values.address,
-        contactPerson: values.contactPerson,
-        contactPhone: values.contactPhone,
-        name: values.companyName || '新项目',
+        contact_person: values.contact_person,
+        contact_phone: values.contact_phone,
+        name: values.company_name || '新项目',
       });
       Toast.show({ content: '项目创建成功', icon: 'success' });
       navigate(`/project/${project.id}`);
@@ -146,14 +146,14 @@ const ProjectCreatePage: React.FC = () => {
     setSubmitting(true);
     try {
       const project = await createNewProject({
-        companyName: parseResult.companyName,
+        company_name: parseResult.company_name,
         industry: parseResult.industry || selectedIndustry?.industry?.industry_name || '',
-        employeeCount: parseResult.employeeCount,
-        registeredCapital: parseResult.registeredCapital,
+        employee_count: parseResult.employee_count,
+        registered_capital: parseResult.registered_capital,
         address: parseResult.address,
-        contactPerson: parseResult.contactPerson,
-        contactPhone: parseResult.contactPhone,
-        name: parseResult.companyName || '新项目',
+        contact_person: parseResult.contact_person,
+        contact_phone: parseResult.contact_phone,
+        name: parseResult.company_name || '新项目',
       });
       Toast.show({ content: '项目创建成功', icon: 'success' });
       navigate(`/project/${project.id}`);
@@ -166,14 +166,14 @@ const ProjectCreatePage: React.FC = () => {
 
   /** 字段中文名映射 */
   const fieldLabels: Record<string, string> = {
-    companyName: '公司名称',
+    company_name: '公司名称',
     industry: '所属行业',
-    employeeCount: '员工人数',
-    registeredCapital: '注册资本',
+    employee_count: '员工人数',
+    registered_capital: '注册资本',
     address: '公司地址',
-    contactPerson: '联系人',
-    contactPhone: '联系电话',
-    businessScope: '经营范围',
+    contact_person: '联系人',
+    contact_phone: '联系电话',
+    business_scope: '经营范围',
   };
 
   /* ==================== 移动端渲染 ==================== */
@@ -211,7 +211,7 @@ const ProjectCreatePage: React.FC = () => {
               <h3 style={{ marginBottom: 12, fontSize: 16 }}>确认企业信息</h3>
 
               {/* 缺失项提示 */}
-              {parseResult.missingFields && parseResult.missingFields.length > 0 && (
+              {parseResult.missing_fields && parseResult.missing_fields.length > 0 && (
                 <div
                   style={{
                     padding: '8px 12px',
@@ -223,14 +223,14 @@ const ProjectCreatePage: React.FC = () => {
                     color: '#d46b08',
                   }}
                 >
-                  以下信息缺失，请点击补充：{parseResult.missingFields.map((f) => fieldLabels[f]).join('、')}
+                  以下信息缺失，请点击补充：{parseResult.missing_fields.map((f) => fieldLabels[f]).join('、')}
                 </div>
               )}
 
               {/* 信息确认表 */}
               {Object.entries(fieldLabels).map(([key, label]) => {
                 const value = (parseResult as Record<string, unknown>)[key] as string;
-                const isMissing = parseResult.missingFields?.includes(key);
+                const isMissing = parseResult.missing_fields?.includes(key);
 
                 return (
                   <div
@@ -398,15 +398,15 @@ const ProjectCreatePage: React.FC = () => {
                                 });
                               } else {
                                 setParseResult({
-                                  companyName: '',
+                                  company_name: '',
                                   industry: '',
-                                  employeeCount: '',
-                                  registeredCapital: '',
+                                  employee_count: '',
+                                  registered_capital: '',
                                   address: '',
-                                  contactPerson: '',
-                                  contactPhone: '',
-                                  businessScope: '',
-                                  missingFields: [],
+                                  contact_person: '',
+                                  contact_phone: '',
+                                  business_scope: '',
+                                  missing_fields: [],
                                   [key]: e.target.value,
                                 } as ParseResult);
                               }
@@ -435,7 +435,7 @@ const ProjectCreatePage: React.FC = () => {
       {/* 第二步：确认信息 */}
       {currentStep === 1 && parseResult && (
         <Card title="确认企业信息">
-          {parseResult.missingFields && parseResult.missingFields.length > 0 && (
+          {parseResult.missing_fields && parseResult.missing_fields.length > 0 && (
             <div
               style={{
                 padding: '10px 16px',
@@ -446,7 +446,7 @@ const ProjectCreatePage: React.FC = () => {
                 color: '#d46b08',
               }}
             >
-              以下信息缺失，请点击补充：{parseResult.missingFields.map((f) => fieldLabels[f]).join('、')}
+              以下信息缺失，请点击补充：{parseResult.missing_fields.map((f) => fieldLabels[f]).join('、')}
             </div>
           )}
 
@@ -498,7 +498,7 @@ const ProjectCreatePage: React.FC = () => {
           <AntForm layout="vertical">
             {Object.entries(fieldLabels).map(([key, label]) => {
               const value = (parseResult as Record<string, unknown>)[key] as string;
-              const isMissing = parseResult.missingFields?.includes(key);
+              const isMissing = parseResult.missing_fields?.includes(key);
 
               return (
                 <AntForm.Item
@@ -522,7 +522,7 @@ const ProjectCreatePage: React.FC = () => {
                       setParseResult({
                         ...parseResult,
                         [key]: e.target.value,
-                        missingFields: (parseResult.missingFields || []).filter(
+                        missing_fields: (parseResult.missing_fields || []).filter(
                           (f) => f !== key,
                         ),
                       });

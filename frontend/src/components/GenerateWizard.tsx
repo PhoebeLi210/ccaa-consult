@@ -44,12 +44,12 @@ interface LevelInfo {
   level: number;
   name: string;
   description: string;
-  documentCount: number;
+  document_count: number;
 }
 
 /** 模板信息 */
 interface TemplateInfo {
-  templateId: string;
+  template_id: string;
   name: string;
   level: number;
   category: string;
@@ -138,7 +138,7 @@ const StepSelectLevel: React.FC<{
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
                   {levelInfo.description}
                 </div>
-                <Tag color="blue">{levelInfo.documentCount} 个文档</Tag>
+                <Tag color="blue">{levelInfo.document_count} 个文档</Tag>
               </div>
             </div>
           </Card>
@@ -152,7 +152,7 @@ const StepSelectLevel: React.FC<{
           style={{ marginTop: 16 }}
           message={`已选择 ${selectedLevels.length} 个层级，预计生成 ${levels
             .filter((l) => selectedLevels.includes(l.level))
-            .reduce((sum, l) => sum + l.documentCount, 0)} 个文档`}
+            .reduce((sum, l) => sum + l.document_count, 0)} 个文档`}
         />
       )}
     </div>
@@ -242,7 +242,7 @@ const StepSelectStandard: React.FC<{
 const StepPreview: React.FC<{
   templates: TemplateInfo[];
   selectedTemplates: string[];
-  onToggleTemplate: (templateId: string, checked: boolean) => void;
+  onToggleTemplate: (template_id: string, checked: boolean) => void;
   loading: boolean;
 }> = ({ templates, selectedTemplates, onToggleTemplate, loading }) => {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
@@ -273,8 +273,8 @@ const StepPreview: React.FC<{
 
   const handleSelectAll = () => {
     templates.forEach((t) => {
-      if (!selectedTemplates.includes(t.templateId)) {
-        onToggleTemplate(t.templateId, true);
+      if (!selectedTemplates.includes(t.template_id)) {
+        onToggleTemplate(t.template_id, true);
       }
     });
   };
@@ -331,7 +331,7 @@ const StepPreview: React.FC<{
               <Table
                 size="small"
                 dataSource={group.templates}
-                rowKey="templateId"
+                rowKey="template_id"
                 pagination={false}
                 columns={[
                   {
@@ -339,8 +339,8 @@ const StepPreview: React.FC<{
                     width: 60,
                     render: (_, record) => (
                       <Checkbox
-                        checked={selectedTemplates.includes(record.templateId)}
-                        onChange={(e) => onToggleTemplate(record.templateId, e.target.checked)}
+                        checked={selectedTemplates.includes(record.template_id)}
+                        onChange={(e) => onToggleTemplate(record.template_id, e.target.checked)}
                       />
                     ),
                   },
@@ -431,13 +431,13 @@ const StepProgress: React.FC<{
 
           {status.status === 'processing' && (
             <Text type="secondary">
-              已生成 {status.generatedDocuments.length} / {status.totalDocuments} 个文档
+              已生成 {status.generated_documents.length} / {status.total_documents} 个文档
             </Text>
           )}
 
           {status.status === 'completed' && (
             <div style={{ marginTop: 16 }}>
-              <Text type="success">成功生成 {status.generatedDocuments.length} 个文档</Text>
+              <Text type="success">成功生成 {status.generated_documents.length} 个文档</Text>
             </div>
           )}
 
@@ -450,7 +450,7 @@ const StepProgress: React.FC<{
                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                     {status.errors.slice(0, 5).map((err, idx) => (
                       <li key={idx}>
-                        {err.documentName}: {err.error}
+                        {err.document_name}: {err.error}
                       </li>
                     ))}
                     {status.errors.length > 5 && (
@@ -510,7 +510,7 @@ const GenerateWizard: React.FC<GenerateWizardProps> = ({
           level: item.level,
           name: item.name,
           description: item.description,
-          documentCount: item.documentCount,
+          document_count: item.document_count,
         })),
       );
     } catch (error) {
@@ -535,7 +535,7 @@ const GenerateWizard: React.FC<GenerateWizardProps> = ({
       }
       setTemplates(allTemplates);
       // 默认全选
-      setSelectedTemplates(allTemplates.map((t) => t.templateId));
+      setSelectedTemplates(allTemplates.map((t) => t.template_id));
     } catch (error) {
       message.error('加载模板列表失败');
     } finally {
@@ -543,11 +543,11 @@ const GenerateWizard: React.FC<GenerateWizardProps> = ({
     }
   };
 
-  const handleToggleTemplate = (templateId: string, checked: boolean) => {
+  const handleToggleTemplate = (template_id: string, checked: boolean) => {
     if (checked) {
-      setSelectedTemplates([...selectedTemplates, templateId]);
+      setSelectedTemplates([...selectedTemplates, template_id]);
     } else {
-      setSelectedTemplates(selectedTemplates.filter((id) => id !== templateId));
+      setSelectedTemplates(selectedTemplates.filter((id) => id !== template_id));
     }
   };
 
@@ -589,8 +589,8 @@ const GenerateWizard: React.FC<GenerateWizardProps> = ({
       setGenerateStatus(status);
 
       // 开始轮询状态
-      if (status.taskId) {
-        pollGenerateStatus(status.taskId);
+      if (status.task_id) {
+        pollGenerateStatus(status.task_id);
       }
     } catch (error) {
       message.error('启动生成任务失败');

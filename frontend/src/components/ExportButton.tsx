@@ -64,8 +64,8 @@ const ExportOptionsForm: React.FC<{
     <Form layout="vertical" size="small">
       <Form.Item label="导出格式">
         <Select
-          value={options.documentFormat || 'docx'}
-          onChange={(value) => onChange({ ...options, documentFormat: value })}
+          value={options.document_format || 'docx'}
+          onChange={(value) => onChange({ ...options, document_format: value })}
           options={[
             { label: 'Word文档 (.docx)', value: 'docx' },
             { label: 'PDF文档 (.pdf)', value: 'pdf' },
@@ -74,14 +74,14 @@ const ExportOptionsForm: React.FC<{
       </Form.Item>
       <Form.Item label="添加水印">
         <Switch
-          checked={options.includeWatermark}
-          onChange={(checked) => onChange({ ...options, includeWatermark: checked })}
+          checked={options.include_watermark}
+          onChange={(checked) => onChange({ ...options, include_watermark: checked })}
         />
       </Form.Item>
       <Form.Item label="包含Logo">
         <Switch
-          checked={options.includeLogo}
-          onChange={(checked) => onChange({ ...options, includeLogo: checked })}
+          checked={options.include_logo}
+          onChange={(checked) => onChange({ ...options, include_logo: checked })}
         />
       </Form.Item>
     </Form>
@@ -140,15 +140,15 @@ const ExportProgressModal: React.FC<{
         status?.status === 'completed' ? (
           <Space>
             <Button onClick={onClose}>关闭</Button>
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
-              onClick={() => {
-                if (status?.taskId) {
-                  downloadExportedFile(status.taskId);
-                }
-              }}
-            >
+              <Button
+                type="primary"
+                icon={<DownloadOutlined />}
+                onClick={() => {
+                  if (status?.task_id) {
+                    downloadExportedFile(status.task_id);
+                  }
+                }}
+              >
               下载文件
             </Button>
           </Space>
@@ -171,7 +171,7 @@ const ExportProgressModal: React.FC<{
             />
             {status.status === 'processing' && (
               <div style={{ color: '#666', fontSize: 13 }}>
-                已处理 {status.processedDocuments} / {status.totalDocuments} 个文档
+                已处理 {status.processed_documents} / {status.total_documents} 个文档
               </div>
             )}
           </>
@@ -203,10 +203,10 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [progressVisible, setProgressVisible] = useState(false);
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
-    documentFormat: 'docx',
-    includeWatermark: false,
-    includeLogo: false,
-    forceExport: false,
+    document_format: 'docx',
+    include_watermark: false,
+    include_logo: false,
+    force_export: false,
   });
   const [exportStatus, setExportStatus] = useState<ExportStatus | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -252,7 +252,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   const handleExportAll = useCallback(async () => {
     // 检查是否有未确认的文档
     const unconfirmedDocs = documents.filter((d) => d.status !== 'confirmed');
-    if (unconfirmedDocs.length > 0 && !exportOptions.forceExport) {
+    if (unconfirmedDocs.length > 0 && !exportOptions.force_export) {
       Modal.confirm({
         title: '存在未确认文档',
         content: (
@@ -271,7 +271,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     }
 
     await startExport();
-  }, [documents, exportOptions.forceExport]);
+  }, [documents, exportOptions.force_export]);
 
   /** 开始导出 */
   const startExport = useCallback(async () => {
@@ -284,8 +284,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       setExportStatus(status);
 
       // 开始轮询状态
-      if (status.taskId) {
-        pollExportStatus(status.taskId);
+      if (status.task_id) {
+        pollExportStatus(status.task_id);
       }
     } catch (error) {
       message.error('导出失败');

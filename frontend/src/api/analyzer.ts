@@ -1,64 +1,64 @@
 import { request } from './request';
 
 export interface CoverageAnalysisResponse {
-  projectId: string;
-  projectName: string;
+  project_id: string;
+  project_name: string;
   standards: string[];
   summary: {
-    totalClauses: number;
+    total_clauses: number;
     covered: number;
     partial: number;
     missing: number;
-    coverageRate: number;
+    coverage_rate: number;
   };
   clauses: Array<{
     clause: string;
     title: string;
     status: 'covered' | 'partial' | 'missing';
-    relatedDocuments: string[];
+    related_documents: string[];
   }>;
   suggestions: string[];
 }
 
 export interface QuickCoverageResponse {
-  projectId: string;
+  project_id: string;
   standard: string;
-  totalClauses: number;
+  total_clauses: number;
   covered: number;
   partial: number;
   missing: number;
-  coverageRate: number;
-  documentCount: number;
+  coverage_rate: number;
+  document_count: number;
 }
 
 export interface EnvironmentalReportResponse {
-  companyName: string;
-  aspectsCount: number;
-  significantAspectsCount: number;
-  complianceRate: number;
-  environmentalAspects: Array<{
+  company_name: string;
+  aspects_count: number;
+  significant_aspects_count: number;
+  compliance_rate: number;
+  environmental_aspects: Array<{
     activity: string;
     aspect: string;
     impact: string;
     significance: string;
   }>;
-  generatedDocuments?: Record<string, any>;
+  generated_documents?: Record<string, any>;
 }
 
 export interface SafetyAssessmentResponse {
-  companyName: string;
-  hazardsCount: number;
-  significantHazardsCount: number;
-  incidentsCount: number;
-  complianceRate: number;
+  company_name: string;
+  hazards_count: number;
+  significant_hazards_count: number;
+  incidents_count: number;
+  compliance_rate: number;
   hazards: Array<{
     activity: string;
-    hazardSource: string;
-    riskDescription: string;
-    riskScore: number;
-    riskLevel: string;
+    hazard_source: string;
+    risk_description: string;
+    risk_score: number;
+    risk_level: string;
   }>;
-  generatedDocuments?: Record<string, any>;
+  generated_documents?: Record<string, any>;
 }
 
 export function analyzeCoverage(projectId: string, standards?: string[]) {
@@ -79,7 +79,7 @@ export function getSupportedStandards() {
     standards: Array<{
       code: string;
       name: string;
-      totalClauses: number;
+      total_clauses: number;
       description: string;
     }>;
   }>('/v1/analyzer/standards');

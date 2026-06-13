@@ -20,14 +20,14 @@ interface NaturalLanguageInputProps {
 
 /** 字段中文名映射 */
 const fieldLabels: Record<string, string> = {
-  companyName: '公司名称',
+  company_name: '公司名称',
   industry: '所属行业',
-  employeeCount: '员工人数',
-  registeredCapital: '注册资本',
+  employee_count: '员工人数',
+  registered_capital: '注册资本',
   address: '公司地址',
-  contactPerson: '联系人',
-  contactPhone: '联系电话',
-  businessScope: '经营范围',
+  contact_person: '联系人',
+  contact_phone: '联系电话',
+  business_scope: '经营范围',
 };
 
 /**
@@ -94,7 +94,7 @@ const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
   /** 判断字段是否缺失 */
   const isFieldMissing = (fieldName: string): boolean => {
     if (!parseResult) return false;
-    return parseResult.missingFields?.includes(fieldName) ?? false;
+    return parseResult.missing_fields?.includes(fieldName) ?? false;
   };
 
   /** 获取字段值 */
@@ -121,9 +121,9 @@ const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
               <Space>
                 <span>AI 解析结果</span>
                 {loading && <LoadingOutlined />}
-                {parseResult.missingFields && parseResult.missingFields.length > 0 && (
+                {parseResult.missing_fields && parseResult.missing_fields.length > 0 && (
                   <Tag color="warning">
-                    {parseResult.missingFields.length} 项待补充
+                    {parseResult.missing_fields.length} 项待补充
                   </Tag>
                 )}
               </Space>

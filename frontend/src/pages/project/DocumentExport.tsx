@@ -57,13 +57,13 @@ const { Text, Title } = Typography;
 /** 导出历史记录 */
 interface ExportHistory {
   id: string;
-  taskId: string;
-  projectName: string;
-  documentCount: number;
+  task_id: string;
+  project_name: string;
+  document_count: number;
   format: 'docx' | 'pdf' | 'zip';
   status: 'completed' | 'failed';
-  createdAt: string;
-  downloadUrl?: string;
+  created_at: string;
+  download_url?: string;
 }
 
 /** 导出选项配置面板 */
@@ -77,8 +77,8 @@ const ExportOptionsPanel: React.FC<{
       <Form layout="vertical" size="small">
         <Form.Item label="导出格式">
           <Select
-            value={options.documentFormat || 'docx'}
-            onChange={(value) => onChange({ ...options, documentFormat: value })}
+            value={options.document_format || 'docx'}
+            onChange={(value) => onChange({ ...options, document_format: value })}
             style={{ width: '100%' }}
             options={[
               { label: 'Word文档 (.docx)', value: 'docx' },
@@ -89,8 +89,8 @@ const ExportOptionsPanel: React.FC<{
         <Form.Item label="添加水印">
           <Space>
             <Switch
-              checked={options.includeWatermark}
-              onChange={(checked) => onChange({ ...options, includeWatermark: checked })}
+              checked={options.include_watermark}
+              onChange={(checked) => onChange({ ...options, include_watermark: checked })}
             />
             <Text type="secondary">在文档中添加"仅供审核使用"水印</Text>
           </Space>
@@ -98,8 +98,8 @@ const ExportOptionsPanel: React.FC<{
         <Form.Item label="包含公司Logo">
           <Space>
             <Switch
-              checked={options.includeLogo}
-              onChange={(checked) => onChange({ ...options, includeLogo: checked })}
+              checked={options.include_logo}
+              onChange={(checked) => onChange({ ...options, include_logo: checked })}
             />
             <Text type="secondary">在文档页眉添加公司Logo</Text>
           </Space>
@@ -108,8 +108,8 @@ const ExportOptionsPanel: React.FC<{
           <Form.Item label="强制导出">
             <Space>
               <Switch
-                checked={options.forceExport}
-                onChange={(checked) => onChange({ ...options, forceExport: checked })}
+                checked={options.force_export}
+                onChange={(checked) => onChange({ ...options, force_export: checked })}
               />
               <Text type="warning">
                 包含 {unconfirmedCount} 个未确认文档
@@ -171,23 +171,23 @@ const ExportHistoryPanel: React.FC<{
         <Empty description="暂无导出记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
         <Timeline
-          items={history.map((item) => ({
+          items=          {history.map((item) => ({
             color: item.status === 'completed' ? 'green' : 'red',
             children: (
               <div>
                 <div style={{ marginBottom: 4 }}>
                   <Space>
                     {getFormatIcon(item.format)}
-                    <Text strong>{item.projectName}</Text>
+                    <Text strong>{item.project_name}</Text>
                     {getStatusTag(item.status)}
                   </Space>
                 </div>
                 <div style={{ fontSize: 12, color: '#666' }}>
                   <Space split={<Divider type="vertical" />}>
-                    <span>{item.documentCount} 个文档</span>
-                    <span>{item.createdAt}</span>
-                    {item.status === 'completed' && item.downloadUrl && (
-                      <a href={item.downloadUrl} target="_blank" rel="noopener noreferrer">
+                    <span>{item.document_count} 个文档</span>
+                    <span>{item.created_at}</span>
+                    {item.status === 'completed' && item.download_url && (
+                      <a href={item.download_url} target="_blank" rel="noopener noreferrer">
                         重新下载
                       </a>
                     )}
@@ -215,10 +215,10 @@ const DocumentExportPage: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
-    documentFormat: 'docx',
-    includeWatermark: false,
-    includeLogo: false,
-    forceExport: false,
+    document_format: 'docx',
+    include_watermark: false,
+    include_logo: false,
+    force_export: false,
   });
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<ExportStatus | null>(null);
@@ -310,7 +310,7 @@ const DocumentExportPage: React.FC = () => {
     const selectedDocs = documents.filter((d) => selectedIds.includes(d.id));
     const unconfirmedSelected = selectedDocs.filter((d) => d.status !== 'confirmed');
     
-    if (unconfirmedSelected.length > 0 && !exportOptions.forceExport) {
+    if (unconfirmedSelected.length > 0 && !exportOptions.force_export) {
       Modal.confirm({
         title: '存在未确认文档',
         content: (
@@ -343,8 +343,8 @@ const DocumentExportPage: React.FC = () => {
       });
       setExportStatus(status);
 
-      if (status.taskId) {
-        pollExportStatus(status.taskId);
+      if (status.task_id) {
+        pollExportStatus(status.task_id);
       }
     } catch (error) {
       message.error('导出失败');
@@ -355,26 +355,26 @@ const DocumentExportPage: React.FC = () => {
   };
 
   // 轮询导出状态
-  const pollExportStatus = async (taskId: string) => {
+  const pollExportStatus = async (task_id: string) => {
     try {
-      const status = await getExportTaskStatus(taskId);
+      const status = await getExportTaskStatus(task_id);
       setExportStatus(status);
 
       if (status.status === 'processing') {
-        setTimeout(() => pollExportStatus(taskId), 1000);
+        setTimeout(() => pollExportStatus(task_id), 1000);
       } else if (status.status === 'completed') {
         message.success('导出完成');
         // 添加到历史记录
         setExportHistory((prev) => [
           {
             id: Date.now().toString(),
-            taskId: status.taskId,
-            projectName: project?.name || '',
-            documentCount: status.totalDocuments,
+            task_id: status.task_id,
+            project_name: project?.name || '',
+            document_count: status.total_documents,
             format: 'zip',
             status: 'completed',
-            createdAt: new Date().toLocaleString(),
-            downloadUrl: `/api/v1/generator/export/download/${status.taskId}`,
+            created_at: new Date().toLocaleString(),
+            download_url: `/api/v1/generator/export/download/${status.task_id}`,
           },
           ...prev,
         ]);
@@ -432,8 +432,8 @@ const DocumentExportPage: React.FC = () => {
     },
     {
       title: '更新时间',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
+      dataIndex: 'updated_at',
+      key: 'updated_at',
       width: 160,
     },
     {
@@ -477,8 +477,8 @@ const DocumentExportPage: React.FC = () => {
               type="primary"
               icon={<DownloadOutlined />}
               onClick={() => {
-                if (exportStatus?.taskId) {
-                  downloadExportedFile(exportStatus.taskId);
+                if (exportStatus?.task_id) {
+                  downloadExportedFile(exportStatus.task_id);
                 }
               }}
             >
@@ -517,7 +517,7 @@ const DocumentExportPage: React.FC = () => {
             />
             {exportStatus.status === 'processing' && (
               <Text type="secondary">
-                已处理 {exportStatus.processedDocuments} / {exportStatus.totalDocuments} 个文档
+                已处理 {exportStatus.processed_documents} / {exportStatus.total_documents} 个文档
               </Text>
             )}
           </>
@@ -696,7 +696,7 @@ const DocumentExportPage: React.FC = () => {
               type="warning"
               showIcon
               message={`有 ${unconfirmedCount} 个文档尚未确认`}
-              description="建议先确认文档内容后再导出，或使用"强制导出"选项。"
+              description="建议先确认文档内容后再导出，或使用强制导出选项。"
               style={{ marginBottom: 16 }}
             />
           )}

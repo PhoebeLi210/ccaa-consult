@@ -190,9 +190,9 @@ const MaterialsUploadPage: React.FC = () => {
   /**
    * 删除材料
    */
-  const handleDelete = async (materialId: string) => {
+  const handleDelete = async (material_id: string) => {
     try {
-      await deleteMaterial(materialId);
+      await deleteMaterial(material_id);
       message.success('删除成功');
       await fetchProjectMaterials();
     } catch (error) {
@@ -204,10 +204,9 @@ const MaterialsUploadPage: React.FC = () => {
   /**
    * 重新处理材料
    */
-  const handleReprocess = async (materialId: string) => {
-    setLoading(true);
+  const handleReprocess = async (material_id: string) => {
     try {
-      await reprocessMaterial(materialId);
+      await reprocessMaterial(material_id);
       message.success('重新处理完成');
       await fetchProjectMaterials();
     } catch (error) {
@@ -361,7 +360,7 @@ const MaterialsUploadPage: React.FC = () => {
                     <Button
                       icon={<ReloadOutlined />}
                       size="small"
-                      onClick={() => handleReprocess(item.materialId)}
+                      onClick={() => handleReprocess(item.material_id)}
                       loading={loading}
                     />
                   </Tooltip>,
@@ -369,7 +368,7 @@ const MaterialsUploadPage: React.FC = () => {
                     key="delete"
                     title="确认删除"
                     description="删除后无法恢复，是否继续？"
-                    onConfirm={() => handleDelete(item.materialId)}
+                    onConfirm={() => handleDelete(item.material_id)}
                     okText="删除"
                     cancelText="取消"
                     okButtonProps={{ danger: true }}
@@ -387,29 +386,29 @@ const MaterialsUploadPage: React.FC = () => {
                     <div
                       className={styles.materialIcon}
                       style={{
-                        color: `var(--ant-${materialTypeColors[item.materialType]}-color)`,
+                        color: `var(--ant-${materialTypeColors[item.material_type]}-color)`,
                       }}
                     >
-                      {materialTypeIcons[item.materialType] || <FileOutlined />}
+                      {materialTypeIcons[item.material_type] || <FileOutlined />}
                     </div>
                   }
                   title={
                     <div className={styles.materialTitle}>
-                      <span className={styles.fileName}>{item.fileName}</span>
+                      <span className={styles.fileName}>{item.file_name}</span>
                       <Tag
-                        color={materialTypeColors[item.materialType]}
+                        color={materialTypeColors[item.material_type]}
                         size="small"
                       >
-                        {getMaterialTypeName(item.materialType)}
+                        {getMaterialTypeName(item.material_type)}
                       </Tag>
                     </div>
                   }
                   description={
                     <div className={styles.materialMeta}>
-                      <span>{formatFileSize(item.fileSize)}</span>
+                      <span>{formatFileSize(item.file_size)}</span>
                       <span className={styles.separator}>|</span>
                       <span>
-                        {new Date(item.uploadedAt).toLocaleDateString()}
+                        {new Date(item.uploaded_at).toLocaleDateString()}
                       </span>
                       <span className={styles.separator}>|</span>
                       <Tag

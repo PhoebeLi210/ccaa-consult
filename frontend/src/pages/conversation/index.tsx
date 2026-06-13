@@ -78,10 +78,10 @@ const ConversationPage: React.FC = () => {
     try {
       const response = await startConversation(inputValue.trim(), projectId || undefined);
       
-      setSessionId(response.sessionId);
-      setProgress(response.progressPercent);
-      setParsedInfo(response.parsedInfo);
-      setMissingFields(response.missingFields);
+      setSessionId(response.session_id);
+      setProgress(response.progress_percent);
+      setParsedInfo(response.parsed_info);
+      setMissingFields(response.missing_fields);
       setIsComplete(response.status === 'complete');
 
       // 添加用户消息
@@ -98,7 +98,7 @@ const ConversationPage: React.FC = () => {
         role: 'assistant',
         content: response.message,
         timestamp: new Date(),
-        questions: response.followUpQuestions,
+        questions: response.follow_up_questions,
       };
 
       setMessages([userMessage, assistantMessage]);
@@ -121,9 +121,9 @@ const ConversationPage: React.FC = () => {
     try {
       const response = await continueConversation(sessionId, inputValue.trim());
       
-      setProgress(response.progressPercent);
-      setParsedInfo(response.parsedInfo);
-      setMissingFields(response.missingFields);
+      setProgress(response.progress_percent);
+      setParsedInfo(response.parsed_info);
+      setMissingFields(response.missing_fields);
       setIsComplete(response.status === 'complete');
 
       // 添加用户消息
@@ -140,7 +140,7 @@ const ConversationPage: React.FC = () => {
         role: 'assistant',
         content: response.message,
         timestamp: new Date(),
-        questions: response.followUpQuestions,
+        questions: response.follow_up_questions,
       };
 
       setMessages((prev) => [...prev, userMessage, assistantMessage]);

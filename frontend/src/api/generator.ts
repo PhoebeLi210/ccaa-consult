@@ -2,38 +2,38 @@ import { request } from './request';
 import { DocumentInfo } from './projects';
 
 export interface ExportOptions {
-  includeWatermark?: boolean;
-  includeLogo?: boolean;
-  documentFormat?: 'docx' | 'pdf';
-  forceExport?: boolean;
+  include_watermark?: boolean;
+  include_logo?: boolean;
+  document_format?: 'docx' | 'pdf';
+  force_export?: boolean;
 }
 
 export interface ExportStatus {
-  taskId: string;
+  task_id: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   progress: number;
-  totalDocuments: number;
-  processedDocuments: number;
-  downloadUrl?: string;
+  total_documents: number;
+  processed_documents: number;
+  download_url?: string;
   error?: string;
-  createdAt: string;
+  created_at: string;
 }
 
 export interface GenerateOptions {
   levels?: number[];
   standards?: string[];
-  templateIds?: string[];
+  template_ids?: string[];
   overwrite?: boolean;
 }
 
 export interface GenerateStatus {
-  taskId: string;
+  task_id: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   progress: number;
-  totalDocuments: number;
-  generatedDocuments: DocumentInfo[];
-  errors: Array<{ documentName: string; error: string }>;
-  createdAt: string;
+  total_documents: number;
+  generated_documents: DocumentInfo[];
+  errors: Array<{ document_name: string; error: string }>;
+  created_at: string;
 }
 
 export function exportSingleDocument(documentId: string, format: 'docx' | 'pdf' = 'docx') {
@@ -44,9 +44,9 @@ export function exportSingleDocument(documentId: string, format: 'docx' | 'pdf' 
 export async function exportProjectDocuments(projectId: string, options?: ExportOptions): Promise<ExportStatus> {
   const response = await request.post<unknown, ExportStatus>('/v1/generator/export/zip', {
     project_id: projectId,
-    include_watermark: options?.includeWatermark ?? false,
-    include_logo: options?.includeLogo ?? false,
-    force_export: options?.forceExport ?? false,
+    include_watermark: options?.include_watermark ?? false,
+    include_logo: options?.include_logo ?? false,
+    force_export: options?.force_export ?? false,
   });
   return response;
 }
@@ -61,7 +61,7 @@ export function downloadExportedFile(taskId: string) {
 
 export function getAvailableTemplates(level?: number) {
   return request.get<unknown, Array<{
-    templateId: string;
+    template_id: string;
     name: string;
     level: number;
     category: string;
@@ -70,17 +70,17 @@ export function getAvailableTemplates(level?: number) {
   }>>('/v1/generator/templates/available', { params: { level } });
 }
 
-export function generateSingleDocument(projectId: string, templateId: string) {
+export function generateSingleDocument(projectId: string, template_id: string) {
   return request.post<unknown, DocumentInfo>('/v1/generator/generate', {
     project_id: projectId,
-    template_id: templateId,
+    template_id: template_id,
   });
 }
 
-export function generateBatchDocuments(projectId: string, templateIds: string[]) {
+export function generateBatchDocuments(projectId: string, template_ids: string[]) {
   return request.post<unknown, GenerateStatus>('/v1/generator/generate/batch', {
     project_id: projectId,
-    template_ids: templateIds,
+    template_ids: template_ids,
   });
 }
 
@@ -110,6 +110,6 @@ export function getSupportedLevels() {
     level: number;
     name: string;
     description: string;
-    documentCount: number;
+    document_count: number;
   }>>('/v1/generator/levels');
 }

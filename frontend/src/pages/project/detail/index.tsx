@@ -11,14 +11,14 @@ import GenerateWizard from '@/components/GenerateWizard';
 
 /** 字段中文名映射 */
 const fieldLabels: Record<string, string> = {
-  companyName: '公司名称',
+  company_name: '公司名称',
   industry: '所属行业',
-  employeeCount: '员工人数',
-  registeredCapital: '注册资本',
+  employee_count: '员工人数',
+  registered_capital: '注册资本',
   address: '公司地址',
-  contactPerson: '联系人',
-  contactPhone: '联系电话',
-  businessScope: '经营范围',
+  contact_person: '联系人',
+  contact_phone: '联系电话',
+  business_scope: '经营范围',
   status: '项目状态',
 };
 
@@ -124,7 +124,7 @@ const ProjectDetailPage: React.FC = () => {
   const getMissingFields = (): string[] => {
     if (!currentProject) return [];
     const missing: string[] = [];
-    const checkFields = ['companyName', 'industry', 'employeeCount', 'registeredCapital', 'address', 'contactPerson', 'contactPhone'];
+    const checkFields = ['company_name', 'industry', 'employee_count', 'registered_capital', 'address', 'contact_person', 'contact_phone'];
     checkFields.forEach((field) => {
       const value = (currentProject as Record<string, unknown>)[field];
       if (!value || value === '') {
@@ -264,8 +264,8 @@ const ProjectDetailPage: React.FC = () => {
                 >
                   当前状态
                 </List.Item>
-                <List.Item extra={currentProject.createdAt}>创建时间</List.Item>
-                <List.Item extra={currentProject.updatedAt}>更新时间</List.Item>
+                <List.Item extra={currentProject.created_at}>创建时间</List.Item>
+                <List.Item extra={currentProject.updated_at}>更新时间</List.Item>
               </List>
 
               {/* 生成文档按钮 */}
@@ -301,11 +301,11 @@ const ProjectDetailPage: React.FC = () => {
                   <div style={{ marginBottom: 12 }}>
                     <div style={{ fontWeight: 500, marginBottom: 8 }}>总体覆盖率</div>
                     <Progress
-                      percent={Math.round(coverageResult.summary.coverageRate * 100)}
-                      status={coverageResult.summary.coverageRate >= 0.8 ? 'success' : coverageResult.summary.coverageRate >= 0.5 ? 'normal' : 'exception'}
+                      percent={Math.round(coverageResult.summary.coverage_rate * 100)}
+                      status={coverageResult.summary.coverage_rate >= 0.8 ? 'success' : coverageResult.summary.coverage_rate >= 0.5 ? 'normal' : 'exception'}
                     />
                     <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>
-                      总条款 {coverageResult.summary.totalClauses}，已覆盖 {coverageResult.summary.covered}，部分覆盖 {coverageResult.summary.partial}，缺失 {coverageResult.summary.missing}
+                      总条款 {coverageResult.summary.total_clauses}，已覆盖 {coverageResult.summary.covered}，部分覆盖 {coverageResult.summary.partial}，缺失 {coverageResult.summary.missing}
                     </div>
                   </div>
                   {coverageResult.clauses && coverageResult.clauses.filter((c) => c.status === 'missing').length > 0 && (
@@ -353,7 +353,7 @@ const ProjectDetailPage: React.FC = () => {
           <AntButton icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
             返回
           </AntButton>
-          <h2 style={{ margin: 0 }}>{currentProject?.companyName || '项目详情'}</h2>
+          <h2 style={{ margin: 0 }}>{currentProject?.company_name || '项目详情'}</h2>
           {currentProject && (
             <AntTag color={statusMap[currentProject.status]?.color || 'default'}>
               {statusMap[currentProject.status]?.text || '未知'}
@@ -457,12 +457,12 @@ const ProjectDetailPage: React.FC = () => {
           <div style={{ marginBottom: 24 }}>
             <div style={{ fontWeight: 500, marginBottom: 12, fontSize: 16 }}>总体覆盖率</div>
             <Progress
-              percent={Math.round(coverageResult.summary.coverageRate * 100)}
-              status={coverageResult.summary.coverageRate >= 0.8 ? 'success' : coverageResult.summary.coverageRate >= 0.5 ? 'normal' : 'exception'}
+              percent={Math.round(coverageResult.summary.coverage_rate * 100)}
+              status={coverageResult.summary.coverage_rate >= 0.8 ? 'success' : coverageResult.summary.coverage_rate >= 0.5 ? 'normal' : 'exception'}
               strokeWidth={20}
             />
             <div style={{ fontSize: 14, color: '#666', marginTop: 8 }}>
-              总条款 {coverageResult.summary.totalClauses}，已覆盖 {coverageResult.summary.covered}，部分覆盖 {coverageResult.summary.partial}，缺失 {coverageResult.summary.missing}
+              总条款 {coverageResult.summary.total_clauses}，已覆盖 {coverageResult.summary.covered}，部分覆盖 {coverageResult.summary.partial}，缺失 {coverageResult.summary.missing}
             </div>
           </div>
 

@@ -3,39 +3,39 @@ import { request } from './request';
 export interface ProjectInfo {
   id: string;
   name: string;
-  companyName: string;
+  company_name: string;
   industry: string;
-  employeeCount: string;
-  registeredCapital: string;
+  employee_count: string;
+  registered_capital: string;
   address: string;
-  contactPerson: string;
-  contactPhone: string;
+  contact_person: string;
+  contact_phone: string;
   status: 'draft' | 'in_progress' | 'completed';
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ParseResult {
-  companyName: string;
+  company_name: string;
   industry: string;
-  employeeCount: string;
-  registeredCapital: string;
+  employee_count: string;
+  registered_capital: string;
   address: string;
-  contactPerson: string;
-  contactPhone: string;
-  businessScope: string;
-  missingFields: string[];
+  contact_person: string;
+  contact_phone: string;
+  business_scope: string;
+  missing_fields: string[];
 }
 
 export interface DocumentInfo {
   id: string;
-  projectId: string;
+  project_id: string;
   name: string;
   type: string;
   status: 'confirmed' | 'pending' | 'draft';
   url: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UploadFileInfo {

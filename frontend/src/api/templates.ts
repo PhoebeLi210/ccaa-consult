@@ -1,7 +1,7 @@
 import { request } from './request';
 
 export interface CustomTemplate {
-  templateId: string;
+  template_id: string;
   name: string;
   description?: string;
   category: string;
@@ -9,23 +9,23 @@ export interface CustomTemplate {
   variables: string[];
   version: string;
   status: 'active' | 'disabled' | 'archived';
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TemplateVersion {
   version: string;
   content: string;
-  updatedAt: string;
+  updated_at: string;
 }
 
 export function getCustomTemplates(params?: { category?: string; status?: string }) {
   return request.get<unknown, CustomTemplate[]>('/v1/custom-templates', { params });
 }
 
-export function getCustomTemplate(templateId: string) {
-  return request.get<unknown, CustomTemplate & { content: string; versionHistory: TemplateVersion[] }>(
-    `/v1/custom-templates/${templateId}`
+export function getCustomTemplate(template_id: string) {
+  return request.get<unknown, CustomTemplate & { content: string; version_history: TemplateVersion[] }>(
+    `/v1/custom-templates/${template_id}`
   );
 }
 

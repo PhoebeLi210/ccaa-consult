@@ -105,8 +105,8 @@ const FlowchartListPage: React.FC = () => {
           <p><strong>描述：</strong>{record.description || '无'}</p>
           <p><strong>节点数：</strong>{record.nodeCount || 0}</p>
           <p><strong>边数：</strong>{record.edgeCount || 0}</p>
-          <p><strong>创建时间：</strong>{record.createdAt}</p>
-          <p><strong>更新时间：</strong>{record.updatedAt}</p>
+          <p><strong>创建时间：</strong>{record.created_at}</p>
+          <p><strong>更新时间：</strong>{record.updated_at}</p>
           <p><strong>状态：</strong>
             <Tag color={record.status === 'published' ? 'success' : 'default'}>
               {record.status === 'published' ? '已发布' : '草稿'}
@@ -157,8 +157,8 @@ const FlowchartListPage: React.FC = () => {
     },
     {
       title: '更新时间',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
+      dataIndex: 'updated_at',
+      key: 'updated_at',
       width: 180,
     },
     {

@@ -8,12 +8,12 @@ export interface FollowUpQuestion {
 }
 
 export interface ConversationResponse {
-  sessionId: string;
+  session_id: string;
   status: 'collecting' | 'complete';
-  parsedInfo: Record<string, any>;
-  missingFields: string[];
-  followUpQuestions: FollowUpQuestion[];
-  progressPercent: number;
+  parsed_info: Record<string, any>;
+  missing_fields: string[];
+  follow_up_questions: FollowUpQuestion[];
+  progress_percent: number;
   message: string;
 }
 
@@ -31,23 +31,23 @@ export function continueConversation(sessionId: string, answer: string) {
   });
 }
 
-export function getConversationStatus(sessionId: string) {
+export function getConversationStatus(session_id: string) {
   return request.get<unknown, {
-    sessionId: string;
+    session_id: string;
     status: string;
-    createdAt: string;
-    lastUpdated: string;
-    messageCount: number;
-    currentInfo: Record<string, any>;
-  }>(`/v1/conversation/${sessionId}/status`);
+    created_at: string;
+    last_updated: string;
+    message_count: number;
+    current_info: Record<string, any>;
+  }>(`/v1/conversation/${session_id}/status`);
 }
 
-export function completeConversation(sessionId: string, projectId?: string) {
+export function completeConversation(session_id: string, projectId?: string) {
   return request.post<unknown, {
     message: string;
-    sessionId: string;
-    projectId: string;
-    finalInfo: Record<string, any>;
-    remainingMissing: string[];
-  }>(`/v1/conversation/${sessionId}/complete`, { project_id: projectId });
+    session_id: string;
+    project_id: string;
+    final_info: Record<string, any>;
+    remaining_missing: string[];
+  }>(`/v1/conversation/${session_id}/complete`, { project_id: projectId });
 }

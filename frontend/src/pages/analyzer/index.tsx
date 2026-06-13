@@ -108,7 +108,7 @@ const AnalyzerPage: React.FC = () => {
       <div className={styles.resultContainer}>
         <Alert
           message="解析完成"
-          description={`已为 ${envResult.companyName} 完成环境评估报告解析`}
+          description={`已为 ${envResult.company_name} 完成环境评估报告解析`}
           type="success"
           showIcon
           icon={<CheckCircleOutlined />}
@@ -120,7 +120,7 @@ const AnalyzerPage: React.FC = () => {
             <Card>
               <Statistic
                 title="环境因素总数"
-                value={envResult.aspectsCount}
+                value={envResult.aspects_count}
                 valueStyle={{ color: '#1890ff' }}
               />
             </Card>
@@ -129,7 +129,7 @@ const AnalyzerPage: React.FC = () => {
             <Card>
               <Statistic
                 title="重要环境因素"
-                value={envResult.significantAspectsCount}
+                value={envResult.significant_aspects_count}
                 valueStyle={{ color: '#cf1322' }}
               />
             </Card>
@@ -138,9 +138,9 @@ const AnalyzerPage: React.FC = () => {
             <Card>
               <Statistic
                 title="合规率"
-                value={envResult.complianceRate}
+                value={envResult.compliance_rate}
                 suffix="%"
-                valueStyle={{ color: envResult.complianceRate >= 90 ? '#3f8600' : '#cf1322' }}
+                valueStyle={{ color: envResult.compliance_rate >= 90 ? '#3f8600' : '#cf1322' }}
               />
             </Card>
           </Col>
@@ -148,7 +148,7 @@ const AnalyzerPage: React.FC = () => {
 
         <Card title="环境因素列表" className={styles.listCard}>
           <List
-            dataSource={envResult.environmentalAspects}
+            dataSource={envResult.environmental_aspects}
             renderItem={(item) => (
               <List.Item>
                 <List.Item.Meta
@@ -172,10 +172,10 @@ const AnalyzerPage: React.FC = () => {
           />
         </Card>
 
-        {envResult.generatedDocuments && (
+        {envResult.generated_documents && (
           <Card title="生成的ISO14001文档" className={styles.documentsCard}>
             <div className={styles.documentList}>
-              {Object.entries(envResult.generatedDocuments).map(([key, doc]) => (
+              {Object.entries(envResult.generated_documents).map(([key, doc]) => (
                 <div key={key} className={styles.documentItem}>
                   <FileTextOutlined className={styles.documentIcon} />
                   <span className={styles.documentName}>{key}</span>
@@ -199,7 +199,7 @@ const AnalyzerPage: React.FC = () => {
       <div className={styles.resultContainer}>
         <Alert
           message="解析完成"
-          description={`已为 ${safetyResult.companyName} 完成职业健康安全评估报告解析`}
+          description={`已为 ${safetyResult.company_name} 完成职业健康安全评估报告解析`}
           type="success"
           showIcon
           icon={<CheckCircleOutlined />}
@@ -211,7 +211,7 @@ const AnalyzerPage: React.FC = () => {
             <Card>
               <Statistic
                 title="危险源总数"
-                value={safetyResult.hazardsCount}
+                value={safetyResult.hazards_count}
                 valueStyle={{ color: '#1890ff' }}
               />
             </Card>
@@ -220,7 +220,7 @@ const AnalyzerPage: React.FC = () => {
             <Card>
               <Statistic
                 title="重大危险源"
-                value={safetyResult.significantHazardsCount}
+                value={safetyResult.significant_hazards_count}
                 valueStyle={{ color: '#cf1322' }}
               />
             </Card>
@@ -229,9 +229,9 @@ const AnalyzerPage: React.FC = () => {
             <Card>
               <Statistic
                 title="合规率"
-                value={safetyResult.complianceRate}
+                value={safetyResult.compliance_rate}
                 suffix="%"
-                valueStyle={{ color: safetyResult.complianceRate >= 90 ? '#3f8600' : '#cf1322' }}
+                valueStyle={{ color: safetyResult.compliance_rate >= 90 ? '#3f8600' : '#cf1322' }}
               />
             </Card>
           </Col>
@@ -245,25 +245,25 @@ const AnalyzerPage: React.FC = () => {
                 <List.Item.Meta
                   title={
                     <div className={styles.hazardTitle}>
-                      <span>{item.hazardSource}</span>
+                      <span>{item.hazard_source}</span>
                       <Tag
                         color={
-                          item.riskLevel === '重大'
+                          item.risk_level === '重大'
                             ? 'red'
-                            : item.riskLevel === '较大'
+                            : item.risk_level === '较大'
                             ? 'orange'
                             : 'default'
                         }
                       >
-                        {item.riskLevel}风险
+                        {item.risk_level}风险
                       </Tag>
                     </div>
                   }
                   description={
                     <div className={styles.hazardDescription}>
                       <p><strong>活动：</strong>{item.activity}</p>
-                      <p><strong>风险描述：</strong>{item.riskDescription}</p>
-                      <p><strong>风险评分：</strong>{item.riskScore}</p>
+                      <p><strong>风险描述：</strong>{item.risk_description}</p>
+                      <p><strong>风险评分：</strong>{item.risk_score}</p>
                     </div>
                   }
                 />
@@ -272,10 +272,10 @@ const AnalyzerPage: React.FC = () => {
           />
         </Card>
 
-        {safetyResult.generatedDocuments && (
+        {safetyResult.generated_documents && (
           <Card title="生成的ISO45001文档" className={styles.documentsCard}>
             <div className={styles.documentList}>
-              {Object.entries(safetyResult.generatedDocuments).map(([key, doc]) => (
+              {Object.entries(safetyResult.generated_documents).map(([key, doc]) => (
                 <div key={key} className={styles.documentItem}>
                   <FileTextOutlined className={styles.documentIcon} />
                   <span className={styles.documentName}>{key}</span>

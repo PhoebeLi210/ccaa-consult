@@ -186,15 +186,15 @@ const StandardDetail: React.FC = () => {
   };
 
   // 渲染审核要点
-  const renderAuditPoints = (auditPoints: AuditPoint[]) => {
-    if (!auditPoints || auditPoints.length === 0) {
+  const renderAuditPoints = (audit_points: AuditPoint[]) => {
+    if (!audit_points || audit_points.length === 0) {
       return <Empty description="暂无审核要点" image={Empty.PRESENTED_IMAGE_SIMPLE} />;
     }
 
     return (
       <Collapse
         accordion
-        items={auditPoints.map((point, index) => ({
+        items={audit_points.map((point, index) => ({
           key: index.toString(),
           label: (
             <Space>
@@ -223,7 +223,7 @@ const StandardDetail: React.FC = () => {
                 </Descriptions.Item>
                 <Descriptions.Item label="常见问题">
                   <List
-                    dataSource={point.commonIssues}
+                    dataSource={point.common_issues}
                     renderItem={(item) => (
                       <List.Item style={{ padding: '4px 0', borderBottom: 'none' }}>
                         <Space>
@@ -305,7 +305,7 @@ const StandardDetail: React.FC = () => {
           { title: '首页', href: '/' },
           { title: '知识库', href: '/knowledge' },
           { title: clause.standard },
-          { title: `${clause.clauseNumber} ${clause.title}` },
+          { title: `${clause.clause_number} ${clause.title}` },
         ]}
         style={{ marginBottom: 16 }}
       />
@@ -331,12 +331,12 @@ const StandardDetail: React.FC = () => {
               </Tag>
               <div>
                 <Title level={3} style={{ marginBottom: 8 }}>
-                  {clause.clauseNumber} {clause.title}
+                  {clause.clause_number} {clause.title}
                 </Title>
                 <Space>
-                  {clause.relatedClauses?.length > 0 && (
+                  {clause.related_clauses?.length > 0 && (
                     <Text type="secondary">
-                      相关条款: {clause.relatedClauses.join(', ')}
+                      相关条款: {clause.related_clauses.join(', ')}
                     </Text>
                   )}
                 </Space>
@@ -393,19 +393,19 @@ const StandardDetail: React.FC = () => {
                 <Space>
                   <AuditOutlined />
                   <span>审核要点</span>
-                  {clause.auditPoints?.length > 0 && (
-                    <Tag color="orange">{clause.auditPoints.length}</Tag>
+                  {clause.audit_points?.length > 0 && (
+                    <Tag color="orange">{clause.audit_points.length}</Tag>
                   )}
                 </Space>
               ),
-              children: renderAuditPoints(clause.auditPoints),
+              children: renderAuditPoints(clause.audit_points),
             },
           ]}
         />
       </Card>
 
       {/* 相关条款 */}
-      {clause.relatedClauses && clause.relatedClauses.length > 0 && (
+      {clause.related_clauses && clause.related_clauses.length > 0 && (
         <Card
           title={
             <Space>
@@ -416,7 +416,7 @@ const StandardDetail: React.FC = () => {
           style={{ marginTop: 16 }}
         >
           <Space wrap>
-            {clause.relatedClauses.map((related) => (
+            {clause.related_clauses.map((related) => (
               <Tag
                 key={related}
                 style={{ cursor: 'pointer' }}
