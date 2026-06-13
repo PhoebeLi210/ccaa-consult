@@ -12,9 +12,11 @@
 import re
 import json
 from typing import Optional, List, Dict, Any
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict
 from functools import lru_cache
 from enum import Enum
+
+from app.modules.generator.base import CompanyInfo
 
 
 class IndustryType(Enum):
@@ -41,45 +43,6 @@ class StandardType(Enum):
     ISO9001 = "ISO9001"
     ISO14001 = "ISO14001"
     ISO45001 = "ISO45001"
-
-
-@dataclass
-class CompanyInfo:
-    """企业信息结构"""
-    company_name: Optional[str] = None
-    industry: Optional[str] = None
-    industry_code: Optional[str] = None  # 行业代码（与 parse.py 中的 INDUSTRY_CODE_MAP 保持一致）
-    sub_industry: Optional[str] = None
-    employee_count: Optional[int] = None
-    office_area_sqm: Optional[float] = None
-    main_equipment: List[str] = field(default_factory=list)
-    main_processes: List[str] = field(default_factory=list)
-    departments: List[str] = field(default_factory=list)
-    certification_type: Optional[str] = None
-    existing_standards: List[str] = field(default_factory=list)
-    target_standards: List[str] = field(default_factory=list)
-    quality_goals: Optional[str] = None
-    key_customers: Optional[str] = None
-    special_processes: List[str] = field(default_factory=list)
-    raw_text: Optional[str] = None
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
-
-    def get_missing_fields(self) -> List[str]:
-        """获取缺失的关键字段"""
-        missing = []
-        if not self.company_name:
-            missing.append("company_name")
-        if not self.industry:
-            missing.append("industry")
-        if not self.employee_count:
-            missing.append("employee_count")
-        if not self.departments:
-            missing.append("departments")
-        if not self.quality_goals:
-            missing.append("quality_goals")
-        return missing
 
 
 class NaturalLanguageParser:
@@ -151,35 +114,55 @@ class NaturalLanguageParser:
         info = CompanyInfo(raw_text=free_text)
 
         # 1. 提取行业
-        info.industry_code = self._extract_industry(free_text)
-        info.industry = info.industry_code  # _extract_industry 现在返回行业代码
+        industry_code = self._extract_industry(free_text)
+        if industry_code:
+            info.industry_code = industry_code
+            info.industry = industry_code
 
         # 2. 提取员工人数
-        info.employee_count = self._extract_employee_count(free_text)
+        employee_count = self._extract_employee_count(free_text)
+        if employee_count is not None:
+            info.employee_count = employee_count
 
         # 3. 提取办公面积
-        info.office_area_sqm = self._extract_area(free_text)
+        area = self._extract_area(free_text)
+        if area is not None:
+            info.office_area_sqm = area
 
         # 4. 提取设备
-        info.main_equipment = self._extract_equipment(free_text)
+        equipment = self._extract_equipment(free_text)
+        if equipment:
+            info.main_equipment = equipment
 
         # 5. 提取部门
-        info.departments = self._extract_departments(free_text)
+        departments = self._extract_departments(free_text)
+        if departments:
+            info.departments = departments
 
         # 6. 提取认证类型
-        info.certification_type = self._extract_certification_type(free_text)
+        cert_type = self._extract_certification_type(free_text)
+        if cert_type:
+            info.certification_type = cert_type
 
         # 7. 提取已有标准
-        info.existing_standards = self._extract_standards(free_text, existing=True)
+        existing_standards = self._extract_standards(free_text, existing=True)
+        if existing_standards:
+            info.existing_standards = existing_standards
 
         # 8. 提取目标标准
-        info.target_standards = self._extract_standards(free_text, existing=False)
+        target_standards = self._extract_standards(free_text, existing=False)
+        if target_standards:
+            info.target_standards = target_standards
 
         # 9. 提取主要过程
-        info.main_processes = self._extract_processes(free_text)
+        processes = self._extract_processes(free_text)
+        if processes:
+            info.main_processes = processes
 
         # 10. 提取公司名称（如果有）
-        info.company_name = self._extract_company_name(free_text)
+        company_name = self._extract_company_name(free_text)
+        if company_name:
+            info.company_name = company_name
 
         return info
 
@@ -407,7 +390,9 @@ def _llm_parse_result(text: str) -> CompanyInfo:
     raw = _LLM_PARSE_STORE.get(text)
     if raw is None:
         raise ValueError("cache miss")
-    return CompanyInfo(**json.loads(raw))
+    data = json.loads(raw)
+    # 过滤 None 值，让字段使用默认值
+    return CompanyInfo(**{k: v for k, v in data.items() if v is not None})
 
 
 def _cache_llm_parse_result(text: str, info: CompanyInfo) -> None:

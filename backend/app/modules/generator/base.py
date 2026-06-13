@@ -12,7 +12,7 @@
 6. 生成器基类
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Any
@@ -98,10 +98,17 @@ class CompanyInfo:
     # 管理者代表
     management_representative: str = ""
     
+    # 行业和客户
+    industry_code: str = ""  # 行业代码
+    key_customers: str = ""  # 主要客户
+    
     # 文件信息
     file_version: str = "A/0"  # 文件版本
     effective_date: str = ""  # 生效日期
     release_date: str = ""  # 发布日期
+    
+    # 解析原文（用于缓存和调试）
+    raw_text: str = ""
     
     def get_full_year(self) -> str:
         """获取当前年份字符串"""
@@ -114,6 +121,23 @@ class CompanyInfo:
     def get_chinese_date(self) -> str:
         """获取中文日期格式"""
         return datetime.now().strftime("%Y年%m月%d日")
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """转换为字典"""
+        return asdict(self)
+    
+    def get_missing_fields(self) -> List[str]:
+        """获取缺失的关键字段"""
+        missing = []
+        if not self.company_name:
+            missing.append("company_name")
+        if not self.industry:
+            missing.append("industry")
+        if not self.employee_count:
+            missing.append("employee_count")
+        if not self.departments:
+            missing.append("departments")
+        return missing
     
     def to_variables(self) -> Dict[str, str]:
         """转换为变量字典"""

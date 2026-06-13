@@ -17,9 +17,9 @@ from dataclasses import dataclass, asdict
 from app.models.models import Project, ProjectRawInput, ProjectStatus
 from app.modules.parser.natural_language_parser import (
     NaturalLanguageParser,
-    CompanyInfo,
     LLMParser
 )
+from app.modules.generator.base import CompanyInfo
 
 
 @dataclass
