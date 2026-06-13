@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 import re
 
-from document_hierarchy import (
+from app.core.document_hierarchy import (
     DocumentLevel,
     DocumentLevelConfig,
     DocumentInfo,

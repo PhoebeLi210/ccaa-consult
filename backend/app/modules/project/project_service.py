@@ -312,48 +312,6 @@ class ProjectService:
         return await self.update_project(project_id, updates)
 
 
-# API路由示例
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-
-router = APIRouter(prefix="/api/v1/projects", tags=["projects"])
-
-
-class CreateProjectInput(BaseModel):
-    free_text: Optional[str] = None
-    file_data: Optional[Dict[str, Any]] = None
-
-
-class AnswerQuestionInput(BaseModel):
-    field: str
-    answer: str
-
-
-@router.post("/")
-async def create_project(
-    input_data: CreateProjectInput,
-    user_id: str = "default_user"
-):
-    """创建项目"""
-    service = ProjectService()
-    request = CreateProjectRequest(
-        user_id=user_id,
-        free_text=input_data.free_text,
-        file_data=input_data.file_data,
-    )
-    return await service.create_project(request)
-
-
-@router.get("/{project_id}")
-async def get_project(project_id: str):
-    """获取项目"""
-    service = ProjectService()
-    project = await service.get_project(project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    return project
-
-
 @router.get("/")
 async def list_projects(
     user_id: str = "default_user",

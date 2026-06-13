@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 import json
 import re
+from functools import lru_cache
 
 from app.core.config import settings
 from app.modules.generator.llm_client import LLMService, LLMConfig, create_llm_service
@@ -17,16 +18,17 @@ from app.modules.generator.llm_client import LLMService, LLMConfig, create_llm_s
 router = APIRouter(prefix="/parse", tags=["自然语言解析"])
 
 
-# LLM解析结果缓存（等同于 functools.lru_cache，适配 async 函数）
-_parse_cache: Dict[str, Dict[str, Any]] = {}
-_PARSE_CACHE_MAX = 128
+# LLM解析结果缓存 text→JSON字符串，自动 LRU 淘汰最近最少使用条目
+_CACHED_PARSE_RESULTS: Dict[str, str] = {}
 
 
-def _cache_parse_result(text: str, result: Dict[str, Any]) -> None:
-    """写入缓存，超出上限时淘汰最早条目"""
-    if len(_parse_cache) >= _PARSE_CACHE_MAX:
-        _parse_cache.pop(next(iter(_parse_cache)))
-    _parse_cache[text] = result
+@lru_cache(maxsize=128)
+def _cached_parse_result(text: str) -> str:
+    """同步缓存层：lru_cache 管理热 key 的追踪与淘汰，实际数据存储在 _CACHED_PARSE_RESULTS。"""
+    result = _CACHED_PARSE_RESULTS.get(text)
+    if result is None:
+        raise ValueError("cache miss")
+    return result
 
 
 # ============ 请求/响应模型 ============
@@ -270,26 +272,30 @@ def get_llm_service() -> LLMService:
 async def parse_with_llm(text: str) -> Dict[str, Any]:
     """使用LLM解析企业信息（结果按输入文本缓存）"""
     # 缓存命中
-    if text in _parse_cache:
-        return _parse_cache[text]
-    
+    try:
+        return json.loads(_cached_parse_result(text))
+    except ValueError:
+        pass
+
     llm_service = get_llm_service()
-    
+
     try:
         result = await llm_service.generate_json(
             USER_PROMPT_TEMPLATE.format(text=text),
             system_prompt=SYSTEM_PROMPT
         )
-        
+
         # 处理行业代码
         if result.get("industry"):
             result["industry_code"] = get_industry_code(result["industry"])
-        
-        # 写入缓存
-        _cache_parse_result(text, result)
-        
+
+        # 写入 lru_cache
+        result_json = json.dumps(result, ensure_ascii=False)
+        _CACHED_PARSE_RESULTS[text] = result_json
+        _cached_parse_result(text)
+
         return result
-    
+
     finally:
         await llm_service.close()
 
