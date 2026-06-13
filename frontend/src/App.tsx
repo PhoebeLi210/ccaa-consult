@@ -16,6 +16,7 @@ import AnalyzerPage from './pages/analyzer';
 import TemplatesPage from './pages/templates';
 import TeamPage from './pages/team';
 import { KnowledgeBase, StandardDetail, KnowledgeDetail } from './pages/knowledge';
+import FlowchartListPage from './pages/flowcharts';
 
 /**
  * 根组件
@@ -71,6 +72,9 @@ const App: React.FC = () => {
         <Route path="/knowledge" element={<KnowledgeBase />} />
         <Route path="/knowledge/standard/:id" element={<StandardDetail />} />
         <Route path="/knowledge/detail/:id" element={<KnowledgeDetail />} />
+
+        {/* 流程图管理 */}
+        <Route path="/flowcharts" element={<FlowchartListPage />} />
 
         {/* 未匹配路由重定向到首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />

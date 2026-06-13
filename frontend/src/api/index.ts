@@ -1,14 +1,7 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 /** 后端API基础URL */
 const BASE_URL = '/api';
-
-/** 自定义响应数据结构 */
-interface ApiResponse<T = unknown> {
-  code: number;
-  message: string;
-  data: T;
-}
 
 /** 创建axios实例 */
 const request: AxiosInstance = axios.create({
@@ -36,17 +29,12 @@ request.interceptors.request.use(
 
 /** 响应拦截器 - 统一处理错误 */
 request.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
-    const { data } = response;
-    if (data.code === 0 || data.code === 200) {
-      return data.data as unknown as AxiosResponse;
-    }
-    // 业务错误
-    return Promise.reject(new Error(data.message || '请求失败'));
+  (response: AxiosResponse) => {
+    return response.data;
   },
   (error) => {
-    // HTTP错误
     const message =
+      error.response?.data?.detail ||
       error.response?.data?.message ||
       error.message ||
       '网络异常，请稍后重试';
@@ -114,59 +102,59 @@ export function getProjectList(params?: {
   pageSize?: number;
   keyword?: string;
 }) {
-  return request.get<unknown, ProjectInfo[]>('/projects', { params });
+  return request.get<unknown, ProjectInfo[]>('/v1/projects', { params });
 }
 
 /** 获取项目详情 */
 export function getProjectDetail(id: string) {
-  return request.get<unknown, ProjectInfo>(`/projects/${id}`);
+  return request.get<unknown, ProjectInfo>(`/v1/projects/${id}`);
 }
 
 /** 创建项目 */
 export function createProject(data: Partial<ProjectInfo>) {
-  return request.post<unknown, ProjectInfo>('/projects', data);
+  return request.post<unknown, ProjectInfo>('/v1/projects', data);
 }
 
 /** 更新项目 */
 export function updateProject(id: string, data: Partial<ProjectInfo>) {
-  return request.put<unknown, ProjectInfo>(`/projects/${id}`, data);
+  return request.put<unknown, ProjectInfo>(`/v1/projects/${id}`, data);
 }
 
 /** 删除项目 */
 export function deleteProject(id: string) {
-  return request.delete<unknown, void>(`/projects/${id}`);
+  return request.delete<unknown, void>(`/v1/projects/${id}`);
 }
 
 /** AI自然语言解析 */
 export function parseNaturalLanguage(text: string) {
-  return request.post<unknown, ParseResult>('/ai/parse', { text });
+  return request.post<unknown, ParseResult>('/v1/parse', { text });
 }
 
 /** 获取项目文档列表 */
 export function getProjectDocuments(projectId: string) {
-  return request.get<unknown, DocumentInfo[]>(`/projects/${projectId}/documents`);
+  return request.get<unknown, DocumentInfo[]>(`/v1/projects/${projectId}/documents`);
 }
 
 /** 确认文档 */
-export function confirmDocument(documentId: string) {
-  return request.put<unknown, DocumentInfo>(`/documents/${documentId}/confirm`);
+export function confirmDocument(projectId: string, documentId: string) {
+  return request.post<unknown, DocumentInfo>(`/v1/projects/${projectId}/documents/${documentId}/confirm`);
 }
 
 /** 批量确认文档 */
-export function batchConfirmDocuments(documentIds: string[]) {
-  return request.post<unknown, void>('/documents/batch-confirm', { ids: documentIds });
+export function batchConfirmDocuments(projectId: string, documentIds: string[]) {
+  return request.post<unknown, void>(`/v1/projects/${projectId}/documents/batch-confirm`, { document_ids: documentIds });
 }
 
 /** 生成文档 */
 export function generateDocuments(projectId: string) {
-  return request.post<unknown, DocumentInfo[]>(`/projects/${projectId}/generate-documents`);
+  return request.post<unknown, DocumentInfo[]>('/v1/generator/generate/all', { project_id: projectId });
 }
 
 /** 上传文件 */
-export function uploadFile(file: File, onProgress?: (progress: number) => void) {
+export function uploadFile(projectId: string, file: File, onProgress?: (progress: number) => void) {
   const formData = new FormData();
   formData.append('file', file);
-  return request.post<unknown, UploadFileInfo>('/files/upload', formData, {
+  return request.post<unknown, UploadFileInfo>(`/v1/uploads/${projectId}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (event) => {
       if (event.total && onProgress) {
@@ -177,8 +165,8 @@ export function uploadFile(file: File, onProgress?: (progress: number) => void) 
 }
 
 /** 获取已上传文件列表 */
-export function getUploadedFiles(params?: { projectId?: string }) {
-  return request.get<unknown, UploadFileInfo[]>('/files', { params });
+export function getUploadedFiles(projectId: string) {
+  return request.get<unknown, UploadFileInfo[]>(`/v1/uploads/${projectId}`);
 }
 
 /* ==================== 多轮对话API (V1.1) ==================== */
@@ -793,6 +781,72 @@ export function getSupportedLevels() {
 }
 
 export default request;
+
+/* ==================== 用户认证API ==================== */
+
+/** 登录请求 */
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+/** 注册请求 */
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  email?: string;
+  full_name?: string;
+  company?: string;
+}
+
+/** 用户信息 */
+export interface UserInfo {
+  user_id: string;
+  username: string;
+  email?: string;
+  full_name?: string;
+  company?: string;
+  role: string;
+  status: string;
+  created_at: string;
+}
+
+/** 令牌响应 */
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: UserInfo;
+}
+
+/** 用户注册 */
+export function register(data: RegisterRequest) {
+  return request.post<unknown, UserInfo>('/v1/auth/register', data);
+}
+
+/** 用户登录（表单格式） */
+export function login(username: string, password: string) {
+  const formData = new FormData();
+  formData.append('username', username);
+  formData.append('password', password);
+  return request.post<unknown, TokenResponse>('/v1/auth/login', formData, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  });
+}
+
+/** 用户登录（JSON格式） */
+export function loginJson(data: LoginRequest) {
+  return request.post<unknown, TokenResponse>('/v1/auth/login/json', data);
+}
+
+/** 获取当前用户信息 */
+export function getCurrentUser() {
+  return request.get<unknown, UserInfo>('/v1/auth/me');
+}
+
+/** 退出登录 */
+export function logout() {
+  return request.post<unknown, { message: string }>('/v1/auth/logout');
+}
 
 /* ==================== 行业配置 API (V2.2) ==================== */
 

@@ -44,9 +44,9 @@ interface UseProjectReturn {
   /** 获取项目文档 */
   fetchDocuments: (projectId: string) => Promise<void>;
   /** 确认单个文档 */
-  confirmSingleDocument: (documentId: string) => Promise<void>;
+  confirmSingleDocument: (projectId: string, documentId: string) => Promise<void>;
   /** 批量确认文档 */
-  confirmMultipleDocuments: (documentIds: string[]) => Promise<void>;
+  confirmMultipleDocuments: (projectId: string, documentIds: string[]) => Promise<void>;
 }
 
 /**
@@ -184,9 +184,9 @@ export function useProject(): UseProjectReturn {
   }, []);
 
   /** 确认单个文档 */
-  const confirmSingleDocument = useCallback(async (documentId: string) => {
+  const confirmSingleDocument = useCallback(async (projectId: string, documentId: string) => {
     try {
-      const updated = await confirmDocument(documentId);
+      const updated = await confirmDocument(projectId, documentId);
       setDocuments((prev) =>
         prev.map((d) => (d.id === documentId ? updated : d)),
       );
@@ -196,9 +196,9 @@ export function useProject(): UseProjectReturn {
   }, []);
 
   /** 批量确认文档 */
-  const confirmMultipleDocuments = useCallback(async (documentIds: string[]) => {
+  const confirmMultipleDocuments = useCallback(async (projectId: string, documentIds: string[]) => {
     try {
-      await batchConfirmDocuments(documentIds);
+      await batchConfirmDocuments(projectId, documentIds);
       setDocuments((prev) =>
         prev.map((d) =>
           documentIds.includes(d.id) ? { ...d, status: 'confirmed' as const } : d,

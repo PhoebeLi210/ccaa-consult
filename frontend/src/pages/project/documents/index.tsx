@@ -40,7 +40,7 @@ const ProjectDocumentsPage: React.FC = () => {
   const handleConfirm = useCallback(
     async (docId: string) => {
       try {
-        await confirmSingleDocument(docId);
+        await confirmSingleDocument(id!, docId);
         Toast.show({ content: '确认成功', icon: 'success' });
       } catch {
         Toast.show({ content: '确认失败', icon: 'fail' });
@@ -59,7 +59,7 @@ const ProjectDocumentsPage: React.FC = () => {
       content: `确定确认选中的 ${selectedIds.length} 个文档？`,
       onConfirm: async () => {
         try {
-          await confirmMultipleDocuments(selectedIds);
+          await confirmMultipleDocuments(id!, selectedIds);
           Toast.show({ content: '批量确认成功', icon: 'success' });
           setSelectedIds([]);
         } catch {

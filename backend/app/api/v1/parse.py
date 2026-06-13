@@ -127,8 +127,18 @@ USER_PROMPT_TEMPLATE = """请从以下文本中提取企业信息：
 
 # ============ API路由 ============
 
-@router.post("/company", response_model=ParseResponse, summary="解析企业信息")
+@router.post("", response_model=ParseResponse, summary="解析企业信息")
 async def parse_company_info(request: ParseRequest):
+    """兼容前端 /v1/parse 路径调用"""
+    return await _parse_company(request)
+
+
+@router.post("/company", response_model=ParseResponse, summary="解析企业信息")
+async def parse_company_info_via_company(request: ParseRequest):
+    return await _parse_company(request)
+
+
+async def _parse_company(request: ParseRequest):
     """
     从自然语言文本中解析企业信息
     

@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { NavBar, Toast, List } from 'antd-mobile';
 import {
   Upload,
@@ -52,6 +53,8 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024;
 /** 文件上传页面（PC端核心页面） */
 const UploadPage: React.FC = () => {
   const { isMobile } = useResponsive();
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get('projectId') || '';
   const [fileList, setFileList] = useState<UploadFileInfo[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -78,7 +81,7 @@ const UploadPage: React.FC = () => {
     setFileList((prev) => [fileRecord, ...prev]);
 
     try {
-      const result = await uploadFile(file, (progress) => {
+      const result = await uploadFile(projectId, file, (progress) => {
         // 更新上传进度
         setFileList((prev) =>
           prev.map((f) =>

@@ -137,10 +137,7 @@ async def list_uploads(
     
     uploads = query.order_by(Upload.created_at.desc()).all()
     
-    return {
-        "total": len(uploads),
-        "uploads": [u.to_dict() for u in uploads]
-    }
+    return [u.to_dict() for u in uploads]
 
 
 @router.get("/{project_id}/{upload_id}", summary="获取上传文件详情")

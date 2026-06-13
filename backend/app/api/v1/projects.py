@@ -96,6 +96,11 @@ class DocumentUpdateRequest(BaseModel):
     confirmed: Optional[bool] = None
 
 
+class BatchConfirmRequest(BaseModel):
+    """批量确认文档请求"""
+    document_ids: List[str]
+
+
 # ============ 项目API ============
 
 @router.post("/", response_model=ProjectResponse, summary="创建项目")
@@ -140,7 +145,7 @@ async def create_project(request: ProjectCreateRequest, db: Session = Depends(ge
     )
 
 
-@router.get("/", response_model=ProjectListResponse, summary="获取项目列表")
+@router.get("/", summary="获取项目列表")
 async def list_projects(
     user_id: Optional[str] = Query(None, description="用户ID过滤"),
     status: Optional[str] = Query(None, description="状态过滤"),
@@ -162,10 +167,7 @@ async def list_projects(
     total = query.count()
     projects = query.order_by(Project.updated_at.desc()).offset(skip).limit(limit).all()
     
-    return ProjectListResponse(
-        total=total,
-        projects=[p.to_dict() for p in projects]
-    )
+    return [p.to_dict() for p in projects]
 
 
 @router.get("/{project_id}", summary="获取项目详情")
@@ -279,18 +281,7 @@ async def list_documents(
     
     documents = query.order_by(Document.created_at).all()
     
-    # 按类型分组
-    grouped = {}
-    for doc in documents:
-        if doc.doc_type not in grouped:
-            grouped[doc.doc_type] = []
-        grouped[doc.doc_type].append(doc.to_dict())
-    
-    return {
-        "total": len(documents),
-        "documents": [d.to_dict() for d in documents],
-        "grouped": grouped,
-    }
+    return [d.to_dict() for d in documents]
 
 
 @router.get("/{project_id}/documents/{document_id}", summary="获取文档详情")
@@ -363,17 +354,19 @@ async def confirm_document(
     document.confirmed_at = datetime.utcnow()
     document.updated_at = datetime.utcnow()
     db.commit()
+    db.refresh(document)
     
-    return {"message": "文档已确认", "document_id": document_id}
+    return document.to_dict()
 
 
 @router.post("/{project_id}/documents/batch-confirm", summary="批量确认文档")
 async def batch_confirm_documents(
     project_id: str,
-    document_ids: List[str],
+    request: BatchConfirmRequest,
     db: Session = Depends(get_db)
 ):
     """批量确认文档"""
+    document_ids = request.document_ids
     count = db.query(Document).filter(
         Document.document_id.in_(document_ids),
         Document.project_id == project_id
