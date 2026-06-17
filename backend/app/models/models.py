@@ -117,7 +117,7 @@ class Project(Base):
     raw_inputs = relationship("ProjectRawInput", back_populates="project", cascade="all, delete-orphan")
     documents = relationship("Document", back_populates="project", cascade="all, delete-orphan")
     uploads = relationship("Upload", back_populates="project", cascade="all, delete-orphan")
-    team = relationship("Team", back_populates="projects", foreign_keys="Project.team_id")
+    team = relationship("Team", back_populates="projects", foreign_keys="Project.team_id", primaryjoin="Project.team_id == Team.team_id")
 
     def to_dict(self):
         return {
@@ -429,7 +429,7 @@ class Team(Base):
 
     # 关联
     members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
-    projects = relationship("Project", back_populates="team", foreign_keys="Project.team_id")
+    projects = relationship("Project", back_populates="team", foreign_keys="Project.team_id", primaryjoin="Team.team_id == Project.team_id")
 
     def to_dict(self):
         return {
@@ -661,6 +661,52 @@ class IndustryRuleTemplate(Base):
             "rule_name": self.rule_name,
             "description": self.description,
             "variables": self.variables or [],
+            "is_active": self.is_active,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class KnowledgeArticle(Base):
+    """知识库文章表"""
+    __tablename__ = "knowledge_articles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    article_id = Column(String(36), unique=True, nullable=False, index=True)
+
+    # 文章信息
+    title = Column(String(200), nullable=False)
+    category = Column(String(50), nullable=False)  # standard/industry/regulation/experience
+    industry_code = Column(String(50), nullable=True)
+    standard_code = Column(String(50), nullable=True)
+
+    # 内容
+    content = Column(Text, nullable=False)  # Markdown格式内容
+    summary = Column(Text, nullable=True)  # 摘要
+
+    # 元数据
+    tags = Column(JSON, nullable=True)  # 标签列表
+    source_file = Column(String(500), nullable=True)  # 来源文件路径
+
+    # 状态
+    is_active = Column(Boolean, default=True)
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "article_id": self.article_id,
+            "title": self.title,
+            "category": self.category,
+            "industry_code": self.industry_code,
+            "standard_code": self.standard_code,
+            "content": self.content,
+            "summary": self.summary,
+            "tags": self.tags or [],
+            "source_file": self.source_file,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
