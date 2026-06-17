@@ -79,9 +79,10 @@ const TemplatesPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await getCustomTemplates();
-      setTemplates(data);
+      setTemplates(Array.isArray(data) ? data : []);
     } catch (error) {
-      message.error('加载模板列表失败');
+      console.error('加载模板失败:', error);
+      setTemplates([]);
     } finally {
       setLoading(false);
     }

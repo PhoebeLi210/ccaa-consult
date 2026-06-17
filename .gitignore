@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -51,7 +51,16 @@ logs/
 # Node
 node_modules/
 package-lock.json
+frontend/dist/
+tsconfig.tsbuildinfo
 
 # Output files
 backend/output/
 *.docx
+
+# Backups
+backend/backups/
+
+# Scripts at root
+push_patches.ps1
+upload.py

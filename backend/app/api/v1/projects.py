@@ -16,8 +16,10 @@ import json
 
 from sqlalchemy import select, func, cast, Integer, update as sql_update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.attributes import flag_modified
 from app.core.database import get_db
 from app.models.models import Project, Document, Upload, ProjectRawInput, ProjectStatus
+from app.api.v1.auth import get_current_user
 
 router = APIRouter(prefix="/projects", tags=["项目管理"])
 
@@ -90,11 +92,12 @@ class BatchConfirmRequest(BaseModel):
 # ============ 项目API ============
 
 @router.post("/", response_model=ProjectResponse, summary="创建项目")
-async def create_project(request: ProjectCreateRequest, db: AsyncSession = Depends(get_db)):
+async def create_project(request: ProjectCreateRequest, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+    user_id = current_user.user_id if hasattr(current_user, 'user_id') else current_user.get("id")
     project_id = str(uuid.uuid4())
     project = Project(
         project_id=project_id,
-        user_id=request.user_id,
+        user_id=user_id,
         company_name=request.company_name,
         industry=request.industry_code or request.industry,
         employee_count=request.employee_count,
@@ -129,15 +132,18 @@ async def create_project(request: ProjectCreateRequest, db: AsyncSession = Depen
 
 @router.get("/", summary="获取项目列表")
 async def list_projects(
-    user_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     keyword: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
+    user_id = current_user.user_id if hasattr(current_user, 'user_id') else current_user.get("id")
+    is_admin = getattr(current_user, 'is_superuser', False)
+
     stmt = select(Project)
-    if user_id:
+    if not is_admin:
         stmt = stmt.where(Project.user_id == user_id)
     if status:
         stmt = stmt.where(Project.status == status)
@@ -148,10 +154,15 @@ async def list_projects(
 
 
 @router.get("/{project_id}", summary="获取项目详情")
-async def get_project(project_id: str, db: AsyncSession = Depends(get_db)):
+async def get_project(project_id: str, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+    user_id = current_user.user_id if hasattr(current_user, 'user_id') else current_user.get("id")
+    is_admin = getattr(current_user, 'is_superuser', False)
+
     result = await db.execute(select(Project).where(Project.project_id == project_id))
     project = result.scalar_one_or_none()
     if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+    if not is_admin and project.user_id != user_id:
         raise HTTPException(status_code=404, detail="项目不存在")
     result_dict = project.to_dict()
     doc_count = (await db.execute(select(func.count()).select_from(Document).where(Document.project_id == project_id))).scalar()
@@ -176,6 +187,7 @@ async def update_project(
         if not project.config:
             project.config = {}
         project.config["industry_code"] = update_data.pop("industry_code")
+        flag_modified(project, "config")
     for key, value in update_data.items():
         if hasattr(project, key):
             setattr(project, key, value)

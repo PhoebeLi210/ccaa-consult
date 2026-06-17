@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, theme } from 'antd';
+import { Layout, Menu, theme, Dropdown, Button, Avatar } from 'antd';
 import {
   HomeOutlined,
   FolderOpenOutlined,
-  CloudUploadOutlined,
   FileTextOutlined,
   FileMarkdownOutlined,
   TeamOutlined,
   BookOutlined,
-  MessageOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   PartitionOutlined,
+  UserOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
+import { useAuth } from '../contexts/AuthContext';
 
 const { Sider, Content, Header } = Layout;
 
@@ -35,19 +36,9 @@ const menuItems = [
     label: '创建项目',
   },
   {
-    key: '/conversation',
-    icon: <MessageOutlined />,
-    label: '多轮对话',
-  },
-  {
     key: '/materials',
     icon: <FolderOpenOutlined />,
     label: '材料管理',
-  },
-  {
-    key: '/upload',
-    icon: <CloudUploadOutlined />,
-    label: '文件上传',
   },
   {
     key: '/analyzer',
@@ -84,6 +75,7 @@ const PcLayout: React.FC<PcLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -162,7 +154,15 @@ const PcLayout: React.FC<PcLayoutProps> = ({ children }) => {
             {menuItems.find((item) => item.key === getSelectedKey())?.label || '首页'}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ color: '#666', fontSize: 14 }}>管理员</span>
+            <Dropdown menu={{
+              items: [
+                { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: () => { logout(); navigate('/login'); } }
+              ]
+            }}>
+              <Button type="text" icon={<Avatar size="small" icon={<UserOutlined />} />}>
+                {user?.username || '用户'}
+              </Button>
+            </Dropdown>
           </div>
         </Header>
 

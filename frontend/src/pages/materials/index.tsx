@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Card,
   Select,
@@ -53,6 +54,9 @@ const defaultCategoryIcon = <FileTextOutlined />;
  */
 const MaterialsPage: React.FC = () => {
   const { isMobile } = useResponsive();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const projectId = searchParams.get('projectId');
 
   // 状态管理
   const [industries, setIndustries] = useState<Industry[]>([]);
@@ -108,28 +112,52 @@ const MaterialsPage: React.FC = () => {
   };
 
   /** 批量下载所有有模板的材料 */
-  const handleBatchDownload = () => {
+  const handleBatchDownload = async () => {
     if (!materialData) return;
 
-    const allMaterials = [
-      ...Object.values(materialData.materials.common).flat(),
-      ...Object.values(materialData.materials.industry_specific).flat(),
-    ];
-
-    const downloadableMaterials = allMaterials.filter((m) => m.template_available);
-
-    if (downloadableMaterials.length === 0) {
-      message.warning('当前行业没有可下载的模板');
+    // 没有项目ID时，提示用户先创建项目
+    if (!projectId) {
+      message.info('请先创建项目并生成文档，然后再下载全套体系文件');
+      navigate('/project/create');
       return;
     }
 
-    downloadableMaterials.forEach((m, index) => {
-      setTimeout(() => {
-        downloadTemplate(m.name);
-      }, index * 500); // 间隔500ms避免浏览器拦截
-    });
-
-    message.success(`正在下载 ${downloadableMaterials.length} 个模板文件`);
+    // 有项目ID，导出已生成的文档
+    try {
+      message.loading('正在生成文档包...', 0);
+      const response = await fetch(`/api/v1/generator/export/zip`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          project_id: projectId,
+          company_info: { industry_code: selectedIndustry },
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '导出失败');
+      }
+      
+      // 下载文件
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `体系文件_${materialData.industry_name}_${new Date().toISOString().slice(0,10)}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      message.success('文档包下载成功');
+    } catch (error: any) {
+      message.error(error.message || '导出失败');
+    } finally {
+      message.destroy();
+    }
   };
 
   /** 计算可下载模板总数 */
@@ -318,14 +346,7 @@ const MaterialsPage: React.FC = () => {
               size={isMobile ? 'middle' : 'large'}
               style={isMobile ? { width: '100%', marginTop: 8 } : {}}
             >
-              批量下载全部模板
-              {getDownloadableCount() > 0 && (
-                <Badge
-                  count={getDownloadableCount()}
-                  size="small"
-                  style={{ marginLeft: 8 }}
-                />
-              )}
+              {projectId ? '下载全套体系文件' : '创建项目并生成文件'}
             </Button>
           )}
         </div>

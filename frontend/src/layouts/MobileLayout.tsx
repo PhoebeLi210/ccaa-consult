@@ -5,11 +5,13 @@ import {
   AppOutline,
   FileOutline,
   ContentOutline,
-  CloudUploadOutline,
+  UploadOutline,
   MessageOutline,
   FolderOutline,
-  PartitionOutline,
+  AppstoreOutline,
+  SetOutline,
 } from 'antd-mobile-icons';
+import { useAuth } from '../contexts/AuthContext';
 
 /** 移动端布局组件属性 */
 interface MobileLayoutProps {
@@ -22,8 +24,8 @@ const tabs = [
   { key: '/project/create', title: '创建', icon: <ContentOutline /> },
   { key: '/conversation', title: '对话', icon: <MessageOutline /> },
   { key: '/materials', title: '材料', icon: <FolderOutline /> },
-  { key: '/upload', title: '上传', icon: <CloudUploadOutline /> },
-  { key: '/flowcharts', title: '流程图', icon: <PartitionOutline /> },
+  { key: '/upload', title: '上传', icon: <UploadOutline /> },
+  { key: '/flowcharts', title: '流程图', icon: <AppstoreOutline /> },
 ];
 
 /**
@@ -33,6 +35,7 @@ const tabs = [
 const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   /** 根据当前路径确定激活的Tab */
   const getActiveKey = () => {
@@ -65,13 +68,18 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
           color: '#fff',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
           fontSize: 17,
           fontWeight: 600,
           flexShrink: 0,
         }}
       >
-        CCAA 咨询管理
+        <span>CCAA 咨询管理</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 400 }}>{user?.username}</span>
+          <SetOutline style={{ fontSize: 20, cursor: 'pointer' }} onClick={() => { logout(); navigate('/login'); }} />
+        </div>
       </div>
 
       {/* 内容区域 */}

@@ -11,6 +11,7 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.orm.attributes import flag_modified
 import uuid
 import json
 
@@ -227,12 +228,14 @@ async def get_conversation_status(session_id: str):
 async def complete_conversation(
     session_id: str,
     project_id: Optional[str] = None,
+    auto_generate: bool = True,
     db: AsyncSession = Depends(get_db)
 ):
     """
     手动完成对话，将收集的信息保存到项目
     
-    即使还有缺失字段，也可以手动完成
+    即使还有缺失字段，也可以手动完成。
+    如果 auto_generate=True，会自动生成全套体系文件。
     """
     if session_id not in conversation_sessions:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -250,12 +253,60 @@ async def complete_conversation(
     session["status"] = "completed"
     session["last_updated"] = datetime.utcnow().isoformat()
     
+    # 自动生成全套体系文件
+    generation_result = None
+    if auto_generate:
+        try:
+            from app.modules.generator.unified_generator import UnifiedDocumentGenerator
+            import uuid as uuid_mod
+            
+            # 构建企业信息
+            company_info = session["parsed_info"]
+            company_info["industry_code"] = company_info.get("industry_code") or company_info.get("industry", "")
+            
+            # 生成文档
+            generator = UnifiedDocumentGenerator()
+            documents = generator.generate_all_documents(company_info, None)
+            
+            # 保存到数据库
+            saved_count = 0
+            for doc in documents:
+                try:
+                    from app.models.models import Document as DocumentModel
+                    doc_dict = doc.to_dict()
+                    db_doc = DocumentModel(
+                        project_id=target_project_id,
+                        document_id=str(uuid_mod.uuid4()),
+                        doc_type=doc_dict.get("doc_type", "procedure"),
+                        title=doc_dict.get("title", "未命名文档"),
+                        file_name=doc_dict.get("file_name", ""),
+                        ai_content=json.dumps(doc_dict, ensure_ascii=False),
+                        current_content=json.dumps(doc_dict, ensure_ascii=False),
+                        version=1,
+                    )
+                    db.add(db_doc)
+                    saved_count += 1
+                except Exception as e:
+                    print(f"保存文档失败: {e}")
+            
+            await db.commit()
+            
+            generation_result = {
+                "total_generated": len(documents),
+                "saved_to_db": saved_count,
+                "message": f"已生成 {len(documents)} 个文档，{saved_count} 个已保存到项目",
+            }
+        except Exception as e:
+            await db.rollback()
+            generation_result = {"error": str(e), "message": "文档生成失败"}
+    
     return {
         "message": "对话已完成，信息已保存到项目",
         "session_id": session_id,
         "project_id": target_project_id,
         "final_info": session["parsed_info"],
         "remaining_missing": session["missing_fields"],
+        "generation_result": generation_result,
     }
 
 
@@ -453,6 +504,7 @@ async def _update_project_with_complete_info(
                 project.config["contact_phone"] = parsed_info["contact_phone"]
             if parsed_info.get("legal_representative"):
                 project.config["legal_representative"] = parsed_info["legal_representative"]
+            flag_modified(project, "config")
         
         await db.commit()
     except Exception as e:

@@ -108,7 +108,7 @@ const HomePage: React.FC = () => {
                     {
                       key: 'delete',
                       text: '删除',
-                      danger: true,
+                      color: 'danger',
                       onClick: () => handleDelete(project.id),
                     },
                   ]}

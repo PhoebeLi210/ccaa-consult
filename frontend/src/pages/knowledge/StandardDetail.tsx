@@ -211,7 +211,7 @@ const StandardDetail: React.FC = () => {
                 <Descriptions.Item label="所需证据">
                   <List
                     dataSource={point.evidence}
-                    renderItem={(item) => (
+                    renderItem={(item: string) => (
                       <List.Item style={{ padding: '4px 0', borderBottom: 'none' }}>
                         <Space>
                           <FileSearchOutlined style={{ color: '#1890ff' }} />
@@ -224,7 +224,7 @@ const StandardDetail: React.FC = () => {
                 <Descriptions.Item label="常见问题">
                   <List
                     dataSource={point.common_issues}
-                    renderItem={(item) => (
+                    renderItem={(item: string) => (
                       <List.Item style={{ padding: '4px 0', borderBottom: 'none' }}>
                         <Space>
                           <WarningOutlined style={{ color: '#faad14' }} />
@@ -326,7 +326,7 @@ const StandardDetail: React.FC = () => {
           {/* 标题区 */}
           <div>
             <Space align="start">
-              <Tag color={STANDARD_COLORS[clause.standard] || 'default'} style={{ marginTop: 4 }}>
+              <Tag color={STANDARD_COLORS[clause.standard || ''] || 'default'} style={{ marginTop: 4 }}>
                 {clause.standard}
               </Tag>
               <div>
@@ -334,9 +334,9 @@ const StandardDetail: React.FC = () => {
                   {clause.clause_number} {clause.title}
                 </Title>
                 <Space>
-                  {clause.related_clauses?.length > 0 && (
+                  {(clause.related_clauses?.length ?? 0) > 0 && (
                     <Text type="secondary">
-                      相关条款: {clause.related_clauses.join(', ')}
+                      相关条款: {clause.related_clauses?.join(', ')}
                     </Text>
                   )}
                 </Space>
@@ -372,7 +372,7 @@ const StandardDetail: React.FC = () => {
                   <span>条款要求</span>
                 </Space>
               ),
-              children: renderRequirements(clause.requirements),
+              children: renderRequirements(clause.requirements || []),
             },
             {
               key: 'records',
@@ -380,12 +380,12 @@ const StandardDetail: React.FC = () => {
                 <Space>
                   <FileTextOutlined />
                   <span>记录要求</span>
-                  {clause.records?.length > 0 && (
-                    <Tag color="blue">{clause.records.length}</Tag>
+                  {(clause.records?.length ?? 0) > 0 && (
+                    <Tag color="blue">{clause.records?.length}</Tag>
                   )}
                 </Space>
               ),
-              children: renderRecordRequirements(clause.records),
+              children: renderRecordRequirements(clause.records || []),
             },
             {
               key: 'audit',
@@ -393,12 +393,12 @@ const StandardDetail: React.FC = () => {
                 <Space>
                   <AuditOutlined />
                   <span>审核要点</span>
-                  {clause.audit_points?.length > 0 && (
-                    <Tag color="orange">{clause.audit_points.length}</Tag>
+                  {(clause.audit_points?.length ?? 0) > 0 && (
+                    <Tag color="orange">{clause.audit_points?.length}</Tag>
                   )}
                 </Space>
               ),
-              children: renderAuditPoints(clause.audit_points),
+              children: renderAuditPoints(clause.audit_points || []),
             },
           ]}
         />
@@ -416,7 +416,7 @@ const StandardDetail: React.FC = () => {
           style={{ marginTop: 16 }}
         >
           <Space wrap>
-            {clause.related_clauses.map((related) => (
+            {clause.related_clauses.map((related: string) => (
               <Tag
                 key={related}
                 style={{ cursor: 'pointer' }}

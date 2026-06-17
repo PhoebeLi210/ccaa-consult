@@ -96,20 +96,18 @@ def setup_logging() -> None:
     
     # 根日志器配置
     root_logger = logging.getLogger()
-    root_logger.setLevel(log_level)
+    root_logger.setLevel(logging.WARNING)  # 控制台只显示 WARNING 及以上
     
     # 清除现有处理器
     root_logger.handlers = []
     
-    # ===== 控制台处理器 =====
+    # ===== 控制台处理器（仅 WARNING 及以上） =====
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(log_level)
+    console_handler.setLevel(logging.WARNING)
     
     if settings.DEBUG:
-        # 开发环境：彩色输出 + 详细格式
-        console_formatter = ColoredFormatter()
+        console_formatter = logging.Formatter('[%(levelname)s] %(name)s - %(message)s')
     else:
-        # 生产环境：JSON格式（便于日志收集）
         console_formatter = JSONFormatter()
     
     console_handler.setFormatter(console_formatter)

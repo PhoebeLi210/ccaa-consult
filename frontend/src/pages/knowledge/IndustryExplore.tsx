@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, List, Card, Tag, Badge, Typography, Space, Empty } from 'antd';
 import { SearchOutlined, RightOutlined } from '@ant-design/icons';
-import { getIndustries } from '../../api/knowledge';
+import { getIndustryList } from '../../api/knowledge';
 import type { KnowledgeIndustry, IndustryDataStatus } from '../../api/knowledge';
 
 const { Title, Text } = Typography;
@@ -26,8 +26,8 @@ export default function IndustryExplore() {
 
   useEffect(() => {
     setLoading(true);
-    getIndustries()
-      .then((data) => setIndustries(data || []))
+    getIndustryList()
+      .then((data: any) => setIndustries(data || []))
       .catch(() => setIndustries([]))
       .finally(() => setLoading(false));
   }, []);
@@ -37,7 +37,7 @@ export default function IndustryExplore() {
       i.name.includes(search) ||
       (i.name_en && i.name_en.toLowerCase().includes(search.toLowerCase())) ||
       i.code.includes(search) ||
-      i.keywords?.some((k) => k.includes(search)),
+      i.keywords?.some((k: string) => k.includes(search)),
   );
 
   return (
@@ -66,7 +66,7 @@ export default function IndustryExplore() {
               loading={loading}
               dataSource={filtered}
               renderItem={(item) => {
-                const st = statusMap[item.data_status] || statusMap.empty;
+                const st = statusMap[item.data_status as IndustryDataStatus] || statusMap.empty;
                 return (
                   <List.Item
                     onClick={() => setSelected(item)}
@@ -130,8 +130,8 @@ export default function IndustryExplore() {
                     {selected.name_en && (
                       <Text type="secondary">{selected.name_en}</Text>
                     )}
-                    <Tag color={statusMap[selected.data_status]?.color}>
-                      {statusMap[selected.data_status]?.label}
+                    <Tag color={statusMap[selected.data_status as IndustryDataStatus]?.color}>
+                      {statusMap[selected.data_status as IndustryDataStatus]?.label}
                     </Tag>
                   </Space>
                 </div>
@@ -152,7 +152,7 @@ export default function IndustryExplore() {
                 <div style={{ marginBottom: 16 }}>
                   <Text strong>关键词：</Text>
                   <div style={{ marginTop: 8 }}>
-                    {selected.keywords.map((kw) => (
+                    {selected.keywords.map((kw: string) => (
                       <Tag key={kw}>{kw}</Tag>
                     ))}
                   </div>
@@ -163,7 +163,7 @@ export default function IndustryExplore() {
                 <div style={{ marginBottom: 16 }}>
                   <Text strong>关键过程：</Text>
                   <div style={{ marginTop: 8 }}>
-                    {selected.key_processes.map((p) => (
+                    {selected.key_processes.map((p: string) => (
                       <Tag key={p} color="cyan">
                         {p}
                       </Tag>
@@ -176,7 +176,7 @@ export default function IndustryExplore() {
                 <div style={{ marginBottom: 16 }}>
                   <Text strong>优先条款：</Text>
                   <div style={{ marginTop: 8 }}>
-                    {selected.priority_clauses.map((c) => (
+                    {selected.priority_clauses.map((c: string) => (
                       <Tag key={c} color="volcano">
                         {c}
                       </Tag>

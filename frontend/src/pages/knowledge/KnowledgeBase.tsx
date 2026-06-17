@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Layout,
-  Menu,
   Card,
   Input,
   List,
@@ -11,97 +11,68 @@ import {
   Empty,
   Spin,
   Typography,
-  Tree,
   Select,
-  Breadcrumb,
-  message,
   Badge,
-  Tooltip,
+  Tabs,
 } from 'antd';
 import {
   SearchOutlined,
   BookOutlined,
-  ExperimentOutlined,
-  AppstoreOutlined,
-  UserOutlined,
-  FileTextOutlined,
   RightOutlined,
-  HistoryOutlined,
-  StarOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   getKnowledgeList,
-  getKnowledgeCategoryTree,
-  searchKnowledge,
   getSupportedStandardsList,
   getIndustryList,
   type KnowledgeItem,
-  type KnowledgeCategoryTree,
-  type KnowledgeCategory,
 } from '../../api/knowledge';
+import { request } from '../../api/request';
 
-const { Sider, Content } = Layout;
 const { Search } = Input;
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
+const { TabPane } = Tabs;
 
-/** 知识分类配置 */
-const CATEGORY_CONFIG: Record<KnowledgeCategory, { label: string; icon: React.ReactNode; color: string }> = {
-  standard: { label: '标准知识', icon: <BookOutlined />, color: 'blue' },
-  experience: { label: '经验知识', icon: <ExperimentOutlined />, color: 'green' },
-  application: { label: '应用知识', icon: <AppstoreOutlined />, color: 'orange' },
-  user: { label: '用户知识', icon: <UserOutlined />, color: 'purple' },
-};
-
-/** 标准颜色配置 */
 const STANDARD_COLORS: Record<string, string> = {
-  ISO9001: 'blue',
-  ISO14001: 'green',
-  ISO45001: 'orange',
+  'ISO9001:2015': 'blue',
+  'ISO14001:2015': 'green',
+  'ISO45001:2018': 'orange',
+  'ISO27001:2022': 'purple',
+  'ISO22000:2018': 'red',
+  'ISO13485:2016': 'cyan',
+  'CMMI': 'geekblue',
 };
 
-/**
- * 知识库主页组件
- */
+interface KnowledgeArticle {
+  id: number;
+  article_id: string;
+  title: string;
+  category: string;
+  content: string;
+  summary: string;
+  tags: string[];
+}
+
 const KnowledgeBase: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // 状态
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('industry');
   const [knowledgeList, setKnowledgeList] = useState<KnowledgeItem[]>([]);
+  const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [total, setTotal] = useState(0);
+  const [articlesTotal, setArticlesTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [selectedCategory, setSelectedCategory] = useState<KnowledgeCategory | 'all'>(
-    (searchParams.get('category') as KnowledgeCategory) || 'all'
-  );
-  const [selectedStandard, setSelectedStandard] = useState<string>(
-    searchParams.get('standard') || ''
-  );
-  const [selectedIndustry, setSelectedIndustry] = useState<string>(
-    searchParams.get('industry') || ''
-  );
-
-  // 下拉选项数据
-  const [standards, setStandards] = useState<Array<{ code: string; name: string }>>([]);
+  const [pageSize, setPageSize] = useState(20);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIndustry, setSelectedIndustry] = useState<string>('');
   const [industries, setIndustries] = useState<Array<{ code: string; name: string }>>([]);
-  const [categoryTree, setCategoryTree] = useState<KnowledgeCategoryTree[]>([]);
 
-  // 加载下拉选项
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const [standardsData, industriesData, treeData] = await Promise.all([
-          getSupportedStandardsList(),
-          getIndustryList(),
-          getKnowledgeCategoryTree(),
-        ]);
-        setStandards(standardsData);
+        const industriesData = await getIndustryList();
         setIndustries(industriesData);
-        setCategoryTree(treeData);
       } catch (error) {
         console.error('加载选项失败:', error);
       }
@@ -109,347 +80,190 @@ const KnowledgeBase: React.FC = () => {
     loadOptions();
   }, []);
 
-  // 加载知识列表
+  useEffect(() => {
+    if (activeTab === 'industry') {
+      loadKnowledgeList();
+    } else {
+      loadArticles();
+    }
+  }, [activeTab, page, pageSize, selectedIndustry]);
+
   const loadKnowledgeList = async () => {
     setLoading(true);
     try {
-      const params: any = {
-        page,
-        pageSize,
-      };
-      if (selectedCategory !== 'all') {
-        params.category = selectedCategory;
-      }
-      if (selectedStandard) {
-        params.standard = selectedStandard;
-      }
-      if (selectedIndustry) {
-        params.industry = selectedIndustry;
-      }
-
-      let result;
-      if (searchQuery) {
-        result = await searchKnowledge({
-          query: searchQuery,
-          ...params,
-        });
-      } else {
-        result = await getKnowledgeList(params);
-      }
-
-      setKnowledgeList(result.items);
-      setTotal(result.total);
+      const params: any = { page, page_size: pageSize };
+      if (selectedIndustry) params.industry = selectedIndustry;
+      const result = await getKnowledgeList(params);
+      setKnowledgeList(result.items || []);
+      setTotal(result.total || 0);
     } catch (error) {
-      message.error('加载知识列表失败');
+      console.error('加载知识列表失败:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadKnowledgeList();
-  }, [page, pageSize, selectedCategory, selectedStandard, selectedIndustry]);
+  const loadArticles = async () => {
+    setLoading(true);
+    try {
+      const result: any = await request.get('/v1/knowledge/articles', {
+        params: { page, page_size: pageSize }
+      });
+      setArticles(result.items || []);
+      setArticlesTotal(result.total || 0);
+    } catch (error) {
+      console.error('加载文章列表失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // 搜索
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setPage(1);
-    // 更新URL参数
-    const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set('q', value);
-    } else {
-      params.delete('q');
-    }
-    setSearchParams(params);
-    loadKnowledgeList();
   };
 
-  // 分类点击
-  const handleCategoryClick = (category: KnowledgeCategory | 'all') => {
-    setSelectedCategory(category);
-    setPage(1);
-    const params = new URLSearchParams(searchParams);
-    if (category === 'all') {
-      params.delete('category');
-    } else {
-      params.set('category', category);
-    }
-    setSearchParams(params);
-  };
-
-  // 标准选择
-  const handleStandardChange = (value: string) => {
-    setSelectedStandard(value);
-    setPage(1);
-    const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set('standard', value);
-    } else {
-      params.delete('standard');
-    }
-    setSearchParams(params);
-  };
-
-  // 行业选择
-  const handleIndustryChange = (value: string) => {
-    setSelectedIndustry(value);
-    setPage(1);
-    const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set('industry', value);
-    } else {
-      params.delete('industry');
-    }
-    setSearchParams(params);
-  };
-
-  // 查看详情
-  const handleViewDetail = (item: KnowledgeItem) => {
-    if (item.category === 'standard') {
-      navigate(`/knowledge/standard/${item.id}`);
-    } else {
-      navigate(`/knowledge/detail/${item.id}`);
-    }
-  };
-
-  // 渲染分类菜单
-  const renderCategoryMenu = () => {
-    const menuItems = [
-      {
-        key: 'all',
-        icon: <AppstoreOutlined />,
-        label: '全部知识',
-      },
-      ...Object.entries(CATEGORY_CONFIG).map(([key, config]) => ({
-        key,
-        icon: config.icon,
-        label: config.label,
-      })),
-    ];
-
-    return (
-      <Menu
-        mode="inline"
-        selectedKeys={[selectedCategory]}
-        items={menuItems}
-        onClick={({ key }) => handleCategoryClick(key as KnowledgeCategory | 'all')}
-        style={{ borderRight: 0 }}
+  const renderIndustryItem = (item: KnowledgeItem) => (
+    <List.Item
+      key={item.id}
+      style={{ cursor: 'pointer', padding: '16px 0' }}
+      onClick={() => navigate(`/knowledge/detail/${item.id}`)}
+    >
+      <List.Item.Meta
+        title={<Text strong style={{ fontSize: 16 }}>{item.title}</Text>}
+        description={
+          <Space direction="vertical" size={4} style={{ width: '100%' }}>
+            <Paragraph ellipsis={{ rows: 2 }} style={{ marginBottom: 0, color: '#666' }}>
+              {item.summary}
+            </Paragraph>
+            <Space size={4} wrap>
+              {item.applicable_standards?.slice(0, 3).map((std: string) => (
+                <Tag key={std} color={STANDARD_COLORS[std] || 'default'}>{std}</Tag>
+              ))}
+              {item.tags?.slice(0, 3).map((tag: string) => (
+                <Tag key={tag}>{tag}</Tag>
+              ))}
+            </Space>
+          </Space>
+        }
       />
-    );
-  };
+      <RightOutlined style={{ color: '#999' }} />
+    </List.Item>
+  );
 
-  // 渲染知识项
-  const renderKnowledgeItem = (item: KnowledgeItem) => {
-    const categoryConfig = CATEGORY_CONFIG[item.category];
-    return (
-      <List.Item
-        key={item.id}
-        actions={[
-          <Space key="actions">
-            <Tooltip title="浏览次数">
-              <Space size={4}>
-                <HistoryOutlined style={{ color: '#999' }} />
-                <Text type="secondary">{item.view_count}</Text>
-              </Space>
-            </Tooltip>
-            <Button
-              type="link"
-              icon={<RightOutlined />}
-              onClick={() => handleViewDetail(item)}
-            >
-              查看
-            </Button>
-          </Space>,
-        ]}
-      >
-        <List.Item.Meta
-          title={
-            <Space>
-              <Text strong style={{ cursor: 'pointer' }} onClick={() => handleViewDetail(item)}>
-                {item.title}
-              </Text>
-              {item.standard && (
-                <Tag color={STANDARD_COLORS[item.standard] || 'default'}>
-                  {item.standard}
-                </Tag>
-              )}
+  const renderArticleItem = (item: KnowledgeArticle) => (
+    <List.Item
+      key={item.article_id}
+      style={{ cursor: 'pointer', padding: '16px 0' }}
+      onClick={() => navigate(`/knowledge/detail/${item.article_id}`)}
+    >
+      <List.Item.Meta
+        avatar={<FileTextOutlined style={{ fontSize: 24, color: '#1890ff' }} />}
+        title={<Text strong style={{ fontSize: 16 }}>{item.title}</Text>}
+        description={
+          <Space direction="vertical" size={4} style={{ width: '100%' }}>
+            <Paragraph ellipsis={{ rows: 2 }} style={{ marginBottom: 0, color: '#666' }}>
+              {item.summary}
+            </Paragraph>
+            <Space size={4} wrap>
+              <Tag color="blue">{item.category}</Tag>
+              {item.tags?.map((tag: string) => (
+                <Tag key={tag}>{tag}</Tag>
+              ))}
             </Space>
-          }
-          description={
-            <Space direction="vertical" size={4} style={{ width: '100%' }}>
-              <Paragraph
-                ellipsis={{ rows: 2 }}
-                style={{ marginBottom: 0, color: '#666' }}
-              >
-                {item.summary}
-              </Paragraph>
-              <Space size={4} wrap>
-                <Tag icon={categoryConfig.icon} color={categoryConfig.color}>
-                  {categoryConfig.label}
-                </Tag>
-                {item.industry_name && (
-                  <Tag color="cyan">{item.industry_name}</Tag>
-                )}
-                {item.tags?.slice(0, 3).map((tag) => (
-                  <Tag key={tag}>{tag}</Tag>
-                ))}
-              </Space>
-            </Space>
-          }
-        />
-      </List.Item>
+          </Space>
+        }
+      />
+      <RightOutlined style={{ color: '#999' }} />
+    </List.Item>
+  );
+
+  const filterList = (list: any[]) => {
+    if (!searchQuery) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter((item: any) =>
+      item.title?.toLowerCase().includes(q) ||
+      item.summary?.toLowerCase().includes(q)
     );
   };
 
   return (
     <div style={{ padding: 0 }}>
-      {/* 面包屑 */}
-      <Breadcrumb
-        items={[
-          { title: '首页', href: '/' },
-          { title: '知识库' },
-          ...(selectedCategory !== 'all'
-            ? [{ title: CATEGORY_CONFIG[selectedCategory]?.label || selectedCategory }]
-            : []),
-        ]}
-        style={{ marginBottom: 16 }}
-      />
-
-      <Layout style={{ background: '#fff', minHeight: 'calc(100vh - 200px)' }}>
-        {/* 左侧分类导航 */}
-        <Sider
-          width={240}
-          style={{
-            background: '#fafafa',
-            borderRight: '1px solid #f0f0f0',
-          }}
-        >
-          <div style={{ padding: '16px 12px' }}>
-            <Title level={5} style={{ marginBottom: 12 }}>
-              <BookOutlined style={{ marginRight: 8 }} />
-              知识分类
-            </Title>
-            {renderCategoryMenu()}
-          </div>
-
-          {/* 标准筛选 */}
-          <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0' }}>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              按标准筛选
-            </Text>
-            <Select
-              placeholder="选择标准"
-              allowClear
-              style={{ width: '100%', marginTop: 8 }}
-              value={selectedStandard || undefined}
-              onChange={handleStandardChange}
-            >
-              {standards.map((s) => (
-                <Option key={s.code} value={s.code}>
-                  {s.name}
-                </Option>
-              ))}
-            </Select>
-          </div>
-
-          {/* 行业筛选 */}
-          <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0' }}>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              按行业筛选
-            </Text>
+      {/* 搜索栏 */}
+      <Card style={{ marginBottom: 16 }}>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Search
+            placeholder="搜索知识库..."
+            allowClear
+            onSearch={handleSearch}
+            style={{ width: '100%' }}
+          />
+          {activeTab === 'industry' && (
             <Select
               placeholder="选择行业"
               allowClear
               showSearch
               optionFilterProp="children"
-              style={{ width: '100%', marginTop: 8 }}
+              style={{ width: 200 }}
               value={selectedIndustry || undefined}
-              onChange={handleIndustryChange}
+              onChange={(v) => { setSelectedIndustry(v || ''); setPage(1); }}
             >
-              {industries.map((i) => (
-                <Option key={i.code} value={i.code}>
-                  {i.name}
-                </Option>
+              {industries.map((ind) => (
+                <Option key={ind.code} value={ind.code}>{ind.name}</Option>
               ))}
             </Select>
-          </div>
-        </Sider>
+          )}
+        </Space>
+      </Card>
 
-        {/* 右侧内容区 */}
-        <Content style={{ padding: 16 }}>
-          {/* 搜索栏 */}
-          <Card style={{ marginBottom: 16 }}>
-            <Space style={{ width: '100%' }} direction="vertical">
-              <Search
-                placeholder="搜索知识库内容..."
-                allowClear
-                enterButton="搜索"
-                size="large"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onSearch={handleSearch}
+      {/* 标签页切换 */}
+      <Tabs activeKey={activeTab} onChange={setActiveTab} style={{ marginBottom: 16 }}>
+        <TabPane tab={<span><BookOutlined /> 行业知识</span>} key="industry" />
+        <TabPane tab={<span><FileTextOutlined /> 标准文档 <Badge count={articlesTotal} size="small" /></span>} key="articles" />
+      </Tabs>
+
+      {/* 内容区域 */}
+      <Card>
+        <Spin spinning={loading}>
+          {activeTab === 'industry' ? (
+            filterList(knowledgeList).length > 0 ? (
+              <List
+                itemLayout="vertical"
+                dataSource={filterList(knowledgeList)}
+                renderItem={renderIndustryItem}
+                pagination={{
+                  current: page,
+                  pageSize,
+                  total,
+                  showSizeChanger: true,
+                  showTotal: (t) => `共 ${t} 个行业`,
+                  onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+                }}
               />
-              <Space wrap>
-                <Text type="secondary">热门搜索:</Text>
-                {['质量目标', '风险管理', '内审', '管理评审', '不合格品'].map((keyword) => (
-                  <Tag
-                    key={keyword}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleSearch(keyword)}
-                  >
-                    {keyword}
-                  </Tag>
-                ))}
-              </Space>
-            </Space>
-          </Card>
-
-          {/* 知识列表 */}
-          <Card
-            title={
-              <Space>
-                <FileTextOutlined />
-                <span>
-                  {selectedCategory === 'all'
-                    ? '全部知识'
-                    : CATEGORY_CONFIG[selectedCategory]?.label}
-                </span>
-                <Badge count={total} style={{ backgroundColor: '#1890ff' }} />
-              </Space>
-            }
-          >
-            <Spin spinning={loading}>
-              {knowledgeList.length > 0 ? (
-                <List
-                  itemLayout="vertical"
-                  dataSource={knowledgeList}
-                  renderItem={renderKnowledgeItem}
-                  pagination={{
-                    current: page,
-                    pageSize,
-                    total,
-                    showSizeChanger: true,
-                    showQuickJumper: true,
-                    showTotal: (total) => `共 ${total} 条`,
-                    onChange: (p, ps) => {
-                      setPage(p);
-                      setPageSize(ps);
-                    },
-                  }}
-                />
-              ) : (
-                <Empty
-                  description={
-                    searchQuery ? '未找到相关知识' : '暂无知识内容'
-                  }
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
-              )}
-            </Spin>
-          </Card>
-        </Content>
-      </Layout>
+            ) : (
+              <Empty description="暂无行业知识" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            )
+          ) : (
+            filterList(articles).length > 0 ? (
+              <List
+                itemLayout="vertical"
+                dataSource={filterList(articles)}
+                renderItem={renderArticleItem}
+                pagination={{
+                  current: page,
+                  pageSize,
+                  total: articlesTotal,
+                  showSizeChanger: true,
+                  showTotal: (t) => `共 ${t} 篇文档`,
+                  onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+                }}
+              />
+            ) : (
+              <Empty description="暂无标准文档" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            )
+          )}
+        </Spin>
+      </Card>
     </div>
   );
 };

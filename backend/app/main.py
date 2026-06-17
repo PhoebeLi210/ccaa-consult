@@ -19,7 +19,7 @@ from app.core.config import settings
 from app.core.database import init_db
 from app.core.logging_config import setup_logging, get_logger
 from app.core.backup import create_backup, list_backups, get_backup_info, setup_auto_backup
-from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, custom_templates, team, flowcharts, industry, certification_scope
+from app.api.v1 import templates, generator, company, materials, projects, parse, auth, analyzer, uploads, conversation, custom_templates, team, flowcharts, industry, certification_scope, knowledge, speech
 
 
 @asynccontextmanager
@@ -64,39 +64,24 @@ app.add_middleware(
 # 请求日志中间件
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    """记录所有HTTP请求"""
-    start_time = time.time()
+    """记录HTTP请求（仅记录错误）"""
     trace_id = str(uuid.uuid4())[:8]
-    
-    # 记录请求
-    access_logger = get_logger("access")
-    access_logger.info(
-        f"{request.method} {request.url.path}",
-        extra={
-            "trace_id": trace_id,
-            "method": request.method,
-            "path": request.url.path,
-            "client_ip": request.client.host if request.client else None,
-        }
-    )
     
     # 处理请求
     response = await call_next(request)
     
-    # 计算耗时
-    duration_ms = round((time.time() - start_time) * 1000, 2)
-    
-    # 记录响应
-    access_logger.info(
-        f"{request.method} {request.url.path} {response.status_code} {duration_ms}ms",
-        extra={
-            "trace_id": trace_id,
-            "method": request.method,
-            "path": request.url.path,
-            "status_code": response.status_code,
-            "duration_ms": duration_ms,
-        }
-    )
+    # 仅记录错误响应
+    if response.status_code >= 400:
+        access_logger = get_logger("access")
+        access_logger.warning(
+            f"{request.method} {request.url.path} {response.status_code}",
+            extra={
+                "trace_id": trace_id,
+                "method": request.method,
+                "path": request.url.path,
+                "status_code": response.status_code,
+            }
+        )
     
     # 添加trace_id到响应头
     response.headers["X-Trace-ID"] = trace_id
@@ -119,6 +104,8 @@ app.include_router(team.router, prefix="/api/v1")
 app.include_router(flowcharts.router, prefix="/api/v1")
 app.include_router(industry.router, prefix="/api/v1")
 app.include_router(certification_scope.router, prefix="/api/v1", tags=["认证范围"])
+app.include_router(knowledge.router, prefix="/api/v1")
+app.include_router(speech.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -236,4 +223,4 @@ async def backup_status():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, access_log=False)

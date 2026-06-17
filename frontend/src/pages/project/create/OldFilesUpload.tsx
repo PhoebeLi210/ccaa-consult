@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   Card,
   Upload,
@@ -26,7 +26,7 @@ import {
   FilePdfOutlined,
   FileWordOutlined,
   FileTextOutlined,
-  ExtractOutlined,
+  ExportOutlined,
   CheckCircleOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -556,7 +556,7 @@ const OldFilesUpload: React.FC<OldFilesUploadProps> = ({
             <Button
               type="primary"
               size="large"
-              icon={<ExtractOutlined />}
+              icon={<ExportOutlined />}
               loading={extracting}
               disabled={successFileCount === 0 || uploading || disabled}
               onClick={handleExtract}
@@ -965,4 +965,4 @@ const OldFilesUpload: React.FC<OldFilesUploadProps> = ({
 };
 
 export default OldFilesUpload;
-export type { OldFilesUploadProps, ExtractionResult };
+export type { OldFilesUploadProps };

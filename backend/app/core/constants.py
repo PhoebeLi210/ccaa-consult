@@ -22,6 +22,12 @@ INDUSTRY_CONFIG_PATH = PROJECT_ROOT / "config" / "industry_config.yaml"
 
 class DocumentLevel(str, Enum):
     """文档层级"""
+    LEVEL_1 = "一级文件"
+    LEVEL_2 = "二级文件"
+    LEVEL_3 = "三级文件"
+    LEVEL_4 = "四级文件"
+
+    # Alias for backward compat (T6 migration left LEVEL1 references)
     LEVEL1 = "一级文件"
     LEVEL2 = "二级文件"
     LEVEL3 = "三级文件"

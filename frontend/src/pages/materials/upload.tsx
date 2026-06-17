@@ -397,7 +397,6 @@ const MaterialsUploadPage: React.FC = () => {
                       <span className={styles.fileName}>{item.file_name}</span>
                       <Tag
                         color={materialTypeColors[item.material_type]}
-                        size="small"
                       >
                         {getMaterialTypeName(item.material_type)}
                       </Tag>
@@ -419,7 +418,6 @@ const MaterialsUploadPage: React.FC = () => {
                             ? 'processing'
                             : 'default'
                         }
-                        size="small"
                       >
                         {item.status === 'completed'
                           ? '已完成'

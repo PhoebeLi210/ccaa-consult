@@ -104,11 +104,7 @@ const FlowchartEditorPage: React.FC = () => {
     }
     setSaving(true);
     try {
-      const data: FlowchartData = {
-        nodes,
-        edges,
-      };
-      await updateFlowchart(flowchartId, { data });
+      await updateFlowchart(flowchartId, { nodes, edges });
       message.success('保存成功');
     } catch (error) {
       message.error('保存失败');

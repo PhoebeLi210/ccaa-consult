@@ -468,4 +468,4 @@ const CertStageSelector: React.FC<CertStageSelectorProps> = ({
 };
 
 export default CertStageSelector;
-export type { CertStageSelectorProps, CertStageOption, DocumentScopeInfo };
+export type { CertStageSelectorProps };

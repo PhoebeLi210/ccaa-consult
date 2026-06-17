@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from pathlib import Path
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 import io
@@ -113,9 +114,10 @@ async def export_and_download_zip(
 
         if request.project_id:
             # ===== 从数据库读取文档 =====
-            db_docs = db.query(DocumentModel).filter(
-                DocumentModel.project_id == request.project_id
-            ).all()
+            result = await db.execute(
+                select(DocumentModel).where(DocumentModel.project_id == request.project_id)
+            )
+            db_docs = result.scalars().all()
 
             if not db_docs:
                 raise HTTPException(
@@ -229,9 +231,10 @@ async def export_single_document(
     """
     try:
         # 从数据库查询文档
-        db_doc = db.query(DocumentModel).filter(
-            DocumentModel.document_id == document_id
-        ).first()
+        result = await db.execute(
+            select(DocumentModel).where(DocumentModel.document_id == document_id)
+        )
+        db_doc = result.scalar_one_or_none()
 
         if not db_doc:
             raise HTTPException(status_code=404, detail=f"文档不存在: {document_id}")

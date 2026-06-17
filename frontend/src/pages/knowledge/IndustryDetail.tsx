@@ -147,14 +147,14 @@ export default function IndustryDetail() {
           </Descriptions.Item>
           {industry.keywords && industry.keywords.length > 0 && (
             <Descriptions.Item label="关键词" span={2}>
-              {industry.keywords.map((kw) => (
+              {industry.keywords.map((kw: string) => (
                 <Tag key={kw}>{kw}</Tag>
               ))}
             </Descriptions.Item>
           )}
           {industry.key_processes && industry.key_processes.length > 0 && (
             <Descriptions.Item label="关键过程" span={2}>
-              {industry.key_processes.map((p) => (
+              {industry.key_processes.map((p: string) => (
                 <Tag key={p} color="cyan">
                   {p}
                 </Tag>
@@ -178,7 +178,7 @@ function AuditPointsTab({ data }: { data: AuditPoint[] }) {
     <List
       dataSource={data}
       renderItem={(item) => {
-        const risk = riskLevelMap[item.risk_level] || {
+        const risk = riskLevelMap[item.risk_level || ''] || {
           label: item.risk_level,
           color: 'default',
         };
@@ -222,7 +222,7 @@ function TypicalNCsTab({ data }: { data: TypicalNC[] }) {
     <List
       dataSource={data}
       renderItem={(item) => {
-        const freq = freqMap[item.frequency] || {
+        const freq = freqMap[item.frequency || ''] || {
           label: item.frequency,
           color: 'default',
         };
@@ -322,7 +322,7 @@ function RegulationsTab({ data }: { data: Regulation[] }) {
                   <div>
                     <Text type="secondary">关键要求：</Text>
                     <ul style={{ marginTop: 4, paddingLeft: 20 }}>
-                      {item.key_requirements.map((req, idx) => (
+                      {item.key_requirements.map((req: string, idx: number) => (
                         <li key={idx}>{req}</li>
                       ))}
                     </ul>

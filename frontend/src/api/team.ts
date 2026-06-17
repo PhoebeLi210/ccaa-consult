@@ -37,7 +37,7 @@ export interface RolePermissions {
 }
 
 export function getMyTeams() {
-  return request.get<unknown, Team[]>('/v1/teams/my');
+  return request.get<unknown, { total: number; teams: Team[] }>('/v1/teams/my').then(res => res.teams || []);
 }
 
 export function getTeamDetail(teamId: string) {

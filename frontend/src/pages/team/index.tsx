@@ -142,7 +142,7 @@ const TeamPage: React.FC = () => {
         getMyPermissions(team.team_id),
       ]);
       setMembers(detailData.members);
-      setMyPermissions(permissionsData as Record<string, boolean>);
+      setMyPermissions(permissionsData as unknown as Record<string, boolean>);
     } catch (error) {
       message.error('加载团队详情失败');
     }

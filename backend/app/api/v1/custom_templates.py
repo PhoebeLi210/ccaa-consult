@@ -22,6 +22,10 @@ from app.api.v1.auth import get_current_user
 router = APIRouter(prefix="/custom-templates", tags=["个人模板"])
 
 
+def _get_user_id(current_user) -> str:
+    return current_user.user_id if hasattr(current_user, 'user_id') else current_user.get("id")
+
+
 # ============ 请求/响应模型 ============
 
 class TemplateCreateRequest(BaseModel):
@@ -73,6 +77,31 @@ class TemplateVersionInfo(BaseModel):
 
 # ============ API路由 ============
 
+@router.get("/", response_model=List[TemplateResponse], summary="获取模板列表")
+async def list_templates(
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    current_user = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """获取当前用户的自定义模板列表"""
+    user_id = current_user.user_id if hasattr(current_user, 'user_id') else current_user.get("id")
+    query = select(CustomTemplate).where(
+        CustomTemplate.user_id == user_id
+    )
+
+    if category:
+        query = query.where(CustomTemplate.category == category)
+    if status:
+        query = query.where(CustomTemplate.status == status)
+
+    query = query.order_by(CustomTemplate.updated_at.desc())
+    result = await db.execute(query)
+    templates = result.scalars().all()
+
+    return [_template_to_response(t) for t in templates]
+
+
 @router.post("/upload", response_model=TemplateResponse, summary="上传自定义模板")
 async def upload_custom_template(
     name: str = Form(..., description="模板名称"),
@@ -112,7 +141,7 @@ async def upload_custom_template(
     upload_dir = os.path.join(
         settings.UPLOAD_DIR,
         'custom_templates',
-        str(current_user["id"])
+        str(_get_user_id(current_user))
     )
     os.makedirs(upload_dir, exist_ok=True)
 
@@ -125,7 +154,7 @@ async def upload_custom_template(
     # 创建数据库记录
     template = CustomTemplate(
         template_id=template_id,
-        user_id=current_user["id"],
+        user_id=_get_user_id(current_user),
         name=name,
         description=description,
         category=category,
@@ -158,7 +187,7 @@ async def get_my_templates(
 ):
     """获取当前用户的自定义模板列表"""
     query = select(CustomTemplate).where(
-        CustomTemplate.user_id == current_user["id"]
+        CustomTemplate.user_id == _get_user_id(current_user)
     )
 
     # 应用筛选条件
@@ -173,7 +202,7 @@ async def get_my_templates(
 
     # 统计总数
     count_query = select(func.count()).select_from(CustomTemplate).where(
-        CustomTemplate.user_id == current_user["id"]
+        CustomTemplate.user_id == _get_user_id(current_user)
     )
     if category:
         count_query = count_query.where(CustomTemplate.category == category)
@@ -208,7 +237,7 @@ async def get_template_detail(
     """获取单个模板的详细信息"""
     result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
-        CustomTemplate.user_id == current_user["id"],
+        CustomTemplate.user_id == _get_user_id(current_user),
     ))
     template = result.scalar_one_or_none()
 
@@ -227,7 +256,7 @@ async def get_template_content(
     """获取模板的YAML内容"""
     result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
-        CustomTemplate.user_id == current_user["id"],
+        CustomTemplate.user_id == _get_user_id(current_user),
     ))
     template = result.scalar_one_or_none()
 
@@ -253,7 +282,7 @@ async def update_template(
     """更新模板的基本信息（不更新文件内容）"""
     result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
-        CustomTemplate.user_id == current_user["id"],
+        CustomTemplate.user_id == _get_user_id(current_user),
     ))
     template = result.scalar_one_or_none()
 
@@ -292,7 +321,7 @@ async def update_template_content(
     """
     result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
-        CustomTemplate.user_id == current_user["id"],
+        CustomTemplate.user_id == _get_user_id(current_user),
     ))
     template = result.scalar_one_or_none()
 
@@ -325,7 +354,7 @@ async def update_template_content(
     backup_dir = os.path.join(
         settings.UPLOAD_DIR,
         'custom_templates',
-        str(current_user["id"]),
+        str(_get_user_id(current_user)),
         'versions'
     )
     os.makedirs(backup_dir, exist_ok=True)
@@ -362,7 +391,7 @@ async def get_template_versions(
     """获取模板的所有版本历史"""
     result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
-        CustomTemplate.user_id == current_user["id"],
+        CustomTemplate.user_id == _get_user_id(current_user),
     ))
     template = result.scalar_one_or_none()
 
@@ -374,7 +403,7 @@ async def get_template_versions(
     backup_dir = os.path.join(
         settings.UPLOAD_DIR,
         'custom_templates',
-        str(current_user["id"]),
+        str(_get_user_id(current_user)),
         'versions'
     )
 
@@ -413,7 +442,7 @@ async def rollback_template(
     """回滚模板到指定版本"""
     result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
-        CustomTemplate.user_id == current_user["id"],
+        CustomTemplate.user_id == _get_user_id(current_user),
     ))
     template = result.scalar_one_or_none()
 
@@ -424,7 +453,7 @@ async def rollback_template(
     backup_dir = os.path.join(
         settings.UPLOAD_DIR,
         'custom_templates',
-        str(current_user["id"]),
+        str(_get_user_id(current_user)),
         'versions'
     )
     backup_file = os.path.join(backup_dir, f"{template_id}_v{version}.yaml")
@@ -466,7 +495,7 @@ async def delete_template(
     """删除自定义模板"""
     result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
-        CustomTemplate.user_id == current_user["id"],
+        CustomTemplate.user_id == _get_user_id(current_user),
     ))
     template = result.scalar_one_or_none()
 
@@ -482,7 +511,7 @@ async def delete_template(
         backup_dir = os.path.join(
             settings.UPLOAD_DIR,
             'custom_templates',
-            str(current_user["id"]),
+            str(_get_user_id(current_user)),
             'versions'
         )
         if os.path.exists(backup_dir):
@@ -508,7 +537,7 @@ async def record_template_use(
     """记录模板被使用一次（增加使用计数）"""
     result = await db.execute(select(CustomTemplate).where(
         CustomTemplate.template_id == template_id,
-        CustomTemplate.user_id == current_user["id"],
+        CustomTemplate.user_id == _get_user_id(current_user),
     ))
     template = result.scalar_one_or_none()
 
@@ -529,7 +558,7 @@ async def get_template_categories(
     """获取用户所有模板的分类列表"""
     result = await db.execute(
         select(CustomTemplate.category).where(
-            CustomTemplate.user_id == current_user["id"],
+            CustomTemplate.user_id == _get_user_id(current_user),
             CustomTemplate.is_active == True,
         ).distinct()
     )

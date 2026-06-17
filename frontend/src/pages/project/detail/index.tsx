@@ -126,7 +126,7 @@ const ProjectDetailPage: React.FC = () => {
     const missing: string[] = [];
     const checkFields = ['company_name', 'industry', 'employee_count', 'registered_capital', 'address', 'contact_person', 'contact_phone'];
     checkFields.forEach((field) => {
-      const value = (currentProject as Record<string, unknown>)[field];
+      const value = (currentProject as unknown as Record<string, unknown>)[field];
       if (!value || value === '') {
         missing.push(field);
       }
@@ -201,7 +201,7 @@ const ProjectDetailPage: React.FC = () => {
               <List header="企业信息">
                 {Object.entries(fieldLabels).map(([key, label]) => {
                   if (key === 'status') return null;
-                  const value = (currentProject as Record<string, unknown>)[key] as string;
+const value = (currentProject as unknown as Record<string, unknown>)[key] as string;
                   const isMissing = missingFields.includes(key);
 
                   return (
@@ -273,12 +273,11 @@ const ProjectDetailPage: React.FC = () => {
                 block
                 color="primary"
                 size="large"
-                icon={<FileTextOutlined />}
                 loading={generating}
                 onClick={handleGenerate}
                 style={{ marginTop: 20 }}
               >
-                生成文档
+                <FileTextOutlined /> 生成文档
               </Button>
 
               {/* 条款覆盖分析按钮 */}
@@ -287,12 +286,11 @@ const ProjectDetailPage: React.FC = () => {
                 color="primary"
                 fill="outline"
                 size="large"
-                icon={<SafetyCertificateOutlined />}
                 loading={coverageLoading}
                 onClick={handleAnalyzeCoverage}
                 style={{ marginTop: 12 }}
               >
-                条款覆盖分析
+                <SafetyCertificateOutlined /> 条款覆盖分析
               </Button>
 
               {/* 覆盖分析结果展示 */}
@@ -401,7 +399,7 @@ const ProjectDetailPage: React.FC = () => {
         {currentProject && (
           <Descriptions bordered column={2}>
             {infoFields.map(([key, label]) => {
-              const value = (currentProject as Record<string, unknown>)[key] as string;
+              const value = (currentProject as unknown as Record<string, unknown>)[key] as string;
               const isMissing = missingFields.includes(key);
 
               return (
@@ -511,7 +509,7 @@ const ProjectDetailPage: React.FC = () => {
                     render: (docs: string[]) => (
                       <Space size="small">
                         {docs?.map((doc) => (
-                          <AntTag key={doc} size="small">{doc}</AntTag>
+                          <AntTag key={doc}>{doc}</AntTag>
                         )) || <span style={{ color: '#999' }}>无</span>}
                       </Space>
                     ),
@@ -541,7 +539,7 @@ const ProjectDetailPage: React.FC = () => {
         visible={wizardVisible}
         onClose={() => setWizardVisible(false)}
         onGenerateComplete={handleWizardComplete}
-        projectId={id}
+        projectId={id || ''}
       />
     </div>
   );

@@ -52,7 +52,7 @@ const buildTreeData = (documents: DocumentInfo[]): DataNode[] => {
         <Tag>{docs.length}</Tag>
       </Space>
     ),
-    icon: ({ expanded }: { expanded: boolean }) =>
+    icon: ({ expanded }: { expanded?: boolean }) =>
       expanded ? <FolderOpenOutlined /> : <FolderOutlined />,
     children: docs.map((doc) => ({
       key: doc.id,

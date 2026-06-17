@@ -36,7 +36,7 @@ class DocumentHierarchyConfig:
         "iso9001_quality_manual": DocumentRequirement(
             template_id=TemplateIDs.QUALITY_MANUAL,
             name="质量管理手册",
-            document_level=DocumentLevel.LEVEL_1,
+            document_level=DocumentLevel.LEVEL1,
             standard=StandardType.ISO9001,
             required=True,
             description="依据ISO9001标准编制的质量管理手册",
@@ -46,7 +46,7 @@ class DocumentHierarchyConfig:
         "iso14001_environment_manual": DocumentRequirement(
             template_id=TemplateIDs.ENVIRONMENT_MANUAL,
             name="环境管理手册",
-            document_level=DocumentLevel.LEVEL_1,
+            document_level=DocumentLevel.LEVEL1,
             standard=StandardType.ISO14001,
             required=True,
             description="依据ISO14001标准编制的环境管理手册",
@@ -56,7 +56,7 @@ class DocumentHierarchyConfig:
         "iso45001_safety_manual": DocumentRequirement(
             template_id=TemplateIDs.SAFETY_MANUAL,
             name="职业健康安全管理手册",
-            document_level=DocumentLevel.LEVEL_1,
+            document_level=DocumentLevel.LEVEL1,
             standard=StandardType.ISO45001,
             required=True,
             description="依据ISO45001标准编制的职业健康安全管理手册",
@@ -66,7 +66,7 @@ class DocumentHierarchyConfig:
         "integrated_manual": DocumentRequirement(
             template_id=TemplateIDs.INTEGRATED_MANUAL,
             name="质量环境安全综合管理手册",
-            document_level=DocumentLevel.LEVEL_1,
+            document_level=DocumentLevel.LEVEL1,
             standard=None,  # 适用于多标一体
             required=False,
             description="三标一体化管理手册",
@@ -79,7 +79,7 @@ class DocumentHierarchyConfig:
         "doc_control": DocumentRequirement(
             template_id=TemplateIDs.DOC_CONTROL_PROCEDURE,
             name="文件控制程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=None,  # 通用
             required=True,
             description="规定文件的编制、审批、发放、使用、修订、回收等控制要求",
@@ -88,7 +88,7 @@ class DocumentHierarchyConfig:
         "record_control": DocumentRequirement(
             template_id=TemplateIDs.RECORD_CONTROL_PROCEDURE,
             name="记录控制程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=None,
             required=True,
             description="规定记录的标识、贮存、保护、检索、保存期限和处置等要求",
@@ -97,7 +97,7 @@ class DocumentHierarchyConfig:
         "internal_audit": DocumentRequirement(
             template_id=TemplateIDs.INTERNAL_AUDIT_PROCEDURE,
             name="内部审核程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=None,
             required=True,
             description="规定内部审核的计划、实施、报告和跟踪验证等要求",
@@ -106,7 +106,7 @@ class DocumentHierarchyConfig:
         "management_review": DocumentRequirement(
             template_id=TemplateIDs.MANAGEMENT_REVIEW_PROCEDURE,
             name="管理评审程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=None,
             required=True,
             description="规定管理评审的计划、输入、输出和跟踪措施等要求",
@@ -115,7 +115,7 @@ class DocumentHierarchyConfig:
         "corrective_action": DocumentRequirement(
             template_id=TemplateIDs.CORRECTIVE_ACTION_PROCEDURE,
             name="纠正措施控制程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=None,
             required=True,
             description="规定不合格的识别、原因分析、纠正措施的制定和实施等要求",
@@ -124,7 +124,7 @@ class DocumentHierarchyConfig:
         "training": DocumentRequirement(
             template_id=TemplateIDs.TRAINING_PROCEDURE,
             name="培训控制程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=None,
             required=True,
             description="规定培训需求的识别、计划、实施、评价和记录等要求",
@@ -134,7 +134,7 @@ class DocumentHierarchyConfig:
         "contract_review": DocumentRequirement(
             template_id=TemplateIDs.CONTRACT_REVIEW_PROCEDURE,
             name="合同评审程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO9001,
             required=True,
             description="规定产品要求的确定、评审和沟通等要求",
@@ -143,7 +143,7 @@ class DocumentHierarchyConfig:
         "purchasing": DocumentRequirement(
             template_id=TemplateIDs.PURCHASING_PROCEDURE,
             name="采购控制程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO9001,
             required=True,
             description="规定供方评价、采购信息、采购产品的验证等要求",
@@ -152,7 +152,7 @@ class DocumentHierarchyConfig:
         "production_control": DocumentRequirement(
             template_id=TemplateIDs.PRODUCTION_CONTROL_PROCEDURE,
             name="生产和服务提供控制程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO9001,
             required=True,
             description="规定生产和服务提供的策划、控制、标识、防护等要求",
@@ -161,7 +161,7 @@ class DocumentHierarchyConfig:
         "inspection": DocumentRequirement(
             template_id=TemplateIDs.INSPECTION_PROCEDURE,
             name="产品检验控制程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO9001,
             required=True,
             description="规定进货检验、过程检验、最终检验等要求",
@@ -170,7 +170,7 @@ class DocumentHierarchyConfig:
         "customer_satisfaction": DocumentRequirement(
             template_id=TemplateIDs.CUSTOMER_SATISFACTION_PROCEDURE,
             name="顾客满意度测量程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO9001,
             required=True,
             description="规定顾客满意度信息的获取、分析和利用等要求",
@@ -180,7 +180,7 @@ class DocumentHierarchyConfig:
         "environmental_factors": DocumentRequirement(
             template_id=TemplateIDs.ENVIRONMENTAL_FACTORS_PROCEDURE,
             name="环境因素识别与评价程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO14001,
             required=True,
             description="规定环境因素的识别、评价和更新等要求",
@@ -189,7 +189,7 @@ class DocumentHierarchyConfig:
         "legal_requirements": DocumentRequirement(
             template_id=TemplateIDs.LEGAL_REQUIREMENTS_PROCEDURE,
             name="法律法规获取与更新程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO14001,
             required=True,
             description="规定环境法律法规的获取、识别、更新和合规性评价等要求",
@@ -198,7 +198,7 @@ class DocumentHierarchyConfig:
         "emergency_response_env": DocumentRequirement(
             template_id=TemplateIDs.EMERGENCY_RESPONSE_PROCEDURE,
             name="应急准备和响应程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO14001,
             required=True,
             description="规定环境突发事件的应急准备和响应要求",
@@ -208,7 +208,7 @@ class DocumentHierarchyConfig:
         "hazard_identification": DocumentRequirement(
             template_id=TemplateIDs.HAZARD_IDENTIFICATION_PROCEDURE,
             name="危险源辨识与风险评价程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO45001,
             required=True,
             description="规定危险源的辨识、风险评价和控制措施的确定等要求",
@@ -217,7 +217,7 @@ class DocumentHierarchyConfig:
         "incident_investigation": DocumentRequirement(
             template_id=TemplateIDs.INCIDENT_INVESTIGATION_PROCEDURE,
             name="事件调查与处理程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO45001,
             required=True,
             description="规定事件的报告、调查、处理和预防措施等要求",
@@ -226,7 +226,7 @@ class DocumentHierarchyConfig:
         "emergency_response_safety": DocumentRequirement(
             template_id=TemplateIDs.EMERGENCY_RESPONSE_PROCEDURE,
             name="应急准备和响应程序",
-            document_level=DocumentLevel.LEVEL_2,
+            document_level=DocumentLevel.LEVEL2,
             standard=StandardType.ISO45001,
             required=True,
             description="规定职业健康安全突发事件的应急准备和响应要求",
@@ -239,7 +239,7 @@ class DocumentHierarchyConfig:
         "job_description": DocumentRequirement(
             template_id=TemplateIDs.JOB_DESCRIPTION,
             name="岗位职责说明书",
-            document_level=DocumentLevel.LEVEL_3,
+            document_level=DocumentLevel.LEVEL3,
             standard=None,
             required=True,
             description="各岗位的职责、权限、任职资格和考核指标",
@@ -249,7 +249,7 @@ class DocumentHierarchyConfig:
         "work_instruction": DocumentRequirement(
             template_id=TemplateIDs.WORK_INSTRUCTION,
             name="作业指导书",
-            document_level=DocumentLevel.LEVEL_3,
+            document_level=DocumentLevel.LEVEL3,
             standard=None,
             required=False,  # 根据实际情况确定
             description="具体作业的操作步骤和要求",
@@ -259,7 +259,7 @@ class DocumentHierarchyConfig:
         "equipment_operation": DocumentRequirement(
             template_id=TemplateIDs.EQUIPMENT_OPERATION,
             name="设备操作规程",
-            document_level=DocumentLevel.LEVEL_3,
+            document_level=DocumentLevel.LEVEL3,
             standard=None,
             required=False,  # 有设备时需要
             description="设备的操作步骤、安全注意事项和维护要求",
@@ -269,7 +269,7 @@ class DocumentHierarchyConfig:
         "inspection_standard": DocumentRequirement(
             template_id=TemplateIDs.INSPECTION_STANDARD,
             name="检验标准",
-            document_level=DocumentLevel.LEVEL_3,
+            document_level=DocumentLevel.LEVEL3,
             standard=StandardType.ISO9001,
             required=False,
             description="产品/服务的检验标准和判定准则",
@@ -279,7 +279,7 @@ class DocumentHierarchyConfig:
         "safety_procedure": DocumentRequirement(
             template_id=TemplateIDs.SAFETY_PROCEDURE,
             name="安全操作规程",
-            document_level=DocumentLevel.LEVEL_3,
+            document_level=DocumentLevel.LEVEL3,
             standard=StandardType.ISO45001,
             required=True,
             description="各岗位的安全操作要求和注意事项",
@@ -292,7 +292,7 @@ class DocumentHierarchyConfig:
         "training_record": DocumentRequirement(
             template_id=TemplateIDs.TRAINING_RECORD,
             name="培训记录表",
-            document_level=DocumentLevel.LEVEL_4,
+            document_level=DocumentLevel.LEVEL4,
             standard=None,
             required=True,
             description="培训实施和考核的记录",
@@ -302,7 +302,7 @@ class DocumentHierarchyConfig:
         "inspection_record": DocumentRequirement(
             template_id=TemplateIDs.INSPECTION_RECORD,
             name="检验记录表",
-            document_level=DocumentLevel.LEVEL_4,
+            document_level=DocumentLevel.LEVEL4,
             standard=StandardType.ISO9001,
             required=True,
             description="产品/服务检验的记录",
@@ -312,7 +312,7 @@ class DocumentHierarchyConfig:
         "audit_checklist": DocumentRequirement(
             template_id=TemplateIDs.AUDIT_CHECKLIST,
             name="内审检查表",
-            document_level=DocumentLevel.LEVEL_4,
+            document_level=DocumentLevel.LEVEL4,
             standard=None,
             required=True,
             description="内部审核的检查表",
@@ -322,7 +322,7 @@ class DocumentHierarchyConfig:
         "corrective_action_form": DocumentRequirement(
             template_id=TemplateIDs.CORRECTIVE_ACTION_FORM,
             name="纠正措施单",
-            document_level=DocumentLevel.LEVEL_4,
+            document_level=DocumentLevel.LEVEL4,
             standard=None,
             required=True,
             description="纠正措施的申请、实施和验证记录",
@@ -332,7 +332,7 @@ class DocumentHierarchyConfig:
         "management_review_record": DocumentRequirement(
             template_id=TemplateIDs.MANAGEMENT_REVIEW_RECORD,
             name="管理评审记录",
-            document_level=DocumentLevel.LEVEL_4,
+            document_level=DocumentLevel.LEVEL4,
             standard=None,
             required=True,
             description="管理评审的输入、输出和决议记录",
@@ -347,7 +347,7 @@ class DocumentHierarchyConfig:
                 DocumentRequirement(
                     template_id="property_service_standard",
                     name="物业服务标准",
-                    document_level=DocumentLevel.LEVEL_3,
+                    document_level=DocumentLevel.LEVEL3,
                     standard=None,
                     required=True,
                     industry_specific=True,
@@ -357,7 +357,7 @@ class DocumentHierarchyConfig:
                 DocumentRequirement(
                     template_id="equipment_maintenance_instruction",
                     name="设备维护作业指导书",
-                    document_level=DocumentLevel.LEVEL_3,
+                    document_level=DocumentLevel.LEVEL3,
                     standard=None,
                     required=True,
                     industry_specific=True,
@@ -367,7 +367,7 @@ class DocumentHierarchyConfig:
                 DocumentRequirement(
                     template_id="security_patrol_instruction",
                     name="安保巡逻作业指导书",
-                    document_level=DocumentLevel.LEVEL_3,
+                    document_level=DocumentLevel.LEVEL3,
                     standard=None,
                     required=True,
                     industry_specific=True,
@@ -379,7 +379,7 @@ class DocumentHierarchyConfig:
                 DocumentRequirement(
                     template_id="property_inspection_record",
                     name="物业巡查记录表",
-                    document_level=DocumentLevel.LEVEL_4,
+                    document_level=DocumentLevel.LEVEL4,
                     standard=None,
                     required=True,
                     industry_specific=True,
@@ -389,7 +389,7 @@ class DocumentHierarchyConfig:
                 DocumentRequirement(
                     template_id="equipment_maintenance_record",
                     name="设备维护保养记录",
-                    document_level=DocumentLevel.LEVEL_4,
+                    document_level=DocumentLevel.LEVEL4,
                     standard=None,
                     required=True,
                     industry_specific=True,
@@ -405,7 +405,7 @@ class DocumentHierarchyConfig:
                 DocumentRequirement(
                     template_id="production_work_instruction",
                     name="生产作业指导书",
-                    document_level=DocumentLevel.LEVEL_3,
+                    document_level=DocumentLevel.LEVEL3,
                     standard=None,
                     required=True,
                     industry_specific=True,
@@ -415,7 +415,7 @@ class DocumentHierarchyConfig:
                 DocumentRequirement(
                     template_id="quality_inspection_instruction",
                     name="质量检验作业指导书",
-                    document_level=DocumentLevel.LEVEL_3,
+                    document_level=DocumentLevel.LEVEL3,
                     standard=StandardType.ISO9001,
                     required=True,
                     industry_specific=True,
@@ -427,7 +427,7 @@ class DocumentHierarchyConfig:
                 DocumentRequirement(
                     template_id="production_record",
                     name="生产记录表",
-                    document_level=DocumentLevel.LEVEL_4,
+                    document_level=DocumentLevel.LEVEL4,
                     standard=StandardType.ISO9001,
                     required=True,
                     industry_specific=True,

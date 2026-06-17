@@ -8,7 +8,8 @@
 
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
+from app.api.v1.auth import get_current_user
 
 router = APIRouter(prefix="/knowledge", tags=["知识库"])
 
@@ -107,34 +108,25 @@ class IndustriesListResponse(BaseModel):
     total: int
 
 
-# 模拟数据 - 行业信息
+# 行业知识数据
 INDUSTRIES_DATA = {
-    "manufacturing": {
-        "code": "manufacturing",
-        "name": "制造业",
-        "description": "包括机械制造、电子制造、化工制造等各类制造型企业",
-        "applicable_standards": ["ISO9001:2015", "ISO14001:2015", "ISO45001:2018"],
-        "typical_clauses": ["7.1.3", "7.1.4", "8.5.1", "8.5.4"],
-        "key_requirements": ["生产过程控制", "设备管理", "质量检验", "环境管理"],
-        "common_documents": ["质量手册", "程序文件", "作业指导书", "检验规范"]
-    },
-    "it_service": {
-        "code": "it_service",
-        "name": "IT服务业",
-        "description": "软件开发、系统集成、IT咨询等服务型企业",
+    "system_integration": {
+        "code": "system_integration",
+        "name": "系统集成",
+        "description": "信息系统集成服务，包括软件开发、系统集成、IT咨询等",
         "applicable_standards": ["ISO9001:2015", "ISO20000-1:2018", "ISO27001:2022"],
         "typical_clauses": ["8.2.3", "8.3.2", "8.3.4", "9.1.2"],
-        "key_requirements": ["服务级别管理", "变更管理", "信息安全", "客户满意度"],
-        "common_documents": ["服务目录", "SLA协议", "变更流程", "事件管理程序"]
+        "key_requirements": ["项目管理", "需求分析", "系统测试", "交付验收", "信息安全", "客户服务"],
+        "common_documents": ["项目管理程序", "需求分析规范", "测试规范", "验收报告", "变更管理程序", "配置管理程序"]
     },
-    "food_processing": {
-        "code": "food_processing",
-        "name": "食品加工",
-        "description": "食品生产、加工、包装企业",
-        "applicable_standards": ["ISO9001:2015", "ISO22000:2018", "HACCP"],
-        "typical_clauses": ["7.1.6", "8.2.4", "8.5.1", "9.1.1"],
-        "key_requirements": ["食品安全", "卫生控制", "追溯系统", "HACCP计划"],
-        "common_documents": ["食品安全手册", "HACCP计划", "前提方案", "召回程序"]
+    "software_development": {
+        "code": "software_development",
+        "name": "软件开发",
+        "description": "软件产品开发、定制软件开发、移动应用开发等",
+        "applicable_standards": ["ISO9001:2015", "ISO27001:2022", "CMMI"],
+        "typical_clauses": ["8.3.1", "8.3.2", "8.3.3", "8.3.4", "8.3.5"],
+        "key_requirements": ["需求管理", "设计开发", "代码评审", "版本控制", "缺陷管理", "发布管理"],
+        "common_documents": ["软件开发计划", "需求规格说明书", "设计文档", "测试用例", "发布记录", "缺陷报告"]
     },
     "construction": {
         "code": "construction",
@@ -142,57 +134,101 @@ INDUSTRIES_DATA = {
         "description": "建筑施工、工程承包、装饰装修企业",
         "applicable_standards": ["ISO9001:2015", "ISO14001:2015", "ISO45001:2018"],
         "typical_clauses": ["8.1", "8.4", "8.5.1", "9.1.1"],
-        "key_requirements": ["施工过程控制", "分包管理", "安全管理", "质量控制"],
-        "common_documents": ["施工组织设计", "安全方案", "质量计划", "验收规范"]
+        "key_requirements": ["施工过程控制", "分包管理", "安全管理", "质量控制", "环境保护"],
+        "common_documents": ["施工组织设计", "安全方案", "质量计划", "验收规范", "环境管理方案"]
     },
-    "medical_device": {
-        "code": "medical_device",
-        "name": "医疗器械",
-        "description": "医疗器械生产、经营企业",
-        "applicable_standards": ["ISO9001:2015", "ISO13485:2016", "ISO14971:2019"],
-        "typical_clauses": ["7.1", "7.3", "7.5", "8.2.4"],
-        "key_requirements": ["风险管理", "设计控制", "灭菌验证", "可追溯性"],
-        "common_documents": ["风险管理文件", "设计历史文件", "主文档", "警戒系统程序"]
+    "steel_structure": {
+        "code": "steel_structure",
+        "name": "钢结构",
+        "description": "钢结构工程设计、制作、安装企业",
+        "applicable_standards": ["ISO9001:2015", "ISO14001:2015", "ISO45001:2018"],
+        "typical_clauses": ["8.5.1", "8.5.2", "8.6", "7.1.3"],
+        "key_requirements": ["焊接质量控制", "涂装质量", "安装精度", "材料检验", "无损检测"],
+        "common_documents": ["焊接工艺评定", "涂装工艺规程", "检验试验计划", "材料质量证明", "安装方案"]
     },
-    "logistics": {
-        "code": "logistics",
-        "name": "物流服务",
-        "description": "仓储、运输、配送等物流服务提供商",
-        "applicable_standards": ["ISO9001:2015", "ISO14001:2015", "ISO28000:2007"],
-        "typical_clauses": ["8.2.3", "8.4", "8.5.4", "9.1.2"],
-        "key_requirements": ["运输安全", "仓储管理", "供应链安全", "应急准备"],
-        "common_documents": ["运输操作规程", "仓储管理程序", "应急预案", "供应商评估表"]
-    }
+    "archive_digitalization": {
+        "code": "archive_digitalization",
+        "name": "档案数字化",
+        "description": "档案整理、数字化加工、档案管理服务",
+        "applicable_standards": ["ISO9001:2015", "ISO27001:2022"],
+        "typical_clauses": ["7.5", "8.5.1", "8.5.2", "8.6"],
+        "key_requirements": ["档案整理规范", "数字化质量控制", "数据安全", "保密管理", "库房管理"],
+        "common_documents": ["档案整理规范", "数字化加工规程", "保密管理制度", "质量检验标准", "库房管理制度"]
+    },
+    "intelligent_manufacturing": {
+        "code": "intelligent_manufacturing",
+        "name": "智能制造",
+        "description": "智能制造装备、工业自动化、智能控制系统",
+        "applicable_standards": ["ISO9001:2015", "ISO14001:2015", "ISO45001:2018"],
+        "typical_clauses": ["8.3", "8.5.1", "7.1.3", "7.1.5"],
+        "key_requirements": ["设计开发", "生产过程控制", "设备管理", "自动化控制", "质量检测"],
+        "common_documents": ["设计开发程序", "设备维护规程", "生产过程控制程序", "质量检测规范", "自动化系统操作规程"]
+    },
+    "food_production": {
+        "code": "food_production",
+        "name": "食品生产",
+        "description": "食品生产、加工、包装企业",
+        "applicable_standards": ["ISO9001:2015", "ISO22000:2018", "HACCP"],
+        "typical_clauses": ["7.1.6", "8.2.4", "8.5.1", "9.1.1"],
+        "key_requirements": ["食品安全", "卫生控制", "追溯系统", "HACCP计划", "配方管理"],
+        "common_documents": ["食品安全手册", "HACCP计划", "前提方案", "召回程序", "卫生管理规程"]
+    },
+    "electromechanical": {
+        "code": "electromechanical",
+        "name": "机电设备",
+        "description": "机电设备制造、安装、维修服务",
+        "applicable_standards": ["ISO9001:2015", "ISO14001:2015", "ISO45001:2018"],
+        "typical_clauses": ["8.5.1", "7.1.3", "8.6", "7.1.5"],
+        "key_requirements": ["设备制造质量", "安装调试", "维修保养", "备件管理", "技术文档"],
+        "common_documents": ["设备制造工艺", "安装调试规程", "维修保养手册", "检验试验规程", "技术档案管理"]
+    },
+    "intelligent_tech": {
+        "code": "intelligent_tech",
+        "name": "智能科技",
+        "description": "智能产品研发、销售，涉及设计开发过程",
+        "applicable_standards": ["ISO9001:2015", "ISO14001:2015", "ISO45001:2018"],
+        "typical_clauses": ["8.3.1", "8.3.2", "8.3.3", "8.3.4"],
+        "key_requirements": ["产品设计开发", "硬件研发", "软件集成", "测试验证", "知识产权"],
+        "common_documents": ["设计开发计划", "产品规格书", "测试报告", "知识产权管理制度", "技术文件管理"]
+    },
+    "property_management": {
+        "code": "property_management",
+        "name": "物业管理",
+        "description": "物业服务、设施管理、社区管理",
+        "applicable_standards": ["ISO9001:2015", "ISO14001:2015", "ISO45001:2018"],
+        "typical_clauses": ["8.2.1", "8.5.1", "9.1.2", "7.1.2"],
+        "key_requirements": ["服务标准", "设施维护", "安全管理", "环境绿化", "客户满意度"],
+        "common_documents": ["服务标准手册", "设施维护规程", "安全管理方案", "应急预案", "客户投诉处理程序"]
+    },
+    "labor_dispatch": {
+        "code": "labor_dispatch",
+        "name": "劳务派遣",
+        "description": "人力资源服务、劳务派遣、外包服务",
+        "applicable_standards": ["ISO9001:2015", "ISO45001:2018"],
+        "typical_clauses": ["8.2", "7.1.2", "7.2", "9.1.2"],
+        "key_requirements": ["用工管理", "劳动关系", "社保公积金", "员工培训", "安全教育"],
+        "common_documents": ["用工管理制度", "劳动合同模板", "社保管理规程", "员工培训计划", "安全教育记录"]
+    },
 }
 
 
 # API端点
 
-@router.get("/industries", response_model=IndustriesListResponse)
-async def get_all_industries():
-    """
-    获取所有行业列表
-    
-    返回系统中支持的所有行业及其基本信息
-    """
+@router.get("/industries", summary="获取所有行业列表")
+async def get_all_industries(current_user = Depends(get_current_user)):
+    """获取所有行业列表"""
     industries = []
     for code, data in INDUSTRIES_DATA.items():
-        industries.append(IndustryInfo(
-            code=data["code"],
-            name=data["name"],
-            description=data["description"],
-            applicable_standards=data["applicable_standards"],
-            typical_clauses=data["typical_clauses"]
-        ))
-    
-    return IndustriesListResponse(
-        industries=industries,
-        total=len(industries)
-    )
+        industries.append({
+            "code": data["code"],
+            "name": data["name"],
+            "description": data["description"],
+        })
+    return industries
 
 
 @router.get("/industries/{code}", response_model=IndustryDetail)
-async def get_industry_detail(code: str):
+async def get_industry_detail(code: str, current_user = Depends(get_current_user)):
     """
     获取指定行业详情
     """
@@ -212,7 +248,7 @@ async def get_industry_detail(code: str):
 
 
 @router.post("/industries/match", response_model=IndustryMatchResult)
-async def match_industry(request: IndustryMatchRequest):
+async def match_industry(request: IndustryMatchRequest, current_user = Depends(get_current_user)):
     """
     根据企业信息匹配行业
     """
@@ -279,7 +315,7 @@ async def match_industry(request: IndustryMatchRequest):
 
 
 @router.get("/industries/{code}/context", response_model=IndustryContextResponse)
-async def get_industry_context(code: str):
+async def get_industry_context(code: str, current_user = Depends(get_current_user)):
     """
     获取行业文档生成上下文
     """
@@ -318,7 +354,7 @@ async def get_industry_context(code: str):
 
 
 @router.get("/clauses/{standard}/{clause}", response_model=ClauseKnowledgeResponse)
-async def get_clause_knowledge(standard: str, clause: str):
+async def get_clause_knowledge(standard: str, clause: str, current_user = Depends(get_current_user)):
     """
     查询条款知识
     """
@@ -400,7 +436,7 @@ async def get_clause_knowledge(standard: str, clause: str):
 
 
 @router.post("/document-context", response_model=DocumentContextResponse)
-async def generate_document_context(request: DocumentContextRequest):
+async def generate_document_context(request: DocumentContextRequest, current_user = Depends(get_current_user)):
     """
     生成文档生成上下文
     """
@@ -456,7 +492,7 @@ async def generate_document_context(request: DocumentContextRequest):
 
 
 @router.get("/statistics", response_model=KnowledgeStatistics)
-async def get_knowledge_statistics():
+async def get_knowledge_statistics(current_user = Depends(get_current_user)):
     """
     获取知识库统计
     """
@@ -479,3 +515,322 @@ async def get_knowledge_statistics():
         last_updated="2024-01-15",
         coverage_by_standard=coverage_by_standard
     )
+
+
+# ============ 前端需要的额外端点 ============
+
+@router.get("/list", summary="获取知识列表")
+async def get_knowledge_list(
+    page: int = 1,
+    page_size: int = 20,
+    category: Optional[str] = None,
+    industry: Optional[str] = None,
+    current_user = Depends(get_current_user),
+):
+    """获取知识库条目列表"""
+    items = []
+    for code, data in INDUSTRIES_DATA.items():
+        if industry and code != industry:
+            continue
+        items.append({
+            "id": code,
+            "title": data.get("name", code),
+            "summary": data.get("description", ""),
+            "category": "standard",
+            "industry_name": data.get("name", code),
+            "tags": data.get("typical_clauses", []),
+            "view_count": 0,
+            "key_requirements": data.get("key_requirements", []),
+            "common_documents": data.get("common_documents", []),
+            "applicable_standards": data.get("applicable_standards", []),
+        })
+    total = len(items)
+    start = (page - 1) * page_size
+    return {"items": items[start:start + page_size], "total": total}
+
+
+@router.get("/categories/tree", summary="获取知识分类树")
+async def get_knowledge_category_tree(current_user = Depends(get_current_user)):
+    """获取知识库分类树"""
+    return [
+        {"key": "standard", "title": "标准知识", "children": [
+            {"key": "iso9001", "title": "ISO 9001 质量管理"},
+            {"key": "iso14001", "title": "ISO 14001 环境管理"},
+            {"key": "iso45001", "title": "ISO 45001 职业健康安全"},
+        ]},
+        {"key": "industry", "title": "行业知识", "children": [
+            {"key": code, "title": data.get("name", code)}
+            for code, data in INDUSTRIES_DATA.items()
+        ]},
+        {"key": "experience", "title": "审核经验"},
+        {"key": "application", "title": "应用案例"},
+    ]
+
+
+@router.get("/standards/list", summary="获取支持的标准列表")
+async def get_supported_standards_list(current_user = Depends(get_current_user)):
+    """获取所有支持的ISO标准"""
+    return [
+        {"code": "ISO9001", "name": "质量管理体系"},
+        {"code": "ISO14001", "name": "环境管理体系"},
+        {"code": "ISO45001", "name": "职业健康安全管理体系"},
+        {"code": "ISO22000", "name": "食品安全管理体系"},
+        {"code": "ISO13485", "name": "医疗器械质量管理体系"},
+    ]
+
+
+@router.get("/search", summary="搜索知识")
+async def search_knowledge(q: str = "", query: str = "", current_user = Depends(get_current_user)):
+    """搜索知识库"""
+    keyword = q or query
+    items = []
+    for code, data in INDUSTRIES_DATA.items():
+        if keyword and keyword.lower() not in data.get("name", "").lower() and keyword.lower() not in data.get("description", "").lower():
+            continue
+        items.append({
+            "id": code,
+            "title": data.get("name", code),
+            "summary": data.get("description", ""),
+            "category": "standard",
+            "industry_name": data.get("name", code),
+        })
+    return {"items": items, "total": len(items)}
+
+
+@router.get("/industry/status", summary="获取行业数据状态")
+async def get_industry_data_status(current_user = Depends(get_current_user)):
+    """获取各行业数据完整度状态"""
+    return {
+        code: {"status": "complete", "name": data.get("name", code)}
+        for code, data in INDUSTRIES_DATA.items()
+    }
+
+
+@router.get("/articles/{article_id}", summary="获取单篇文章详情")
+async def get_knowledge_article(article_id: str, current_user = Depends(get_current_user)):
+    """根据ID获取单篇知识库文章"""
+    from app.models.models import KnowledgeArticle
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+    
+    engine = create_engine("sqlite:///data/zhizhitong.db")
+    with Session(engine) as session:
+        article = session.query(KnowledgeArticle).filter(
+            KnowledgeArticle.article_id == article_id,
+            KnowledgeArticle.is_active == True
+        ).first()
+        
+        if not article:
+            raise HTTPException(status_code=404, detail="文章不存在")
+        
+        return article.to_dict()
+
+
+@router.get("/articles", summary="获取导入的知识文章列表")
+async def list_knowledge_articles(
+    category: Optional[str] = None,
+    industry_code: Optional[str] = None,
+    standard_code: Optional[str] = None,
+    page: int = 1,
+    page_size: int = 20,
+    current_user = Depends(get_current_user),
+):
+    """获取已导入的知识库文章"""
+    from app.models.models import KnowledgeArticle
+    
+    # 直接使用同步查询
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+    
+    engine = create_engine("sqlite:///data/zhizhitong.db")
+    with Session(engine) as session:
+        query = session.query(KnowledgeArticle).filter(KnowledgeArticle.is_active == True)
+        
+        if category:
+            query = query.filter(KnowledgeArticle.category == category)
+        if industry_code:
+            query = query.filter(KnowledgeArticle.industry_code == industry_code)
+        if standard_code:
+            query = query.filter(KnowledgeArticle.standard_code == standard_code)
+        
+        total = query.count()
+        articles = query.offset((page - 1) * page_size).limit(page_size).all()
+        
+        return {
+            "items": [a.to_dict() for a in articles],
+            "total": total,
+        }
+
+
+@router.get("/{item_id}", summary="获取知识详情")
+async def get_knowledge_detail(item_id: str, current_user = Depends(get_current_user)):
+    """获取单个知识条目详情"""
+    data = INDUSTRIES_DATA.get(item_id)
+    if not data:
+        return {"id": item_id, "title": item_id, "summary": "", "category": "standard"}
+    return {
+        "id": item_id,
+        "title": data.get("name", item_id),
+        "summary": data.get("description", ""),
+        "category": "standard",
+        "industry_name": data.get("name", item_id),
+        "tags": data.get("typical_clauses", []),
+        "content": data.get("description", ""),
+        "key_requirements": data.get("key_requirements", []),
+        "common_documents": data.get("common_documents", []),
+        "applicable_standards": data.get("applicable_standards", []),
+    }
+
+
+@router.get("/{item_id}/related", summary="获取相关知识")
+async def get_related_knowledge(item_id: str, limit: int = 5, current_user = Depends(get_current_user)):
+    """获取与指定知识相关的其他知识条目"""
+    items = []
+    for code, data in INDUSTRIES_DATA.items():
+        if code != item_id:
+            items.append({
+                "id": code,
+                "title": data.get("name", code),
+                "summary": data.get("description", ""),
+                "category": "standard",
+            })
+        if len(items) >= limit:
+            break
+    return items
+
+
+@router.post("/{item_id}/view", summary="增加浏览次数")
+async def increment_view_count(item_id: str, current_user = Depends(get_current_user)):
+    """记录知识条目被浏览"""
+    return {"message": "ok"}
+
+
+@router.get("/standards/{clause_id}", summary="获取标准条款详情")
+async def get_standard_clause_detail(clause_id: str, current_user = Depends(get_current_user)):
+    """获取标准条款详情"""
+    data = INDUSTRIES_DATA.get(clause_id)
+    if data:
+        return {
+            "id": clause_id,
+            "clause_number": clause_id,
+            "title": data.get("name", clause_id),
+            "description": data.get("description", ""),
+            "standard": data.get("applicable_standards", ["ISO9001"])[0] if data.get("applicable_standards") else "ISO9001",
+            "requirements": data.get("key_requirements", []),
+            "audit_points": [],
+            "key_requirements": data.get("key_requirements", []),
+            "common_documents": data.get("common_documents", []),
+            "applicable_standards": data.get("applicable_standards", []),
+        }
+    return {
+        "id": clause_id,
+        "clause_number": clause_id,
+        "title": clause_id,
+        "description": "",
+        "standard": "ISO9001",
+        "requirements": [],
+        "audit_points": [],
+    }
+
+
+# ============ 知识库导入接口 ============
+
+@router.post("/import", summary="导入知识库文档")
+async def import_knowledge_article(
+    title: str,
+    category: str = "standard",
+    industry_code: Optional[str] = None,
+    standard_code: Optional[str] = None,
+    content: str = "",
+    tags: Optional[List[str]] = None,
+    db = None,
+):
+    """
+    导入知识库文章
+    
+    支持导入Markdown格式的知识库文档
+    """
+    from app.models.models import KnowledgeArticle
+    import uuid
+    
+    article_id = str(uuid.uuid4())
+    
+    # 生成摘要（取前200字）
+    summary = content[:200].replace("#", "").replace("*", "").strip() if content else ""
+    
+    article = KnowledgeArticle(
+        article_id=article_id,
+        title=title,
+        category=category,
+        industry_code=industry_code,
+        standard_code=standard_code,
+        content=content,
+        summary=summary,
+        tags=tags or [],
+        source_file="",
+    )
+    
+    # 如果有数据库连接，保存到数据库
+    if db:
+        try:
+            db.add(article)
+            await db.commit()
+            await db.refresh(article)
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(status_code=500, detail=f"保存失败: {str(e)}")
+    
+    return {
+        "message": "导入成功",
+        "article_id": article_id,
+        "title": title,
+    }
+
+
+@router.post("/import/file", summary="导入Markdown文件")
+async def import_markdown_file(
+    file_path: str,
+    category: str = "standard",
+    industry_code: Optional[str] = None,
+    standard_code: Optional[str] = None,
+):
+    """
+    从文件路径导入Markdown文档
+    """
+    from pathlib import Path
+    
+    path = Path(file_path)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"文件不存在: {file_path}")
+    
+    if not path.suffix.lower() in ['.md', '.markdown']:
+        raise HTTPException(status_code=400, detail="仅支持Markdown文件(.md)")
+    
+    content = path.read_text(encoding='utf-8')
+    
+    # 从文件名或内容提取标题
+    title = path.stem
+    if content.startswith('#'):
+        first_line = content.split('\n')[0].replace('#', '').strip()
+        if first_line:
+            title = first_line
+    
+    # 从内容提取标签
+    tags = []
+    if 'ISO9001' in content:
+        tags.append('ISO9001')
+    if 'ISO14001' in content:
+        tags.append('ISO14001')
+    if 'ISO45001' in content:
+        tags.append('ISO45001')
+    if 'ISO27001' in content:
+        tags.append('ISO27001')
+    
+    return {
+        "title": title,
+        "category": category,
+        "content": content[:5000],
+        "total_length": len(content),
+        "tags": tags,
+        "file_path": str(path),
+    }

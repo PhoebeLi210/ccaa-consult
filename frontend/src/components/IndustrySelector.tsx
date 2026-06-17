@@ -3,7 +3,7 @@ import { Input, Card, Tag, Badge, Space, message, Spin } from 'antd';
 import {
   SearchOutlined,
   SafetyCertificateOutlined,
-  FactoryOutlined,
+  ToolOutlined,
   DesktopOutlined,
   BuildOutlined,
   HomeOutlined,
@@ -43,14 +43,14 @@ const getIndustryIcon = (code: string): React.ReactNode => {
     construction: <BuildOutlined style={{ fontSize: 28 }} />,
     steel_structure: <BuildOutlined style={{ fontSize: 28 }} />,
     archive_digitalization: <DesktopOutlined style={{ fontSize: 28 }} />,
-    intelligent_manufacturing: <FactoryOutlined style={{ fontSize: 28 }} />,
+    intelligent_manufacturing: <ToolOutlined style={{ fontSize: 28 }} />,
     food_production: <SafetyCertificateOutlined style={{ fontSize: 28 }} />,
     electromechanical: <BuildOutlined style={{ fontSize: 28 }} />,
     intelligent_tech: <DesktopOutlined style={{ fontSize: 28 }} />,
     property_management: <HomeOutlined style={{ fontSize: 28 }} />,
     labor_dispatch: <TeamOutlined style={{ fontSize: 28 }} />,
   };
-  return iconMap[code] || <FactoryOutlined style={{ fontSize: 28 }} />;
+  return iconMap[code] || <ToolOutlined style={{ fontSize: 28 }} />;
 };
 
 /** 根据行业代码获取图标颜色 */

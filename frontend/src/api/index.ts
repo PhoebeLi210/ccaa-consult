@@ -8,6 +8,10 @@ export * from './team';
 export * from './generator';
 export * from './auth';
 export * from './industry';
+export * from './knowledge';
+export * from './flowcharts';
+export * from './knowledge';
+export * from './flowcharts';
 
 import request from './request';
 export default request;

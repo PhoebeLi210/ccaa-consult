@@ -8,6 +8,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -126,10 +127,13 @@ async def generate_file_list(request: FileListRequest, db: AsyncSession = Depend
     - 应急预案（根据行业配置动态生成）
     """
     # 1. 查询行业配置
-    industry_config = db.query(IndustryConfig).filter(
-        IndustryConfig.industry_code == request.industry_code,
-        IndustryConfig.is_active == True
-    ).first()
+    result = await db.execute(
+        select(IndustryConfig).where(
+            IndustryConfig.industry_code == request.industry_code,
+            IndustryConfig.is_active == True
+        )
+    )
+    industry_config = result.scalar_one_or_none()
 
     if not industry_config:
         raise HTTPException(
@@ -175,9 +179,12 @@ async def generate_file_list(request: FileListRequest, db: AsyncSession = Depend
         ))
 
     # 3. 查询并添加行业特有文件
-    special_files = db.query(IndustrySpecialFile).filter(
-        IndustrySpecialFile.industry_id == industry_config.id
-    ).order_by(IndustrySpecialFile.sort_order).all()
+    result = await db.execute(
+        select(IndustrySpecialFile).where(
+            IndustrySpecialFile.industry_id == industry_config.id
+        ).order_by(IndustrySpecialFile.sort_order)
+    )
+    special_files = result.scalars().all()
 
     for sf in special_files:
         all_files.append(FileItem(

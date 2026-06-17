@@ -1,230 +1,138 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  Tag,
-  Space,
-  Button,
-  Typography,
-  Divider,
-  Empty,
-  Spin,
-  Breadcrumb,
-  message,
-  Descriptions,
-} from 'antd';
-import {
-  ArrowLeftOutlined,
-  BookOutlined,
-  ExperimentOutlined,
-  AppstoreOutlined,
-  UserOutlined,
-  HistoryOutlined,
-  StarOutlined,
-  ShareAltOutlined,
-} from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  getKnowledgeDetail,
-  getRelatedKnowledge,
-  incrementViewCount,
-  type KnowledgeItem,
-  type KnowledgeCategory,
-} from '../../api/knowledge';
+import { Card, Tag, Space, Button, Typography, Spin, Empty, message, List } from 'antd';
+import { ArrowLeftOutlined, BookOutlined, FileTextOutlined, DownloadOutlined } from '@ant-design/icons';
+import { getKnowledgeDetail, type KnowledgeItem } from '../../api/knowledge';
+import { request } from '../../api/request';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
-/** 知识分类配置 */
-const CATEGORY_CONFIG: Record<KnowledgeCategory, { label: string; icon: React.ReactNode; color: string }> = {
-  standard: { label: '标准知识', icon: <BookOutlined />, color: 'blue' },
-  experience: { label: '经验知识', icon: <ExperimentOutlined />, color: 'green' },
-  application: { label: '应用知识', icon: <AppstoreOutlined />, color: 'orange' },
-  user: { label: '用户知识', icon: <UserOutlined />, color: 'purple' },
-};
-
-/**
- * 知识详情页组件
- */
 const KnowledgeDetail: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-
-  // 状态
   const [loading, setLoading] = useState(true);
-  const [knowledge, setKnowledge] = useState<KnowledgeItem | null>(null);
-  const [relatedKnowledge, setRelatedKnowledge] = useState<KnowledgeItem[]>([]);
+  const [knowledge, setKnowledge] = useState<any>(null);
 
-  // 加载知识详情
   useEffect(() => {
-    const loadDetail = async () => {
-      if (!id) return;
+    if (!id) return;
+    setLoading(true);
 
-      setLoading(true);
-      try {
-        const [knowledgeData, relatedData] = await Promise.all([
-          getKnowledgeDetail(id),
-          getRelatedKnowledge(id, 5).catch(() => []),
-        ]);
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-        setKnowledge(knowledgeData);
-        setRelatedKnowledge(relatedData);
-
-        // 增加查看次数
-        incrementViewCount(id).catch(() => {});
-      } catch (error) {
-        message.error('加载知识详情失败');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDetail();
+    if (isUUID) {
+      request.get(`/v1/knowledge/articles/${id}`)
+        .then((article: any) => {
+          setKnowledge({
+            title: article.title || '未命名',
+            summary: article.summary || '',
+            category: article.category || 'standard',
+            tags: article.tags || [],
+            source_file: article.source_file || '',
+            content_length: article.content?.length || 0,
+          });
+        })
+        .catch(() => message.error('文章加载失败'))
+        .finally(() => setLoading(false));
+    } else {
+      getKnowledgeDetail(id)
+        .then((data) => setKnowledge(data))
+        .catch(() => message.error('加载失败'))
+        .finally(() => setLoading(false));
+    }
   }, [id]);
 
-  // 返回知识库
-  const handleBack = () => {
-    navigate('/knowledge');
-  };
+  if (loading) return <div style={{ textAlign: 'center', padding: 100 }}><Spin size="large" /></div>;
+  if (!knowledge) return <Empty description="内容不存在"><Button onClick={() => navigate('/knowledge')}>返回</Button></Empty>;
 
-  if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: 100 }}>
-        <Spin size="large" />
-      </div>
-    );
-  }
-
-  if (!knowledge) {
-    return (
-      <Empty
-        description="知识不存在"
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-      >
-        <Button type="primary" onClick={handleBack}>
-          返回知识库
-        </Button>
-      </Empty>
-    );
-  }
-
-  const categoryConfig = CATEGORY_CONFIG[knowledge.category];
+  const isImportedArticle = !!knowledge.source_file || knowledge.content?.length > 0;
 
   return (
     <div style={{ padding: 0 }}>
-      {/* 面包屑 */}
-      <Breadcrumb
-        items={[
-          { title: '首页', href: '/' },
-          { title: '知识库', href: '/knowledge' },
-          { title: categoryConfig.label },
-          { title: knowledge.title },
-        ]}
-        style={{ marginBottom: 16 }}
-      />
-
-      {/* 返回按钮 */}
-      <Button
-        type="text"
-        icon={<ArrowLeftOutlined />}
-        onClick={handleBack}
-        style={{ marginBottom: 16 }}
-      >
+      <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/knowledge')} style={{ marginBottom: 16 }}>
         返回知识库
       </Button>
 
-      {/* 知识基本信息 */}
       <Card>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          {/* 标题区 */}
           <div>
-            <Space align="start" wrap>
-              <Tag color={categoryConfig.color} icon={categoryConfig.icon}>
-                {categoryConfig.label}
-              </Tag>
-              {knowledge.standard && (
-                <Tag color="blue">{knowledge.standard}</Tag>
-              )}
-              {knowledge.industry_name && (
-                <Tag color="cyan">{knowledge.industry_name}</Tag>
-              )}
-            </Space>
-            <Title level={3} style={{ marginTop: 12, marginBottom: 8 }}>
-              {knowledge.title}
-            </Title>
-            <Space split={<Divider type="vertical" />}>
-              <Space size={4}>
-                <HistoryOutlined style={{ color: '#999' }} />
-                <Text type="secondary">浏览 {knowledge.view_count} 次</Text>
-              </Space>
-              <Text type="secondary">
-                更新于 {new Date(knowledge.updated_at).toLocaleDateString()}
-              </Text>
-            </Space>
+            <Tag color="blue" icon={knowledge.category === 'standard' ? <BookOutlined /> : <FileTextOutlined />}>
+              {isImportedArticle ? '标准文档' : '行业知识'}
+            </Tag>
+            <Title level={3} style={{ marginTop: 12 }}>{knowledge.title}</Title>
           </div>
 
-          <Divider style={{ margin: '12px 0' }} />
+          {knowledge.summary && (
+            <div>
+              <Title level={5}>摘要</Title>
+              <Text style={{ paddingLeft: 24 }}>{knowledge.summary}</Text>
+            </div>
+          )}
 
-          {/* 摘要 */}
-          <div>
-            <Title level={5}>摘要</Title>
-            <Paragraph style={{ paddingLeft: 24, color: '#666' }}>
-              {knowledge.summary}
-            </Paragraph>
-          </div>
-
-          {/* 标签 */}
-          {knowledge.tags && knowledge.tags.length > 0 && (
+          {knowledge.tags?.length > 0 && (
             <div>
               <Title level={5}>标签</Title>
               <Space wrap style={{ paddingLeft: 24 }}>
-                {knowledge.tags.map((tag) => (
-                  <Tag key={tag}>{tag}</Tag>
-                ))}
+                {knowledge.tags.map((t: string) => <Tag key={t}>{t}</Tag>)}
               </Space>
             </div>
           )}
 
-          {/* 详细内容 */}
-          {knowledge.content && (
+          {knowledge.applicable_standards?.length > 0 && (
             <div>
-              <Title level={5}>详细内容</Title>
-              <Paragraph style={{ paddingLeft: 24, whiteSpace: 'pre-wrap' }}>
+              <Title level={5}>适用标准</Title>
+              <Space wrap style={{ paddingLeft: 24 }}>
+                {knowledge.applicable_standards.map((s: string) => <Tag key={s} color="blue">{s}</Tag>)}
+              </Space>
+            </div>
+          )}
+
+          {knowledge.key_requirements?.length > 0 && (
+            <div>
+              <Title level={5}>关键要求</Title>
+              <ul style={{ paddingLeft: 48 }}>
+                {knowledge.key_requirements.map((r: string) => <li key={r}>{r}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {knowledge.common_documents?.length > 0 && (
+            <div>
+              <Title level={5}>常用文件</Title>
+              <ul style={{ paddingLeft: 48 }}>
+                {knowledge.common_documents.map((d: string) => <li key={d}>{d}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {isImportedArticle && knowledge.content && (
+            <div>
+              <Title level={5}>文档内容</Title>
+              <div style={{
+                paddingLeft: 24,
+                maxHeight: 600,
+                overflow: 'auto',
+                whiteSpace: 'pre-wrap',
+                lineHeight: 1.8,
+                background: '#fafafa',
+                padding: 16,
+                borderRadius: 8,
+                border: '1px solid #f0f0f0',
+              }}>
                 {knowledge.content}
-              </Paragraph>
+              </div>
+            </div>
+          )}
+
+          {isImportedArticle && !knowledge.content && (
+            <div>
+              <Title level={5}>文档信息</Title>
+              <Space direction="vertical" style={{ paddingLeft: 24 }}>
+                <Text type="secondary">这是一个完整的标准文档</Text>
+              </Space>
             </div>
           )}
         </Space>
       </Card>
-
-      {/* 相关知识 */}
-      {relatedKnowledge.length > 0 && (
-        <Card
-          title={
-            <Space>
-              <BookOutlined />
-              <span>相关知识</span>
-            </Space>
-          }
-          style={{ marginTop: 16 }}
-        >
-          <Space direction="vertical" style={{ width: '100%' }}>
-            {relatedKnowledge.map((item) => (
-              <Card
-                key={item.id}
-                size="small"
-                hoverable
-                onClick={() => navigate(`/knowledge/detail/${item.id}`)}
-              >
-                <Space direction="vertical" size={4}>
-                  <Text strong>{item.title}</Text>
-                  <Text type="secondary" ellipsis style={{ maxWidth: 600 }}>
-                    {item.summary}
-                  </Text>
-                </Space>
-              </Card>
-            ))}
-          </Space>
-        </Card>
-      )}
     </div>
   );
 };

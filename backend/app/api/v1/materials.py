@@ -18,6 +18,7 @@ import os
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.models import Project, ProjectRawInput
+from app.api.v1.auth import get_current_user
 
 router = APIRouter(prefix="/materials", tags=["补充材料"])
 
@@ -135,6 +136,215 @@ material_storage: Dict[str, Dict[str, Any]] = {}
 async def get_material_types():
     """获取所有支持的补充材料类型及其配置"""
     return list(MATERIAL_TYPES.values())
+
+
+@router.get("/industries", summary="获取行业列表")
+async def get_industries(db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+    """获取所有可用行业列表，供材料管理页面选择"""
+    from app.models.models import IndustryConfig
+    result = await db.execute(
+        select(IndustryConfig).where(IndustryConfig.is_active == True)
+    )
+    industries = result.scalars().all()
+    return [
+        {"code": ind.industry_code, "name": ind.industry_name, "description": ind.description}
+        for ind in industries
+    ]
+
+
+@router.get("/list/{industry_code}", summary="获取行业材料清单")
+async def get_material_list(industry_code: str, current_user = Depends(get_current_user)):
+    """获取指定行业的材料清单"""
+    from pathlib import Path
+    import yaml
+    
+    backend_dir = Path(__file__).resolve().parent.parent.parent.parent
+    templates_dir = backend_dir / "templates_industry"
+    config_path = backend_dir / "config" / "industry_config.yaml"
+    
+    industry_specific = {}
+    common = {}
+    
+    # 加载行业配置
+    industry_config = None
+    if config_path.exists():
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                all_config = yaml.safe_load(f)
+            # 映射行业代码到配置中的key
+            industry_map = {
+                "intelligent_tech": "intelligent_technology",
+                "software_development": "software_development",
+                "electromechanical": "electromechanical_equipment",
+                "property_management": "property_service",
+                "archive_digitalization": "archive_service",
+                "construction": "environmental_technology",
+            }
+            config_key = industry_map.get(industry_code)
+            if config_key:
+                industry_config = all_config.get("industries", {}).get(config_key, {})
+        except Exception:
+            pass
+    
+    # 加载行业特有文件（从industry_config）
+    if industry_config:
+        special_reqs = industry_config.get("special_requirements", {})
+        
+        # 程序文件
+        procedures = special_reqs.get("procedures", [])
+        if procedures:
+            industry_specific["行业特有程序文件"] = [
+                {
+                    "name": p.get("name", ""),
+                    "required": p.get("required", True),
+                    "description": p.get("description", ""),
+                    "template_available": False,
+                }
+                for p in procedures
+            ]
+        
+        # 作业指导书
+        instructions = special_reqs.get("instructions", [])
+        if instructions:
+            industry_specific["行业特有作业指导书"] = [
+                {
+                    "name": inst.get("name", ""),
+                    "required": inst.get("required", True),
+                    "description": "",
+                    "template_available": False,
+                }
+                for inst in instructions
+            ]
+        
+        # 表单
+        forms = special_reqs.get("forms", [])
+        if forms:
+            industry_specific["行业特有表单"] = [
+                {
+                    "name": f.get("name", ""),
+                    "required": True,
+                    "description": "",
+                    "template_available": False,
+                }
+                for f in forms
+            ]
+    
+    # 加载通用模板（从templates_industry目录）
+    if templates_dir.exists():
+        for level_dir in templates_dir.iterdir():
+            if level_dir.is_dir():
+                category = level_dir.name
+                industry_specific[category] = industry_specific.get(category, [])
+                for fname in level_dir.iterdir():
+                    if fname.suffix == '.yaml':
+                        try:
+                            with open(fname, 'r', encoding='utf-8') as f:
+                                tpl = yaml.safe_load(f)
+                            if tpl:
+                                name = tpl.get('name', fname.stem)
+                                industry_specific[category].append({
+                                    "name": name,
+                                    "required": True,
+                                    "description": tpl.get('description', ''),
+                                    "template_available": True,
+                                    "template_file": fname.name,
+                                })
+                        except Exception:
+                            pass
+    
+    # 通用材料
+    common["组织架构图"] = [{"name": "组织架构图", "required": True, "description": "公司组织架构图", "template_available": False}]
+    common["设备清单"] = [{"name": "设备清单", "required": True, "description": "主要设备清单", "template_available": False}]
+    common["工艺流程图"] = [{"name": "工艺流程图", "required": False, "description": "主要工艺流程图", "template_available": False}]
+    
+    # 加载行业要求的公司材料
+    if industry_config:
+        materials = industry_config.get("required_company_materials", {}).get("basic", [])
+        if materials:
+            common["行业要求材料"] = [
+                {
+                    "name": m.get("name", ""),
+                    "required": m.get("required", True),
+                    "description": m.get("description", ""),
+                    "template_available": False,
+                }
+                for m in materials
+            ]
+    
+    total = sum(len(v) for v in industry_specific.values()) + sum(len(v) for v in common.values())
+    
+    # 按正确顺序排序：一级文件 → 二级文件 → 三级文件 → 四级文件 → 其他
+    level_order = {"一级文件": 1, "二级文件": 2, "三级文件": 3, "四级文件": 4}
+    sorted_industry_specific = dict(
+        sorted(
+            industry_specific.items(),
+            key=lambda x: level_order.get(x[0], 99)
+        )
+    )
+    
+    return {
+        "industry_code": industry_code,
+        "industry_name": industry_config.get("name", industry_code) if industry_config else industry_code,
+        "materials": {
+            "industry_specific": sorted_industry_specific,
+            "common": common,
+        },
+        "total_count": total,
+    }
+
+
+@router.get("/templates/downloadable", summary="获取可下载模板")
+async def get_downloadable_templates(industry_code: str = None, current_user = Depends(get_current_user)):
+    """获取可下载的材料模板"""
+    return []
+
+
+@router.get("/template/download/{template_name}", summary="下载模板文件")
+async def download_template(template_name: str):
+    """下载指定模板文件"""
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    import yaml
+    
+    backend_dir = Path(__file__).resolve().parent.parent.parent.parent
+    templates_dir = backend_dir / "templates_industry"
+    
+    # 搜索模板文件
+    for level_dir in templates_dir.iterdir():
+        if level_dir.is_dir():
+            for fname in level_dir.iterdir():
+                if fname.suffix == '.yaml':
+                    try:
+                        with open(fname, 'r', encoding='utf-8') as f:
+                            tpl = yaml.safe_load(f)
+                        if tpl and tpl.get('name') == template_name:
+                            return FileResponse(
+                                path=str(fname),
+                                filename=f"{template_name}.yaml",
+                                media_type="application/x-yaml"
+                            )
+                    except Exception:
+                        pass
+    
+    # 尝试直接用文件名匹配
+    for level_dir in templates_dir.iterdir():
+        if level_dir.is_dir():
+            fpath = level_dir / template_name
+            if fpath.exists():
+                return FileResponse(
+                    path=str(fpath),
+                    filename=template_name,
+                    media_type="application/x-yaml"
+                )
+            fpath_yaml = level_dir / f"{template_name}.yaml"
+            if fpath_yaml.exists():
+                return FileResponse(
+                    path=str(fpath_yaml),
+                    filename=f"{template_name}.yaml",
+                    media_type="application/x-yaml"
+                )
+    
+    raise HTTPException(status_code=404, detail="模板文件不存在")
 
 
 @router.post("/upload", response_model=MaterialUploadResponse, summary="上传补充材料")

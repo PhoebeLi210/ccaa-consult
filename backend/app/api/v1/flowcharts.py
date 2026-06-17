@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from app.models.flowchart_models import Flowchart, FlowchartTemplate, FlowchartNodeConfig
 from app.core.database import get_db
+from app.api.v1.auth import get_current_user
 
 
 # ==================== Pydantic请求/响应模型 ====================
@@ -329,6 +330,29 @@ async def delete_flowchart(
 
 
 @router.get(
+    "/project/",
+    response_model=List[FlowchartListItem],
+    summary="获取所有流程图列表",
+    description="获取当前用户所有项目的流程图列表"
+)
+async def get_all_flowcharts(
+    status: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """获取所有流程图列表（无项目过滤）"""
+    query = select(Flowchart)
+
+    if status:
+        query = query.where(Flowchart.status == status)
+
+    result = await db.execute(query.order_by(Flowchart.updated_at.desc()))
+    flowcharts = result.scalars().all()
+
+    return flowcharts
+
+
+@router.get(
     "/project/{project_id}",
     response_model=List[FlowchartListItem],
     summary="获取项目的流程图列表",
@@ -337,7 +361,8 @@ async def delete_flowchart(
 async def get_project_flowcharts(
     project_id: UUID,
     status: Optional[str] = None,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
     """
     获取项目的流程图列表
@@ -345,6 +370,16 @@ async def get_project_flowcharts(
     - **project_id**: 项目ID（路径参数）
     - **status**: 按状态筛选（可选，查询参数）
     """
+    from app.models.models import Project
+    user_id = current_user.user_id if hasattr(current_user, 'user_id') else current_user.get("id")
+    is_admin = getattr(current_user, 'is_superuser', False)
+
+    if not is_admin:
+        proj_result = await db.execute(select(Project).where(Project.project_id == project_id))
+        project = proj_result.scalar_one_or_none()
+        if not project or project.user_id != user_id:
+            raise HTTPException(status_code=404, detail="项目不存在")
+
     query = select(Flowchart).where(Flowchart.project_id == project_id)
 
     if status:

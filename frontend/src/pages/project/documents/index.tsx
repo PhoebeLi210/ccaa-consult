@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { NavBar, Button, Toast, Dialog, List, SwipeAction, Tag } from 'antd-mobile';
-import { Card, Button as AntButton, Table, Space, Tag as AntTag, Checkbox, message, Empty as AntEmpty, Spin } from 'antd';
+import { Card, Button as AntButton, Table, Space, Tag as AntTag, Checkbox, message, Empty as AntEmpty, Spin, Modal } from 'antd';
 import { CheckOutlined, FileTextOutlined, ArrowLeftOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useProject } from '@/hooks/useProject';
@@ -182,7 +182,7 @@ const ProjectDocumentsPage: React.FC = () => {
                     prefix={
                       <Checkbox
                         checked={selectedIds.includes(doc.id)}
-                        onChange={(val) => handleSelectToggle(doc.id, val)}
+                        onChange={(val) => handleSelectToggle(doc.id, typeof val === 'boolean' ? val : (val as any)?.target?.checked ?? false)}
                       />
                     }
                     description={
